@@ -26,22 +26,7 @@ public:
     find_optimal(const candidate_array&       candidates,
                  const std::array<idx_t, N>& dims) {
 
-        /*
-        std::vector<idx_t> absdiffs(candidates.size());
-
-        idx_t i = 0;
-        for (auto& candidate : candidates) {
-
-            // approximation for the local nodecount, truncation here is ok!
-            std::array<idx_t, N> local_nc{};
-            for (idx_t ii = 0; ii < N; ++ii){
-                local_nc[ii] = dims[ii] / candidate[ii];
-            }
-            absdiffs[i]   = sum_abs_diff(local_nc);
-            i++;
-        }
-        */
-        auto square = [&](const std::array<idx_t, N>& lhs, const std::array<idx_t, N> rhs){
+        auto is_more_square = [&](const std::array<idx_t, N>& lhs, const std::array<idx_t, N> rhs){
 
             std::array<idx_t, N> lhs_dims{};
             std::array<idx_t, N> rhs_dims{};
@@ -56,13 +41,7 @@ public:
         };
 
 
-        return *std::min_element(candidates.begin(), candidates.end(), square);
-        /*
-        idx_t idx = std::min_element(absdiffs.begin(), absdiffs.end()) -
-                     absdiffs.begin();
-
-        return candidates[idx];
-        */
+        return *std::min_element(candidates.begin(), candidates.end(), is_more_square);
     }
 
 

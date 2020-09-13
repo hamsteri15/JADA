@@ -1,9 +1,9 @@
 #pragma once
 
-#include "utils/array_op_overloads.hpp"
 #include <array>
+#include "utils/array_op_overloads.hpp"
 
-namespace Communication {
+namespace JADA {
 
 template <size_t N> class LocalGlobalMapping {
 
@@ -26,7 +26,7 @@ public:
 
         return std::make_pair<std::array<size_t, N>, std::array<size_t, N>>(
             subdomain_coords * global_dimensions / domain_splits,
-            (subdomain_coords + 1) * global_dimensions / domain_splits);
+            (subdomain_coords + size_t(1)) * global_dimensions / domain_splits);
     }
 
     ///
@@ -77,12 +77,14 @@ public:
 
         auto nc = global_dimensions / domain_splits;
 
-        // note! for uneven spluttings this will return a coordinate index one too many,
+
+
+        // note! for uneven splittings this will return a coordinate index one too many,
         // the special case is handled below
         auto subdomain_coords = global_idx / nc;
 
         for (size_t i = 0; i < N; ++i) {
-            if (subdomain_coords[i] == domain_splits[i]) { subdomain_coords[i] -= 1; }
+            if (subdomain_coords[i] == domain_splits[i]) { subdomain_coords[i] -= size_t(1); }
         }
         return subdomain_coords;
     }

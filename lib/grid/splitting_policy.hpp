@@ -77,25 +77,7 @@ public:
         return candidates;
     }
 
-protected:
-
-    ///
-    ///@brief Returns all factors of n as a vector
-    ///
-    ///@param n the number to factor
-    ///@return std::vector<idx_t> all factors
-    ///
-    static inline std::vector<idx_t> factor(idx_t n) {
-
-        std::vector<idx_t> ret;
-
-        for (idx_t i = 1; i <= n; ++i) {
-            if ((n % i) == 0) { ret.push_back(i); }
-        }
-
-        return ret;
-    }
-
+    
     ///
     ///@brief Checks is a given decomposition is valid
     ///
@@ -121,6 +103,26 @@ protected:
         }
         return true;
     }
+
+protected:
+
+    ///
+    ///@brief Returns all factors of n as a vector
+    ///
+    ///@param n the number to factor
+    ///@return std::vector<idx_t> all factors
+    ///
+    static inline std::vector<idx_t> factor(idx_t n) {
+
+        std::vector<idx_t> ret;
+
+        for (idx_t i = 1; i <= n; ++i) {
+            if ((n % i) == 0) { ret.push_back(i); }
+        }
+
+        return ret;
+    }
+
 };
 
 } // namespace JADA

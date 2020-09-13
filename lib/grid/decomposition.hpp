@@ -1,23 +1,20 @@
 #pragma once
 
-#include "communication/domain_splitting_policy.hpp"
-#include "communication/local_global_mapping.hpp"
-#include "communication/neighbour_policy.hpp"
 #include <array>
 #include <vector>
 
-#include "math/field.hpp"
-#include "math/field_subset.hpp"
-#include "utils/array_op_overloads.hpp"
-#include "utils/assert.hpp"
+#include "grid/split.hpp"
+#include "grid/splitting_policy_min_diff.hpp"
+#include "grid/local_global_mapping.hpp"
+#include "utils/runtime_assert.hpp"
 
-namespace Communication {
+namespace JADA {
 
 template <size_t N> class Decomposition : private LocalGlobalMapping<N> {
 
     static_assert(N <= 3, "Only up to 3 dimensions supported.");
 
-    using splitting_policy_t = SplittingPolicyMinNcDiff<N>;
+    using splitting_policy_t = SplittingPolicyMinDiff<N>;
 
     size_t                m_subdomain_count;     // total number of subdomains
     std::array<size_t, N> m_global_dims;         // global domain dimensions
@@ -28,12 +25,15 @@ template <size_t N> class Decomposition : private LocalGlobalMapping<N> {
 public:
     Decomposition() = default;
 
+
     ///
-    ///@brief Construct from specified number of splits
+    ///@brief Construct from specified number of splitst
     ///
     ///@param subdomain_count total number of subdomains
-    ///@param global_dims global array dimensions WITHOUT BARRIERS!
-    ///@param subdomain_counts specified splitting in each direction
+    ///@param global_dims total number of subdomains 
+    ///@param periodic_directions periodic (1) or not (0) in each direction 
+    ///@param barriers number of barrier nodes in each direction
+    ///@param subdomain_counts speciefied splitting in each direction
     ///
     Decomposition(size_t                       subdomain_count,
                   const std::array<size_t, N>& global_dims,
@@ -50,12 +50,16 @@ public:
             "Invalid domain decomposition.");
     }
 
+    
+
     ///
     ///@brief Construct from subdomain count and global dimensions. The splitting policy finds an
     /// optimal splitting.
     ///
     ///@param subdomain_count total number of subdomains
-    ///@param global_dims global array dimensions WITHOUT BARRIERS!
+    ///@param global_dims total number of subdomains 
+    ///@param periodic_directions periodicity periodic (1) or not (0) in each direction 
+    ///@param barriers number of barrier nodes in each direction
     ///
     Decomposition(size_t                       subdomain_count,
                   const std::array<size_t, N>& global_dims,
@@ -65,7 +69,7 @@ public:
                         global_dims,
                         periodic_directions,
                         barriers,
-                        splitting_policy_t::split(subdomain_count, global_dims)) {}
+                        split(subdomain_count, global_dims)) {}
 
 
     ///
@@ -125,4 +129,4 @@ public:
     }
 };
 
-} // namespace Communication
+} // namespace JADA

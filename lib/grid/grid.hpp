@@ -12,7 +12,7 @@ namespace JADA{
 template<idx_t Dim>
 struct Grid{
 
-    static_assert(N <= 3, "Only up to grid 3 dimensions supported.");
+    static_assert(Dim <= 3, "Only up to grid 3 dimensions supported.");
 
 
     Grid() = default;
