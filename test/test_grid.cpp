@@ -1,11 +1,14 @@
 #include "catch.hpp"
 
 #include <array>
+#include <iostream>
 
-#include "grid/split.hpp"
 #include "grid/decomposition.hpp"
 #include "grid/local_global_mapping.hpp"
+#include "grid/split.hpp"
 #include "grid/uniform_grid.hpp"
+#include "grid/grid_loops.hpp"
+#include "operation/fdm_operations.hpp"
 
 TEST_CASE("Test split") {
 
@@ -127,28 +130,152 @@ TEST_CASE("Test Decomposition") {
 
     using namespace JADA;
 
+    std::array<size_t, 3> global_dims = {8, 8, 8};
+    std::array<size_t, 3> barriers    = {0, 0, 0};
+    std::array<size_t, 3> periodicity = {0, 0, 0};
 
-        std::array<size_t, 3> global_dims = {8,8,8};
-    std::array<size_t, 3> barriers = {0,0,0};
-    std::array<size_t, 3> periodicity = {0,0,0};
-
-    for (size_t i = 1; i < 8; ++i){
-        REQUIRE_NOTHROW(Decomposition<3>(i, global_dims, periodicity, barriers));
+    for (size_t i = 1; i < 8; ++i) {
+        REQUIRE_NOTHROW(
+            Decomposition<3>(i, global_dims, periodicity, barriers));
     }
-
 }
 
+TEST_CASE("Test Grid") { 
+      using namespace JADA; 
+
+
+
+
+      SECTION("1D grid loops"){
+
+            std::vector<int> test = {-1,0,0,-1};
+            Grid<1> grid({test.size()});
+            CHECK(grid.dimensions() == std::array<idx_t, 1>{test.size()});
+
+            auto loop = grid_directional_loop(grid, Direction::i, DDcd2{});
+
+            for (auto [i] : loop){
+                  test[i] = 1;
+            }
+            CHECK(test == std::vector<int>{-1, 1,1, -1});
+      }
+
+      SECTION("2D grid loops"){
+
+            idx_t ni = 4;
+            idx_t nj = 4;
+            std::vector<int> test = {-1, 0, 0, -1, 
+                                     -1, 0, 0, -1, 
+                                     -1, 0, 0, -1,
+                                     -1, 0, 0, -1};
+
+            Grid<2> grid({nj,ni});
+
+            auto loop_i = grid_directional_loop(grid, Direction::i, DDcd2{});
+
+            for (auto [idx] : loop_i){
+                  test[idx] = 1;
+            }
+            std::vector<int> correct_i = {-1, 1, 1, -1, 
+                                          -1, 1, 1, -1, 
+                                          -1, 1, 1, -1,
+                                          -1, 1, 1, -1};
+
+
+            CHECK(test == correct_i);
+            
+            
+            auto loop_j = grid_directional_loop(grid, Direction::j, DDcd2{});
+
+            for (auto [idx] : loop_j){
+                  test[idx] = 2;
+            }
+
+            std::vector<int> correct_j = {-1, 1, 1, -1, 
+                                           2, 2, 2,  2, 
+                                           2, 2, 2,  2,
+                                          -1, 1, 1, -1};
+
+            CHECK(test==correct_j);
+
+            idx_t ni2 = 3;
+            idx_t nj2 = 1;
+            Grid<2> grid2({nj2,ni2});
+            REQUIRE_THROWS(grid_directional_loop(grid2, Direction::j, DDcd2{}));
+            REQUIRE_NOTHROW(grid_directional_loop(grid2, Direction::i, DDcd2{}));
+
+
+      }
+
+      SECTION("3D grid loops"){
+
+
+            
+            idx_t ni = 3;
+            idx_t nj = 5;
+            idx_t nk = 4;
+
+            std::vector<int> test(nk*nj*ni);
+
+            for (idx_t k = 1; k < nk-1; ++k){
+            for (idx_t j = 0; j < nj; ++j){
+            for (idx_t i = 0; i < ni; ++i){
+                  test[k*ni*nj + ni * j + i] = 1;
+            }}}
+
+
+
+            Grid<3> grid({nk,nj,ni});
+
+            auto loop_i = grid_directional_loop(grid, Direction::i, DDcd2{});
+            auto loop_j = grid_directional_loop(grid, Direction::j, DDcd2{});
+            auto loop_k = grid_directional_loop(grid, Direction::k, DDcd2{});
+
+            //i
+            for (auto [idx] : loop_i){
+                  test[idx] = 1;
+            }
+
+            for (idx_t k = 0; k < nk; ++k){
+            for (idx_t j = 0; j < nj; ++j){
+            for (idx_t i = 1; i < ni-1; ++i){
+                  REQUIRE(test[k*ni*nj + ni * j + i] == 1);
+            }}}
+
+            //j
+            for (auto [idx] : loop_j){
+                  test[idx] = 2;
+            }
+
+            for (idx_t k = 0; k < nk; ++k){
+            for (idx_t j = 1; j < nj-1; ++j){
+            for (idx_t i = 0; i < ni; ++i){
+                  REQUIRE(test[k*ni*nj + ni * j + i] == 2);
+            }}}
+
+            //k
+            for (auto [idx] : loop_k){
+                  test[idx] = 3;
+            }
+
+            for (idx_t k = 1; k < nk-1; ++k){
+            for (idx_t j = 0; j < nj; ++j){
+            for (idx_t i = 0; i < ni; ++i){
+                  REQUIRE(test[k*ni*nj + ni * j + i] == 3);
+            }}}
+
+      }
+
+}
 
 TEST_CASE("Test UniformGrid") {
 
     using namespace JADA;
-
 
     std::array<double, 2> L{1.0, 1.0};
     std::array<size_t, 2> dims{10, 10};
 
     UniformGrid<2> grid(dims, L);
 
-    CHECK(grid.stepsize() == std::array<double, 2>{1.0/10, 1.0/10});
-
+    CHECK(grid.stepsize() == std::array<double, 2>{1.0 / 10, 1.0 / 10});
 }

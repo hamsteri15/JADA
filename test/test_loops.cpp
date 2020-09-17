@@ -45,6 +45,7 @@ TEST_CASE("Test loops") {
 
     SECTION("3D loops") {
 
+        
         idx_t ni = 10;
         idx_t nj = 11;
         idx_t nk = 12;
@@ -63,5 +64,6 @@ TEST_CASE("Test loops") {
             REQUIRE(i == idx);
             ++idx;
         }
+        
     }
 }
