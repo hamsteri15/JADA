@@ -152,7 +152,7 @@ TEST_CASE("Test Grid") {
             Grid<1> grid({test.size()});
             CHECK(grid.dimensions() == std::array<idx_t, 1>{test.size()});
 
-            auto loop = grid_directional_loop(grid, Direction::i, DDcd2{});
+            auto loop = directional_loop(grid, Direction::i, DDcd2{});
 
             for (auto [i] : loop){
                   test[i] = 1;
@@ -171,7 +171,7 @@ TEST_CASE("Test Grid") {
 
             Grid<2> grid({nj,ni});
 
-            auto loop_i = grid_directional_loop(grid, Direction::i, DDcd2{});
+            auto loop_i = directional_loop(grid, Direction::i, DDcd2{});
 
             for (auto [idx] : loop_i){
                   test[idx] = 1;
@@ -185,7 +185,7 @@ TEST_CASE("Test Grid") {
             CHECK(test == correct_i);
             
             
-            auto loop_j = grid_directional_loop(grid, Direction::j, DDcd2{});
+            auto loop_j = directional_loop(grid, Direction::j, DDcd2{});
 
             for (auto [idx] : loop_j){
                   test[idx] = 2;
@@ -201,8 +201,8 @@ TEST_CASE("Test Grid") {
             idx_t ni2 = 3;
             idx_t nj2 = 1;
             Grid<2> grid2({nj2,ni2});
-            REQUIRE_THROWS(grid_directional_loop(grid2, Direction::j, DDcd2{}));
-            REQUIRE_NOTHROW(grid_directional_loop(grid2, Direction::i, DDcd2{}));
+            REQUIRE_THROWS(directional_loop(grid2, Direction::j, DDcd2{}));
+            REQUIRE_NOTHROW(directional_loop(grid2, Direction::i, DDcd2{}));
 
 
       }
@@ -217,19 +217,11 @@ TEST_CASE("Test Grid") {
 
             std::vector<int> test(nk*nj*ni);
 
-            for (idx_t k = 1; k < nk-1; ++k){
-            for (idx_t j = 0; j < nj; ++j){
-            for (idx_t i = 0; i < ni; ++i){
-                  test[k*ni*nj + ni * j + i] = 1;
-            }}}
-
-
-
             Grid<3> grid({nk,nj,ni});
 
-            auto loop_i = grid_directional_loop(grid, Direction::i, DDcd2{});
-            auto loop_j = grid_directional_loop(grid, Direction::j, DDcd2{});
-            auto loop_k = grid_directional_loop(grid, Direction::k, DDcd2{});
+            auto loop_i = directional_loop(grid, Direction::i, DDcd2{});
+            auto loop_j = directional_loop(grid, Direction::j, DDcd2{});
+            auto loop_k = directional_loop(grid, Direction::k, DDcd2{});
 
             //i
             for (auto [idx] : loop_i){

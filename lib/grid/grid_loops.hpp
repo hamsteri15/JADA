@@ -9,7 +9,7 @@
 namespace JADA{
 
 template <idx_t Dim, class Method>
-inline static index_generator<1> grid_directional_loop(const Grid<Dim>& grid, Direction dir, Method method) {
+inline static index_generator<1> directional_loop(const Grid<Dim>& grid, Direction dir, Method method) {
 
     const auto dims = grid.dimensions();
     auto begin = std::array<idx_t, Dim>{};
