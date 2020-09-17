@@ -11,8 +11,8 @@ struct DDcd2 : public StencilOperation<DDcd2> {
     static constexpr StencilIndices<3> indices = {-1, 0, 1};
 
     template <class T>
-    static auto apply(const T& v1, const T& v2, const T& v3) {
-        return v1 - 2.0 * v2 + v3;
+    static T apply(const T& v1, const T& v2, const T& v3) {
+        return T(v1 - 2.0 * v2 + v3);
     }
 };
 
@@ -22,9 +22,9 @@ struct DDcd4 : public StencilOperation<DDcd4> {
     static constexpr StencilIndices<5> indices = {-2, -1, 0, 1, 2};
 
     template <class T>
-    static auto
+    static T
     apply(const T& v1, const T& v2, const T& v3, const T& v4, const T& v5) {
-        return (-v1 + 16.0 * v2 - 30.0 * v3 + 16.0 * v4 - v5) / 12.0;
+        return T((-v1 + 16.0 * v2 - 30.0 * v3 + 16.0 * v4 - v5) / 12.0);
     }
 };
 } // namespace JADA

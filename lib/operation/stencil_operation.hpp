@@ -7,7 +7,7 @@ namespace JADA {
 
 template <class Derived> struct StencilOperation {
 
-    template <idx_t N> static constexpr StencilIndices<N> get_indices() {
+    static constexpr auto get_indices() {
         return Derived::indices;
     }
 
