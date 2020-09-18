@@ -26,5 +26,46 @@ inline static index_generator<1> directional_loop(const Grid<Dim>& grid, Directi
     return serial_index(begin, end, dims);
 }
 
+//This is the left "begin" boundary loop
+template <idx_t Dim, class Method>
+inline static index_generator<1> directional_loop_begin(const Grid<Dim>& grid, Direction dir, Method method) {
+
+    auto dims = grid.dimensions();
+    auto begin = std::array<idx_t, Dim>{};
+    const idx_t dir_idx = DirectionMap<Dim>::dir_to_idx(dir);
+
+    //TODO:
+    //maybe shift all but not the Direction index by left halfwidth
+    //from begin
+
+    auto end = std::array<idx_t, Dim>{};
+
+    end[dir_idx] += method.left_halfwidth();
+
+    Utils::runtime_assert(begin <= end, "Invalid directional loop");
+
+
+    return serial_index(begin, end, dims);
+}
+
+//this is the "end" boundary loop
+template <idx_t Dim, class Method>
+inline static index_generator<1> directional_loop_end(const Grid<Dim>& grid, Direction dir, Method method) {
+
+    const auto dims = grid.dimensions();
+    auto begin = dims;
+    const idx_t dir_idx = DirectionMap<Dim>::dir_to_idx(dir);
+
+    begin[dir_idx] -= method.right_halfwidth();
+
+    auto end = dims;
+
+
+    Utils::runtime_assert(begin <= end, "Invalid directional loop");
+    return serial_index(begin, end, dims);
+}
+
+
+
 }
 

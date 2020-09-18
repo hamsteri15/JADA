@@ -30,11 +30,14 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 
 
-#Build wrapper
+#Build jada
 INCLUDE_DIRECTORIES(lib)
 ADD_SUBDIRECTORY(lib)
 
 
+#Build jada
+INCLUDE_DIRECTORIES(src)
+ADD_SUBDIRECTORY(src)
 
 if(ENABLE_TESTING)
   enable_testing()

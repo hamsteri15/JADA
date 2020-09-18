@@ -12,11 +12,22 @@ namespace JADA{
 template<idx_t Dim, Direction dir, class StencilOp>
 struct FdmDerivative{
 
+    using stencil_op_t = StencilOp;
+
+
+
     FdmDerivative(const Grid<Dim>& grid) : 
     m_grid(grid), 
-    m_interior_loop(directional_loop(grid, dir, StencilOp{})) {}
+    m_interior_loop(directional_loop(grid, dir, StencilOp{}))
+     {}
 
 
+    template<class Iterable>
+    Iterable operator()(const Iterable& in){
+        Iterable out(std::size(m_grid));
+        this->operator()(in, out);
+        return out;
+    }
 
     template<class Iterable>
     void operator()(const Iterable& in, Iterable& out) {
@@ -44,6 +55,8 @@ struct FdmDerivative{
 private:
     const Grid<Dim>&    m_grid;
     index_generator<1>  m_interior_loop;
+    //index_generator<1>  m_begin_bc_loop;
+    //index_generator<1>  m_end_bc_loop;
 
 };
 

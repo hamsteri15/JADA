@@ -1,11 +1,8 @@
 SET(LibrarySubDirs 
-    #utils
     loops
     stencil
     operation
-    #math 
-    #io
-    #communication
+    grid
     ) #add more here if necessary
 SUBDIRS(${LibrarySubDirs} )
 

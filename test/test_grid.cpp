@@ -152,58 +152,87 @@ TEST_CASE("Test Grid") {
             Grid<1> grid({test.size()});
             CHECK(grid.dimensions() == std::array<idx_t, 1>{test.size()});
 
+            auto loop_begin = directional_loop_begin(grid, Direction::i, DDcd2{});
             auto loop = directional_loop(grid, Direction::i, DDcd2{});
+            auto loop_end = directional_loop_end(grid, Direction::i, DDcd2{});
 
             for (auto [i] : loop){
                   test[i] = 1;
             }
             CHECK(test == std::vector<int>{-1, 1,1, -1});
+
+            for (auto [i] : loop_begin){
+                  test[i] = 3;
+            }
+            CHECK(test == std::vector<int>{3, 1,1,-1});
+
+            for (auto [i] : loop_end){
+                  test[i] = 6;
+            }
+
+            CHECK(test == std::vector<int>{3, 1,1, 6});
+
       }
 
       SECTION("2D grid loops"){
 
             idx_t ni = 4;
             idx_t nj = 4;
-            std::vector<int> test = {-1, 0, 0, -1, 
-                                     -1, 0, 0, -1, 
-                                     -1, 0, 0, -1,
-                                     -1, 0, 0, -1};
 
             Grid<2> grid({nj,ni});
 
-            auto loop_i = directional_loop(grid, Direction::i, DDcd2{});
+            std::vector<int> test(ni * nj);
 
-            for (auto [idx] : loop_i){
-                  test[idx] = 1;
+            SECTION("i-direction"){
+
+                  test = {-1, 0, 0, -1, 
+                          -1, 0, 0, -1, 
+                          -1, 0, 0, -1,
+                          -1, 0, 0, -1};
+
+
+                  auto loop_i = directional_loop(grid, Direction::i, DDcd2{});
+
+                  for (auto [idx] : loop_i){
+                        test[idx] = 1;
+                  }
+                  std::vector<int> correct_i = {-1, 1, 1, -1, 
+                                                -1, 1, 1, -1, 
+                                                -1, 1, 1, -1,
+                                                -1, 1, 1, -1};
+                  CHECK(test == correct_i);
+
+
             }
-            std::vector<int> correct_i = {-1, 1, 1, -1, 
-                                          -1, 1, 1, -1, 
-                                          -1, 1, 1, -1,
-                                          -1, 1, 1, -1};
 
 
-            CHECK(test == correct_i);
+            SECTION("j-direction"){
+
+                  test = {-1, -1, -1, -1, 
+                          0, 0, 0, 0, 
+                          0, 0, 0, 0,
+                          -1, -1, -1, -1};
+
+                  auto loop_j = directional_loop(grid, Direction::j, DDcd2{});
+
+                  for (auto [idx] : loop_j){
+                        test[idx] = 2;
+                  }
+
+                  std::vector<int> correct_j = {-1, -1, -1, -1, 
+                                                2, 2, 2,  2, 
+                                                2, 2, 2,  2,
+                                                -1, -1, -1, -1};
+
+                  CHECK(test==correct_j);
+
+                  idx_t ni2 = 3;
+                  idx_t nj2 = 1;
+                  Grid<2> grid2({nj2,ni2});
+                  REQUIRE_THROWS(directional_loop(grid2, Direction::j, DDcd2{}));
+                  REQUIRE_NOTHROW(directional_loop(grid2, Direction::i, DDcd2{}));
+            } 
             
-            
-            auto loop_j = directional_loop(grid, Direction::j, DDcd2{});
-
-            for (auto [idx] : loop_j){
-                  test[idx] = 2;
-            }
-
-            std::vector<int> correct_j = {-1, 1, 1, -1, 
-                                           2, 2, 2,  2, 
-                                           2, 2, 2,  2,
-                                          -1, 1, 1, -1};
-
-            CHECK(test==correct_j);
-
-            idx_t ni2 = 3;
-            idx_t nj2 = 1;
-            Grid<2> grid2({nj2,ni2});
-            REQUIRE_THROWS(directional_loop(grid2, Direction::j, DDcd2{}));
-            REQUIRE_NOTHROW(directional_loop(grid2, Direction::i, DDcd2{}));
-
 
       }
 
