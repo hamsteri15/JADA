@@ -21,7 +21,7 @@ struct DirectionMap<1>{
         case (Direction::i):
             return 0;
         default:
-            throw std::runtime_error("In valid direction for 1D grid");
+            throw std::runtime_error("Invalid direction for 1D grid");
         }
         
     }
@@ -39,7 +39,7 @@ struct DirectionMap<2>{
         case (Direction::j):
             return 0;
         default:
-            throw std::runtime_error("In valid direction for 2D grid");
+            throw std::runtime_error("Invalid direction for 2D grid");
         }
         
     }
@@ -60,7 +60,7 @@ struct DirectionMap<3>{
             return 0;
         
         default:
-            throw std::runtime_error("In valid direction for 3D grid");
+            throw std::runtime_error("Invalid direction for 3D grid");
         }
         
     }
