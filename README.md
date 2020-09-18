@@ -6,7 +6,7 @@
 
 Although, the library is intended to be as dependency-free as possible, the following libraries are still required:
 
-- C++17
+- C++20 (for co-routines)
 - [CMake](https://cmake.org/) build script for cross-platform configuration (see 
   [here](#cmakeliststxt) for more info)
 - [Open MPI](https://www.open-mpi.org/) for distributed memory parallelization
