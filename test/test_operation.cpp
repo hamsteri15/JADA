@@ -56,7 +56,54 @@ TEST_CASE("Test FdmDerivative"){
 
     }
 
-    /*
+    
+    SECTION("2D tests"){
+
+        idx_t nj = 11; idx_t ni = 10;
+        std::vector<int> in(nj*ni);
+        std::vector<int> out(nj*ni);
+
+        Grid<2> grid({nj,ni});
+
+        using scheme_i = FdmDerivative<2, Direction::i, DDcd2>;
+        using scheme_j = FdmDerivative<2, Direction::j, DDcd2>;
+
+
+        scheme_i dd_i(grid);
+        scheme_j dd_j(grid);
+
+
+        for (idx_t j = 0; j < nj; ++j){
+        for (idx_t i = 0; i < ni; ++i){
+            in[i + ni*j] = int(i*i);
+        }}    
+
+        dd_i(in, out);
+
+        for (idx_t j = 0; j < nj; ++j){
+        for (idx_t i = 1; i < ni-1; ++i){
+            REQUIRE(out[i + ni*j] == 2);
+        }}    
+
+
+        for (idx_t j = 0; j < nj; ++j){
+        for (idx_t i = 0; i < ni; ++i){
+            in[i + ni*j] = int(j*j);
+        }}    
+
+        dd_j(in, out);
+
+        for (idx_t j = 1; j < nj-1; ++j){
+        for (idx_t i = 0; i < ni; ++i){
+            REQUIRE(out[i + ni*j] == 2);
+        }}    
+
+
+
+
+    }
+    
+
     SECTION("3D tests"){
 
         idx_t nk = 12; idx_t nj = 11; idx_t ni = 10;
@@ -69,24 +116,57 @@ TEST_CASE("Test FdmDerivative"){
         using scheme_j = FdmDerivative<3, Direction::j, DDcd2>;
         using scheme_k = FdmDerivative<3, Direction::k, DDcd2>;
 
-
         scheme_i dd_i(grid);
         scheme_j dd_j(grid);
         scheme_k dd_k(grid);
+        
+        
+        //i
+        for (idx_t k = 0; k < nk; ++k){
+        for (idx_t j = 0; j < nj; ++j){
+        for (idx_t i = 0; i < ni; ++i){
+            in[i + ni*j+ni*nj*k] = int(i*i);
+        }}}    
 
         dd_i(in, out);
+
+        for (idx_t k = 0; k < nk; ++k){
+        for (idx_t j = 0; j < nj; ++j){
+        for (idx_t i = 1; i < ni-1; ++i){
+            REQUIRE(out[i + ni*j+ni*nj*k] == 2);
+        }}}
+
+
+        //j
+        for (idx_t k = 0; k < nk; ++k){
+        for (idx_t j = 0; j < nj; ++j){
+        for (idx_t i = 0; i < ni; ++i){
+            in[i + ni*j+ni*nj*k] = int(j*j);
+        }}}    
+
         dd_j(in, out);
+
+        for (idx_t k = 0; k < nk; ++k){
+        for (idx_t j = 1; j < nj-1; ++j){
+        for (idx_t i = 0; i < ni; ++i){
+            REQUIRE(out[i + ni*j+ni*nj*k] == 2);
+        }}}
+
+        //k
+        for (idx_t k = 0; k < nk; ++k){
+        for (idx_t j = 0; j < nj; ++j){
+        for (idx_t i = 0; i < ni; ++i){
+            in[i + ni*j+ni*nj*k] = int(k*k);
+        }}}    
+
         dd_k(in, out);
 
+        for (idx_t k = 1; k < nk-1; ++k){
+        for (idx_t j = 0; j < nj; ++j){
+        for (idx_t i = 0; i < ni; ++i){
+            REQUIRE(out[i + ni*j+ni*nj*k] == 2);
+        }}}
     }
-    */
 
 
-    //FdmDerivative<>
-
-
-
-    //apply_stencil_operation<std::vector<int>, DDcd2, 3>(in, out, grid, Direction::i);
-
-    //CHECK(out[0] != 433453);
 }
