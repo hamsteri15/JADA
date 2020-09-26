@@ -18,22 +18,32 @@ struct params{
 
 };
 
+/*
+// Fourth order central-difference for the second derivative
+struct DDcd4 : public StencilOperation<DDcd4> {
 
-//TODO: move to lib/
+    static constexpr StencilIndices<5> indices = {-2, -1, 0, 1, 2};
+
+    template <class T>
+    static T
+    apply(const T& v1, const T& v2, const T& v3, const T& v4, const T& v5) {
+        return T((-v1 + 16.0 * v2 - 30.0 * v3 + 16.0 * v4 - v5) / 12.0);
+    }
+};
+*/
+
 template<class Scheme>
-struct mirrorBc{
+struct LeftBoundaryOp : public Scheme{
 
-    using stencil_t = Scheme::stencil_op_t;
+    static constexpr auto indices = 
+    mirror_front(Scheme::indices, StencilOperation<Scheme>::left_halfwidth());
 
-
-
-
-    static auto left_stencil = mirror_front(stencil_t{}, stencil_t::left_haldwidth());
-    static auto right_stencil = mirror_back(stencil_t{}, stencil_t::right_halfwidth());
+    using Scheme::apply;
 
 
 
 };
+
 
 
 struct stepper{
@@ -41,7 +51,9 @@ struct stepper{
 
     using scheme = FdmDerivative<1, Direction::i, DDcd4>;
 
-    mirrorBc<scheme> mirror;
+    LeftBoundaryOp<DDcd4> left_op;
+
+//    mirrorBc<scheme> mirror;
 
     stepper(const UniformGrid<1>& grid) : m_grid(grid), dd_x(grid) 
     {}
@@ -49,9 +61,13 @@ struct stepper{
 
     std::vector<double> next(const std::vector<double>& current){
 
-        //do left boundary stuff
+        std::vector<double> R(current.size());
 
-        auto R = dd_x(current);
+        //do left boundary stuff
+//        scheme::apply_begin_bc(current ,R, left_op);
+
+        //do interior stuff
+        dd_x(current, R);
         return R;
 
 
@@ -78,6 +94,14 @@ int main(){
     UniformGrid<1> grid({params::ni}, {params::Lx});
     stepper step(grid);
 
+
+    //LeftBoundaryOp<DDcd4> left_op;
+
+    double test = LeftBoundaryOp<DDcd4>::apply(3.0, 31.0, 31.0, 4.0, 5.0);
+
+    std::cout << test << std::endl;
+
+
     std::vector<double> current(params::ni);
 
     for (idx_t i = 0; i < current.size(); ++i){
@@ -85,7 +109,7 @@ int main(){
     }
 
 
-    print(current);
+//    print(current);
 
     double time = 0;
     while (time < params::end_t){
@@ -98,7 +122,7 @@ int main(){
 
     }
     std::cout << "done" << std::endl;
-    print(current);
+//    print(current);
     return 0;
 }
 

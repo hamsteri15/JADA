@@ -18,8 +18,10 @@ struct FdmDerivative{
 
     FdmDerivative(const Grid<Dim>& grid) : 
     m_grid(grid), 
-    m_interior_loop(directional_loop(grid, dir, StencilOp{}))
-     {}
+    m_interior_loop(directional_loop(grid, dir, StencilOp{})),
+    m_begin_bc_loop(directional_loop_begin(grid, dir, StencilOp{})),
+    m_end_bc_loop(directional_loop_end(grid, dir, StencilOp{}))
+    {}
 
 
     template<class Iterable>
@@ -28,6 +30,24 @@ struct FdmDerivative{
         this->operator()(in, out);
         return out;
     }
+
+
+    template<class Iterable, class BcOp>
+    void apply_begin_bc(const Iterable& in, Iterable& out, const BcOp& bc){
+
+        for (auto [idx] : m_begin_bc_loop){
+
+            //pick a stencil
+            auto   tuple = StencilPicker::pick_stencil(in, BcOp::get_indices(), idx, m_grid.offset(dir));
+            //apply operation
+            auto   func  = [&](auto&... wr) { return BcOp::apply(wr...); };
+
+            out[idx] = std::apply(func, tuple); 
+        }
+
+
+    }    
+
 
     template<class Iterable>
     void operator()(const Iterable& in, Iterable& out) {
@@ -55,8 +75,8 @@ struct FdmDerivative{
 private:
     const Grid<Dim>&    m_grid;
     index_generator<1>  m_interior_loop;
-    //index_generator<1>  m_begin_bc_loop;
-    //index_generator<1>  m_end_bc_loop;
+    index_generator<1>  m_begin_bc_loop;
+    index_generator<1>  m_end_bc_loop;
 
 };
 
