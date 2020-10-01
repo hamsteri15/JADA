@@ -4,8 +4,10 @@
 #include "grid/direction.hpp"
 #include "operation/fdm_operations.hpp"
 #include "operation/fdm_derivative.hpp"
+#include "operation/fdm_boundary_operation.hpp"
 
-TEST_CASE("StencilOperation") {
+
+TEST_CASE("Test StencilOperation") {
 
     using namespace JADA;
 
@@ -26,7 +28,21 @@ TEST_CASE("StencilOperation") {
     }
 }
 
+TEST_CASE("Test FdmBoundaryOperation"){
 
+
+    using namespace JADA;
+
+    FdmBoundaryOperation<DDcd2> b;
+
+    CHECK(FdmBoundaryOperation<DDcd2>::scheme_indices == std::array<int, 3>{-1, 0, 1});
+    CHECK(b.scheme_indices == std::array<int, 3>{-1, 0, 1});
+
+    CHECK(b.scheme_left_width == 1);
+    CHECK(b.scheme_right_width == 1);
+
+
+}
 
 TEST_CASE("Test FdmDerivative"){
 

@@ -24,16 +24,16 @@ struct FdmDerivative{
     {}
 
 
-    template<class Iterable>
-    Iterable operator()(const Iterable& in){
-        Iterable out(std::size(m_grid));
+    template<class Indexable>
+    Indexable operator()(const Indexable& in){
+        Indexable out(std::size(m_grid));
         this->operator()(in, out);
         return out;
     }
 
 
-    template<class Iterable, class BcOp>
-    void apply_begin_bc(const Iterable& in, Iterable& out, const BcOp& bc){
+    template<class Indexable, class BcOp>
+    void apply_begin_bc(const Indexable& in, Indexable& out, const BcOp& bc){
 
         for (auto [idx] : m_begin_bc_loop){
 
@@ -49,8 +49,8 @@ struct FdmDerivative{
     }    
 
 
-    template<class Iterable>
-    void operator()(const Iterable& in, Iterable& out) {
+    template<class Indexable>
+    void operator()(const Indexable& in, Indexable& out) {
 
         //TODO: consider if necessessary
         Utils::runtime_assert(std::size(in) == std::size(m_grid), "The grid size differes from input array size.");
