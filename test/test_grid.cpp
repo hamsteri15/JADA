@@ -8,6 +8,8 @@
 #include "grid/local_global_mapping.hpp"
 #include "grid/split.hpp"
 #include "grid/uniform_grid.hpp"
+#include "grid/partition.hpp"
+
 #include "operation/fdm_operations.hpp"
 
 TEST_CASE("Test split") {
@@ -351,4 +353,93 @@ TEST_CASE("Test UniformGrid") {
     UniformGrid<2> grid(dims, L);
 
     CHECK(grid.stepsize() == std::array<double, 2>{1.0 / 10, 1.0 / 10});
+}
+
+TEST_CASE("Test Partition") {
+
+    using namespace JADA;
+
+    SECTION("1D tests"){
+
+        std::array<idx_t, 1> dims{10};
+        
+        Partition<1> p(dims, {0}, {3});
+        CHECK(p.size() == 3);
+        CHECK(p.get_begin() == std::array<idx_t, 1>{0});
+        CHECK(p.get_end() == std::array<idx_t, 1>{3});
+
+        Partition<1> p2(dims, Direction::i, 5, 2);
+        CHECK(p2.size() == 2);
+        CHECK(p2.get_begin() == std::array<idx_t, 1>{5});
+        CHECK(p2.get_end() == std::array<idx_t, 1>{7});
+
+
+        REQUIRE_THROWS(Partition<1>(dims, Direction::j, 0, 2));
+        REQUIRE_THROWS(Partition<1>(dims, Direction::i, 5, 7));
+
+
+    }
+
+    SECTION("2D tests"){
+
+        idx_t ni = 12;
+        idx_t nj = 10;
+
+        std::array<idx_t, 2> dims{nj, ni};
+        
+        Partition<2> p(dims, {0, 0}, {0, 3});
+        CHECK(p.size() == 0);
+        CHECK(p.get_begin() == std::array<idx_t, 2>{0, 0});
+        CHECK(p.get_end() == std::array<idx_t, 2>{0, 3});
+
+        Partition<2> p2(dims, {0, 0}, {1, 3});
+        CHECK(p2.size() == 3);
+        CHECK(p2.get_begin() == std::array<idx_t, 2>{0, 0});
+        CHECK(p2.get_end() == std::array<idx_t, 2>{1, 3});
+
+
+        Partition<2> p3(dims, {0, 0}, dims);
+        CHECK(p3.size() == 10 * 12);
+        CHECK(p3.get_begin() == std::array<idx_t, 2>{0, 0});
+        CHECK(p3.get_end() == dims);
+
+        Partition<2> p4(dims, Direction::i, 5, 2);
+        CHECK(p4.size() == 2 * nj);
+        CHECK(p4.get_begin() == std::array<idx_t, 2>{0, 5});
+        CHECK(p4.get_end() == std::array<idx_t, 2>{nj, 7});
+      
+
+        Partition<2> p5(dims, Direction::j, 5, 2);
+        CHECK(p5.size() == 2 * ni);
+        CHECK(p5.get_begin() == std::array<idx_t, 2>{5, 0});
+        CHECK(p5.get_end() == std::array<idx_t, 2>{7, ni});
+
+
+        REQUIRE_THROWS(Partition<2>(dims, Direction::k, 0, 2));
+        REQUIRE_THROWS(Partition<2>(dims, Direction::i, 5, 8));
+
+
+
+    }
+
+    SECTION("3D tests"){
+
+        idx_t ni = 12;
+        idx_t nj = 10;
+        idx_t nk = 7;
+        std::array<idx_t, 3> dims{nk, nj, ni};
+
+        Partition<3> p(dims, {0,0,0}, {1,1,1});
+        CHECK(p.size()==1);
+        CHECK(p.get_begin() == std::array<idx_t, 3>{0,0,0});
+        CHECK(p.get_end() == std::array<idx_t, 3>{1,1,1} );
+
+
+        REQUIRE_THROWS(Partition<3>(dims, Direction::k, 0, 8));
+
+
+
+    }
+
+
 }

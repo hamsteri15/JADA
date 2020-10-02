@@ -32,21 +32,6 @@ struct FdmDerivative{
     }
 
 
-    template<class Indexable, class BcOp>
-    void apply_begin_bc(const Indexable& in, Indexable& out, const BcOp& bc){
-
-        for (auto [idx] : m_begin_bc_loop){
-
-            //pick a stencil
-            auto   tuple = StencilPicker::pick_stencil(in, BcOp::get_indices(), idx, m_grid.offset(dir));
-            //apply operation
-            auto   func  = [&](auto&... wr) { return BcOp::apply(wr...); };
-
-            out[idx] = std::apply(func, tuple); 
-        }
-
-
-    }    
 
 
     template<class Indexable>

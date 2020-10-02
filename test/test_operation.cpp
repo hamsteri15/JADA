@@ -6,6 +6,20 @@
 #include "operation/fdm_derivative.hpp"
 #include "operation/fdm_boundary_operation.hpp"
 
+namespace JADA{
+
+struct RightBiasedOperation : public StencilOperation<RightBiasedOperation> {
+        static constexpr StencilIndices<6> indices = {-2, -1, 0, 1, 2, 3};
+
+        template <class T>
+        static T
+        apply(const T& v1, const T& v2, const T& v3, const T& v4, const T& v5, const T& v6) {
+            return T((-v1 + 16.0 * v2 - 30.0 * v3 + 16.0 * v4 - v5 + v6) / 12.0);
+        }
+
+};
+
+}
 
 TEST_CASE("Test StencilOperation") {
 
@@ -33,13 +47,48 @@ TEST_CASE("Test FdmBoundaryOperation"){
 
     using namespace JADA;
 
-    FdmBoundaryOperation<DDcd2> b;
+    
+    SECTION("Symmetric stencil"){
+        FdmBoundaryOperation<DDcd2> b;
 
-    CHECK(FdmBoundaryOperation<DDcd2>::scheme_indices == std::array<int, 3>{-1, 0, 1});
-    CHECK(b.scheme_indices == std::array<int, 3>{-1, 0, 1});
+        CHECK(FdmBoundaryOperation<DDcd2>::scheme_indices == std::array<int, 3>{-1, 0, 1});
+        CHECK(b.scheme_indices == std::array<int, 3>{-1, 0, 1});
 
-    CHECK(b.scheme_left_width == 1);
-    CHECK(b.scheme_right_width == 1);
+        CHECK(b.scheme_left_width == 1);
+        CHECK(b.scheme_right_width == 1);
+
+
+        idx_t nk = 12; idx_t nj = 11; idx_t ni = 10;
+
+        Grid<3> grid({nk,nj,ni});
+
+
+        CHECK((nk * nj * 1) == b.get_buffer_size(grid, Direction::i, BoundaryLocation::begin));
+        CHECK((nk * nj * 1) == b.get_buffer_size(grid, Direction::i, BoundaryLocation::end));
+
+    }
+    
+    SECTION("Biased stencil"){
+
+        FdmBoundaryOperation<RightBiasedOperation> b;
+        CHECK(b.scheme_left_width == 2);
+        CHECK(b.scheme_right_width == 3);
+
+        idx_t nk = 12; idx_t nj = 11; idx_t ni = 10;
+
+        Grid<3> grid({nk,nj,ni});
+
+
+        CHECK((nk * nj * 2) == b.get_buffer_size(grid, Direction::i, BoundaryLocation::begin));
+        CHECK((nk * nj * 3) == b.get_buffer_size(grid, Direction::i, BoundaryLocation::end));
+
+    }
+
+
+
+    
+
+
 
 
 }
