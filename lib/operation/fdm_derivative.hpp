@@ -2,13 +2,13 @@
 
 #include "grid/direction.hpp"
 #include "grid/grid.hpp"
-#include "grid/grid_loops.hpp"
 #include "loops/index_type.hpp"
 #include "loops/index_generator.hpp"
 #include "stencil/stencil_picker.hpp"
 
 namespace JADA{
 
+/*
 template<idx_t Dim, Direction dir, class StencilOp>
 struct FdmDerivative{
 
@@ -64,7 +64,7 @@ private:
     index_generator<1>  m_end_bc_loop;
 
 };
-
+*/
 
 
 

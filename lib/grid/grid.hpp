@@ -5,6 +5,7 @@
 
 #include "grid/direction.hpp"
 #include "loops/index_type.hpp"
+#include "loops/serial_index_loops.hpp"
 
 namespace JADA {
 
@@ -33,6 +34,18 @@ template <idx_t Dim> struct Grid {
                                idx_t(1),
                                std::multiplies<idx_t>());
     }
+
+
+    ///
+    ///@brief Get a loop over all indices of the grid
+    ///
+    ///@return index_generator<1> an index generator returning the indices
+    ///
+    index_generator<1> get_loop() const{
+        return serial_index(std::array<idx_t, Dim>{}, m_dimensions, m_dimensions);
+    }
+
+
 
     ///
     ///@brief Get the number of points in each direction

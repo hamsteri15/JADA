@@ -4,13 +4,24 @@
 #include <iostream>
 
 #include "grid/decomposition.hpp"
-#include "grid/grid_loops.hpp"
 #include "grid/local_global_mapping.hpp"
 #include "grid/split.hpp"
 #include "grid/uniform_grid.hpp"
 #include "grid/partition.hpp"
+#include "grid/create_partition.hpp"
 
 #include "operation/fdm_operations.hpp"
+
+
+
+template <class Loop>
+static std::vector<int> set_ones(const std::vector<int>& v, Loop loop) {
+
+    std::vector<int> ret = v;
+    for (auto [i] : loop) { ret[i] = 1; }
+    return ret;
+}
+
 
 TEST_CASE("Test split") {
 
@@ -142,206 +153,41 @@ TEST_CASE("Test Decomposition") {
     }
 }
 
-template <class Loop>
-static std::vector<int> set_ones(const std::vector<int>& v, Loop& loop) {
+TEST_CASE("Test Grid"){
 
-    std::vector<int> ret = v;
-    for (auto [i] : loop) { ret[i] = 1; }
-    return ret;
-}
-
-TEST_CASE("Test Grid") {
     using namespace JADA;
-
-    SECTION("1D grid loops") {
-
+    
+    SECTION("1D loop tests"){
         std::vector<int> test = {0, 0, 0, 0};
         Grid<1>          grid({test.size()});
         CHECK(grid.dimensions() == std::array<idx_t, 1>{test.size()});
 
-        auto loop_begin = directional_loop_begin(grid, Direction::i, DDcd2{});
-        auto loop       = directional_loop(grid, Direction::i, DDcd2{});
-        auto loop_end   = directional_loop_end(grid, Direction::i, DDcd2{});
-
-        CHECK(set_ones(test, loop_begin) == std::vector<int>{1, 0, 0, 0});
-        CHECK(set_ones(test, loop) == std::vector<int>{0, 1, 1, 0});
-        CHECK(set_ones(test, loop_end) == std::vector<int>{0, 0, 0, 1});
-    }
-    SECTION("2D grid loops") {
-
-        idx_t ni = 4;
-        idx_t nj = 4;
-
-        Grid<2> grid({nj, ni});
-
-        std::vector<int> test{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-        CHECK(test.size() == ni * nj);
-
-        SECTION("i-direction") {
-
-            auto loop_begin =
-                directional_loop_begin(grid, Direction::i, DDcd2{});
-            auto loop     = directional_loop(grid, Direction::i, DDcd2{});
-            auto loop_end = directional_loop_end(grid, Direction::i, DDcd2{});
-
-            CHECK(set_ones(test, loop_begin) ==
-                  std::vector<int>{
-                      1, 0, 0, 0, 
-                      1, 0, 0, 0, 
-                      1, 0, 0, 0, 
-                      1, 0, 0, 0});
-
-            CHECK(set_ones(test, loop) ==
-                  std::vector<int>{
-                      0, 1, 1, 0, 
-                      0, 1, 1, 0, 
-                      0, 1, 1, 0, 
-                      0, 1, 1, 0});
-
-            CHECK(set_ones(test, loop_end) ==
-                  std::vector<int>{
-                      0, 0, 0, 1, 
-                      0, 0, 0, 1, 
-                      0, 0, 0, 1, 
-                      0, 0, 0, 1});
-        }
-
-        SECTION("j-direction") {
-
-            auto loop_begin =
-                directional_loop_begin(grid, Direction::j, DDcd2{});
-            auto loop     = directional_loop(grid, Direction::j, DDcd2{});
-            auto loop_end = directional_loop_end(grid, Direction::j, DDcd2{});
-
-            CHECK(set_ones(test, loop_begin) ==
-                  std::vector<int>{
-                      1, 1, 1, 1, 
-                      0, 0, 0, 0, 
-                      0, 0, 0, 0, 
-                      0, 0, 0, 0});
-
-            CHECK(set_ones(test, loop) ==
-                  std::vector<int>{
-                      0, 0, 0, 0, 
-                      1, 1, 1, 1, 
-                      1, 1, 1, 1, 
-                      0, 0, 0, 0});
-
-            CHECK(set_ones(test, loop_end) ==
-                  std::vector<int>{
-                      0, 0, 0, 0, 
-                      0, 0, 0, 0, 
-                      0, 0, 0, 0, 
-                      1, 1, 1, 1});
-        }
-    }
-
-    SECTION("3D grid loops") {
-
-        idx_t ni = 8;
-        idx_t nj = 6;
-        idx_t nk = 7;
-
-        Grid<3> grid({nk, nj, ni});
-
-        std::vector<int> test(nk*nj*ni);
-
-        CHECK(test.size() == grid.size());
-
-        SECTION("i-direction"){
-            auto loop_begin =
-                directional_loop_begin(grid, Direction::i, DDcd4{});
-            auto loop     = directional_loop(grid, Direction::i, DDcd4{});
-            auto loop_end = directional_loop_end(grid, Direction::i, DDcd4{});
-
-            auto begin_test = set_ones(test, loop_begin);
-            auto interior_test = set_ones(test, loop);
-            auto end_test = set_ones(test, loop_end);
-
-            for (idx_t k = 0; k < nk; ++k){
-            for (idx_t j = 0; j < nj; ++j){
-            for (idx_t i = 0; i < 2;  ++i){
-                REQUIRE(begin_test[i+ni*j + ni*nj*k] == 1);
-            }}}
-
-            for (idx_t k = 0; k < nk; ++k){
-            for (idx_t j = 0; j < nj; ++j){
-            for (idx_t i = 2; i < ni-2;  ++i){
-                REQUIRE(interior_test[i+ni*j + ni*nj*k] == 1);
-            }}}
-
-            for (idx_t k = 0; k < nk; ++k){
-            for (idx_t j = 0; j < nj; ++j){
-            for (idx_t i = ni-2; i < ni;  ++i){
-                REQUIRE(end_test[i+ni*j + ni*nj*k] == 1);
-            }}}
-
-        }
-
-        SECTION("j-direction"){
-            auto loop_begin =
-                directional_loop_begin(grid, Direction::j, DDcd4{});
-            auto loop     = directional_loop(grid, Direction::j, DDcd4{});
-            auto loop_end = directional_loop_end(grid, Direction::j, DDcd4{});
-
-            auto begin_test = set_ones(test, loop_begin);
-            auto interior_test = set_ones(test, loop);
-            auto end_test = set_ones(test, loop_end);
-
-            for (idx_t k = 0; k < nk; ++k){
-            for (idx_t j = 0; j < 2; ++j){
-            for (idx_t i = 0; i < ni; ++i){
-                REQUIRE(begin_test[i+ni*j + ni*nj*k] == 1);
-            }}}
-
-            for (idx_t k = 0; k < nk; ++k){
-            for (idx_t j = 2; j < nj-2; ++j){
-            for (idx_t i = 0; i < ni; ++i){
-                REQUIRE(interior_test[i+ni*j + ni*nj*k] == 1);
-            }}}
-
-            for (idx_t k = 0; k < nk; ++k){
-            for (idx_t j = nj-2; j < nj; ++j){
-            for (idx_t i = 0; i < ni; ++i){
-                REQUIRE(end_test[i+ni*j + ni*nj*k] == 1);
-            }}}
-
-        }
-
-        SECTION("k-direction"){
-            auto loop_begin =
-                directional_loop_begin(grid, Direction::k, DDcd4{});
-            auto loop     = directional_loop(grid, Direction::k, DDcd4{});
-            auto loop_end = directional_loop_end(grid, Direction::k, DDcd4{});
-
-            auto begin_test = set_ones(test, loop_begin);
-            auto interior_test = set_ones(test, loop);
-            auto end_test = set_ones(test, loop_end);
-
-            for (idx_t k = 0; k < 2; ++k){
-            for (idx_t j = 0; j < nj; ++j){
-            for (idx_t i = 0; i < ni;  ++i){
-                REQUIRE(begin_test[i+ni*j + ni*nj*k] == 1);
-            }}}
-
-            for (idx_t k = 2; k < nk-2; ++k){
-            for (idx_t j = 0; j < nj; ++j){
-            for (idx_t i = 0; i < ni;  ++i){
-                REQUIRE(interior_test[i+ni*j + ni*nj*k] == 1);
-            }}}
-
-            for (idx_t k = nk-2; k < nk; ++k){
-            for (idx_t j = 0; j < nj; ++j){
-            for (idx_t i = 0; i < ni; ++i){
-                REQUIRE(end_test[i+ni*j + ni*nj*k] == 1);
-            }}}
-
-        }
-
+        CHECK(set_ones(test, grid.get_loop()) == std::vector<int>{1,1,1,1});
 
     }
+
+    SECTION("2D loop tests"){
+        idx_t nj = 3; idx_t ni = 4;
+        std::vector<int> test(nj*ni, 0);
+        Grid<2>          grid({nj, ni});
+        CHECK(grid.dimensions() == std::array<idx_t, 2>{nj,ni});
+
+        CHECK(set_ones(test, grid.get_loop()) == std::vector<int>(grid.size(), 1));
+
+    }
+
+    SECTION("3D loop tests"){
+        idx_t nk = 2; idx_t nj = 3; idx_t ni = 4;
+        std::vector<int> test(nk*nj*ni, 0);
+        Grid<3>          grid({nk, nj, ni});
+        CHECK(grid.dimensions() == std::array<idx_t, 3>{nk,nj,ni});
+
+        CHECK(set_ones(test, grid.get_loop()) == std::vector<int>(grid.size(), 1));
+
+    }
+
 }
+
 
 TEST_CASE("Test UniformGrid") {
 
@@ -437,6 +283,74 @@ TEST_CASE("Test Partition") {
 
         REQUIRE_THROWS(Partition<3>(dims, Direction::k, 0, 8));
 
+    }
+
+
+    SECTION("Partition loops"){
+
+        idx_t nj = 3; idx_t ni = 4;
+        Grid<2> grid({nj,ni});
+
+        std::vector<int> test(nj*ni);
+        
+
+        SECTION("i-direction"){
+
+            auto [begin, middle, end] = create_partitions(grid, Direction::i, DDcd2{});
+
+            CHECK(set_ones(test, begin.get_loop()) ==
+                  std::vector<int>{
+                      1, 0, 0, 0, 
+                      1, 0, 0, 0, 
+                      1, 0, 0, 0 
+                      });
+
+
+            CHECK(set_ones(test, middle.get_loop()) ==
+                  std::vector<int>{
+                      0, 1, 1, 0, 
+                      0, 1, 1, 0, 
+                      0, 1, 1, 0 
+                      });
+
+
+            CHECK(set_ones(test, end.get_loop()) ==
+                  std::vector<int>{
+                      0, 0, 0, 1, 
+                      0, 0, 0, 1, 
+                      0, 0, 0, 1 
+                      });
+
+        }
+
+        SECTION("j-direction"){
+
+            auto [begin, middle, end] = create_partitions(grid, Direction::j, DDcd2{});
+
+            CHECK(set_ones(test, begin.get_loop()) ==
+                  std::vector<int>{
+                      1, 1, 1, 1, 
+                      0, 0, 0, 0, 
+                      0, 0, 0, 0 
+                      });
+
+
+            CHECK(set_ones(test, middle.get_loop()) ==
+                  std::vector<int>{
+                      0, 0, 0, 0, 
+                      1, 1, 1, 1, 
+                      0, 0, 0, 0 
+                      });
+
+
+            CHECK(set_ones(test, end.get_loop()) ==
+                  std::vector<int>{
+                      0, 0, 0, 0, 
+                      0, 0, 0, 0, 
+                      1, 1, 1, 1 
+                      });
+
+        }
 
 
     }

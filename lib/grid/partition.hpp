@@ -10,7 +10,6 @@
 
 namespace JADA {
 
-enum class PartitionLocation { begin, middle, end };
 
 template <idx_t Dim> struct Partition {
 
@@ -36,6 +35,11 @@ template <idx_t Dim> struct Partition {
                     get_extent(parent_dims, dir, width)) {}
 
 
+    index_generator<1> get_loop() const{
+        return serial_index(m_begin, get_end(), m_parent_dims);
+    }
+
+
 
     std::array<idx_t, Dim> get_begin() const {
         return m_begin;
@@ -55,9 +59,6 @@ template <idx_t Dim> struct Partition {
         return std::accumulate(m_extent.begin(), m_extent.end(), idx_t(1), std::multiplies<idx_t>{});
 
     }
-
-
-
 
 
 private:

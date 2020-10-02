@@ -32,6 +32,10 @@ struct DDcd4 : public StencilOperation<DDcd4> {
 };
 */
 
+
+
+
+/*
 template<class Scheme>
 struct LeftBoundaryOp : public Scheme{
 
@@ -88,9 +92,11 @@ void print(const std::vector<T>& v){
     }
 
 }
+*/
 
 int main(){
 
+    /*
     UniformGrid<1> grid({params::ni}, {params::Lx});
     stepper step(grid);
 
@@ -123,6 +129,7 @@ int main(){
     }
     std::cout << "done" << std::endl;
 //    print(current);
+*/
     return 0;
 }
 

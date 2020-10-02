@@ -4,7 +4,6 @@
 #include "grid/direction.hpp"
 #include "operation/fdm_operations.hpp"
 #include "operation/fdm_derivative.hpp"
-#include "operation/fdm_boundary_operation.hpp"
 
 namespace JADA{
 
@@ -42,57 +41,7 @@ TEST_CASE("Test StencilOperation") {
     }
 }
 
-TEST_CASE("Test FdmBoundaryOperation"){
-
-
-    using namespace JADA;
-
-    
-    SECTION("Symmetric stencil"){
-        FdmBoundaryOperation<DDcd2> b;
-
-        CHECK(FdmBoundaryOperation<DDcd2>::scheme_indices == std::array<int, 3>{-1, 0, 1});
-        CHECK(b.scheme_indices == std::array<int, 3>{-1, 0, 1});
-
-        CHECK(b.scheme_left_width == 1);
-        CHECK(b.scheme_right_width == 1);
-
-
-        idx_t nk = 12; idx_t nj = 11; idx_t ni = 10;
-
-        Grid<3> grid({nk,nj,ni});
-
-
-        CHECK((nk * nj * 1) == b.get_buffer_size(grid, Direction::i, BoundaryLocation::begin));
-        CHECK((nk * nj * 1) == b.get_buffer_size(grid, Direction::i, BoundaryLocation::end));
-
-    }
-    
-    SECTION("Biased stencil"){
-
-        FdmBoundaryOperation<RightBiasedOperation> b;
-        CHECK(b.scheme_left_width == 2);
-        CHECK(b.scheme_right_width == 3);
-
-        idx_t nk = 12; idx_t nj = 11; idx_t ni = 10;
-
-        Grid<3> grid({nk,nj,ni});
-
-
-        CHECK((nk * nj * 2) == b.get_buffer_size(grid, Direction::i, BoundaryLocation::begin));
-        CHECK((nk * nj * 3) == b.get_buffer_size(grid, Direction::i, BoundaryLocation::end));
-
-    }
-
-
-
-    
-
-
-
-
-}
-
+/*
 TEST_CASE("Test FdmDerivative"){
 
     using namespace JADA;
@@ -235,3 +184,4 @@ TEST_CASE("Test FdmDerivative"){
 
 
 }
+*/
