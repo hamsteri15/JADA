@@ -5,14 +5,7 @@
 
 namespace JADA{
 
-enum class PartitionId { begin, middle, end };
 
-/*
-Partition(std::array<idx_t, Dim> parent_dims,
-              Direction              dir,
-              idx_t                  begin_idx,
-              idx_t                  width
-*/
 
 template<idx_t Dim, class Stencil>
 auto create_partitions(const Grid<Dim>& grid, Direction dir, Stencil stencil){
@@ -34,35 +27,6 @@ auto create_partitions(const Grid<Dim>& grid, Direction dir, Stencil stencil){
 
 }
 
-/*
-template<idx_t Dim, class Stencil>
-static Partition<Dim> create_partition(const Grid<Dim>& grid, Direction dir, Stencil stencil, PartitionId id){
-
-    idx_t begin_width = stencil.left_halfwidth();
-    idx_t end_width = stencil.right_halfwidth();
-    idx_t dir_idx = DirectionMap<Dim>::dir_to_idx(dir);
-    auto grid_dims = grid.dimensions();
-    idx_t middle_width = grid_dims[dir_idx] - begin_width - end_width;
-
-    std::array<idx_t, Dim> begin{};
-
-    switch (id)
-    {
-    case PartitionId::begin:
-        return Partition<Dim>(grid_dims, begin, dir, begin_width); 
-    case PartitionId::middle:
-
-        
-    
-    default:
-        break;
-    }
-
-
-
-
-}
-*/
 
 
 }
