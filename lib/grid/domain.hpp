@@ -24,8 +24,8 @@ template <idx_t Dim> struct Domain {
         idx_t dir_idx = DirectionMap<Dim>::dir_to_idx(dir);
         return m_boundaries[dir_idx];
 
-        Utils::runtime_assert(m_boundaries.first.location == BoundaryLocation::begin);
-        Utils::runtime_assert(m_boundaries.second.location == BoundaryLocation::end);
+        Utils::runtime_assert(m_boundaries.first.location == BoundaryLocation::begin, "Invalid boundary order.");
+        Utils::runtime_assert(m_boundaries.second.location == BoundaryLocation::end, "Invalid boundary order");
 
     }
 
