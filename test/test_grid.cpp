@@ -363,6 +363,39 @@ TEST_CASE("Test Domain"){
 
     using namespace JADA;
 
+    /*
+
+    Domain(std::array<double, Dim>           phys_dims,
+           std::array<idx_t, Dim>            node_count,
+           std::array<std::pair<Boundary, Boundary>, Dim> boundary_types)
+        : m_phys_dims(phys_dims)
+        , m_node_count(node_count)
+        , m_boundaries(boundary_types) {}
+    */
+
+
+    SECTION("Constructors"){
+        std::array<double, 2> pdims = {1.0, 1.0};
+        std::array<idx_t, 2>  nc = {10, 10};
+
+        std::array<std::pair<Boundary, Boundary>, 2> boundaries = {
+            std::make_pair(Boundary(BoundaryType::physical, BoundaryLocation::begin),
+                           Boundary(BoundaryType::physical, BoundaryLocation::end)),
+            std::make_pair(Boundary(BoundaryType::physical, BoundaryLocation::begin),
+                           Boundary(BoundaryType::physical, BoundaryLocation::end))
+        };
+
+        REQUIRE_NOTHROW(Domain<2>(pdims, nc, boundaries));
+
+//        REQUIRE_NOTHROW(Domain<2>(4, pdims, nc, boundaries));
+
+
+
+
+    }
+
+
+
 
 
 }

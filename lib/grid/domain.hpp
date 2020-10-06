@@ -2,6 +2,7 @@
 
 #include <utility> //std::pair
 
+#include "grid/decomposition.hpp"
 #include "grid/boundary.hpp"
 #include "grid/direction.hpp"
 #include "loops/index_type.hpp"
@@ -10,13 +11,30 @@ namespace JADA {
 
 template <idx_t Dim> struct Domain {
 
+    using boundary_array = std::array<std::pair<Boundary, Boundary>, Dim>;
+
+
     Domain(std::array<double, Dim>           phys_dims,
            std::array<idx_t, Dim>            node_count,
-           std::array<std::pair<Boundary, Boundary>, Dim> boundary_types)
-        : m_phys_dims(phys_dims)
+           boundary_array boundary_types)
+        : m_decomposition(1, node_count, periodic_directions(boundary_types), std::array<idx_t, Dim>{}) 
+        , m_phys_dims(phys_dims)
         , m_node_count(node_count)
         , m_boundaries(boundary_types) {}
 
+
+    /*
+
+    Domain(idx_t n_domains,
+           std::array<double, Dim> gphys_dims,
+           std::array<idx_t, Dim> gnode_count,
+           boundary_array gboundary_types)
+    {
+
+    }
+
+
+    */
 
 
     std::pair<Boundary, Boundary> get_boundaries(Direction dir) const{
@@ -39,9 +57,21 @@ template <idx_t Dim> struct Domain {
     }
 
 private:
+    Decomposition<Dim>                m_decomposition;
     std::array<double, Dim>           m_phys_dims;
     std::array<idx_t, Dim>            m_node_count;
     std::array<std::pair<Boundary, Boundary>, Dim> m_boundaries;
+
+
+    static std::array<idx_t, Dim> periodic_directions(boundary_array b){
+
+        std::array<idx_t, Dim> ret;
+        for (idx_t i = 0; i < Dim; ++i){
+            ret[i] = (b[i].first.type == BoundaryType::periodic) && (b[i].second.type == BoundaryType::periodic); 
+        }
+        return ret;
+    }
+
 
 
 };
