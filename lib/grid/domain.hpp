@@ -14,12 +14,10 @@ template <idx_t Dim> struct Domain {
     using boundary_array = std::array<std::pair<Boundary, Boundary>, Dim>;
 
 
-    Domain(std::array<double, Dim>           phys_dims,
+    Domain(
            std::array<idx_t, Dim>            node_count,
            boundary_array boundary_types)
         : m_decomposition(1, node_count, periodic_directions(boundary_types), std::array<idx_t, Dim>{}) 
-        , m_phys_dims(phys_dims)
-        , m_node_count(node_count)
         , m_boundaries(boundary_types) {}
 
 
@@ -29,13 +27,15 @@ template <idx_t Dim> struct Domain {
            std::array<double, Dim> gphys_dims,
            std::array<idx_t, Dim> gnode_count,
            boundary_array gboundary_types)
+           
+        : m_decomposition(n_domains, node_count, periodic_directions(boundary_types), std::array<idx_t, Dim>{})
+        , m_phys_dims 
     {
 
     }
 
 
     */
-
 
     std::pair<Boundary, Boundary> get_boundaries(Direction dir) const{
 
@@ -58,10 +58,8 @@ template <idx_t Dim> struct Domain {
 
 private:
     Decomposition<Dim>                m_decomposition;
-    std::array<double, Dim>           m_phys_dims;
-    std::array<idx_t, Dim>            m_node_count;
     std::array<std::pair<Boundary, Boundary>, Dim> m_boundaries;
-
+//    UniformGrid<Dim>                    m_grid; 
 
     static std::array<idx_t, Dim> periodic_directions(boundary_array b){
 
