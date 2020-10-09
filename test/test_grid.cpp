@@ -154,13 +154,15 @@ TEST_CASE("Test Decomposition") {
     }
 }
 
-TEST_CASE("Test Grid"){
+
+
+TEST_CASE("Test UniformGrid") {
 
     using namespace JADA;
-    
+
     SECTION("1D loop tests"){
         std::vector<int> test = {0, 0, 0, 0};
-        Grid<1>          grid({test.size()});
+        UniformGrid<1>          grid({test.size()});
         CHECK(grid.dimensions() == std::array<idx_t, 1>{test.size()});
 
         CHECK(set_ones(test, grid.get_loop()) == std::vector<int>{1,1,1,1});
@@ -170,7 +172,7 @@ TEST_CASE("Test Grid"){
     SECTION("2D loop tests"){
         idx_t nj = 3; idx_t ni = 4;
         std::vector<int> test(nj*ni, 0);
-        Grid<2>          grid({nj, ni});
+        UniformGrid<2>          grid({nj, ni});
         CHECK(grid.dimensions() == std::array<idx_t, 2>{nj,ni});
 
         CHECK(set_ones(test, grid.get_loop()) == std::vector<int>(grid.size(), 1));
@@ -180,26 +182,13 @@ TEST_CASE("Test Grid"){
     SECTION("3D loop tests"){
         idx_t nk = 2; idx_t nj = 3; idx_t ni = 4;
         std::vector<int> test(nk*nj*ni, 0);
-        Grid<3>          grid({nk, nj, ni});
+        UniformGrid<3>          grid({nk, nj, ni});
         CHECK(grid.dimensions() == std::array<idx_t, 3>{nk,nj,ni});
 
         CHECK(set_ones(test, grid.get_loop()) == std::vector<int>(grid.size(), 1));
 
     }
 
-}
-
-
-TEST_CASE("Test UniformGrid") {
-
-    using namespace JADA;
-
-    std::array<double, 2> L{1.0, 1.0};
-    std::array<size_t, 2> dims{10, 10};
-
-    UniformGrid<2> grid(dims, L);
-
-    CHECK(grid.stepsize() == std::array<double, 2>{1.0 / 10, 1.0 / 10});
 }
 
 TEST_CASE("Test Partition") {
@@ -290,7 +279,7 @@ TEST_CASE("Test Partition") {
     SECTION("Partition loops"){
 
         idx_t nj = 3; idx_t ni = 4;
-        Grid<2> grid({nj,ni});
+        UniformGrid<2> grid({nj,ni});
 
         std::vector<int> test(nj*ni);
         

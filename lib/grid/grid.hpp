@@ -9,34 +9,39 @@
 
 namespace JADA {
 
-template <idx_t Dim> struct Grid {
-
-    static constexpr idx_t n_spatial_dims = Dim;
-
+template<idx_t N, class Derived>
+struct Grid{
 
 
-    static_assert(Dim <= 3, "Only up to grid 3 dimensions supported.");
-
-    Grid() = default;
+    static constexpr idx_t Dim = N;
 
     ///
-    ///@brief Construct a new Grid object
+    ///@brief CRTP injection of dimensions function
     ///
-    ///@param Number of points per Dim in the grid
+    ///@return std::array<idx_t, Dim> number of nodes in each spatial direction
     ///
-    Grid(std::array<idx_t, Dim> dimensions)
-        : m_dimensions(dimensions) {}
+    std::array<idx_t, Dim> dimensions() const {
+        return static_cast<const Derived*>(this)->get_dimensions();
+    }
+
 
     ///
-    ///@brief Get the total grid point count
+    ///@brief CRTP injection of points function
     ///
-    ///@return idx_t number of points in the grid
+    ///@return const std::vector<std::array<idx_t, Dim>>& all point coordinates of the grid
+    ///
+    const std::vector<std::array<idx_t, Dim>>& points() const {
+        return static_cast<const Derived*>(this)->get_dimensions();
+    }
+
+
+    ///
+    ///@brief Total point count in the grid
+    ///
+    ///@return idx_t total point count 
     ///
     idx_t size() const {
-        return std::accumulate(m_dimensions.begin(),
-                               m_dimensions.end(),
-                               idx_t(1),
-                               std::multiplies<idx_t>());
+        return multiply_each(dimensions());
     }
 
 
@@ -46,17 +51,10 @@ template <idx_t Dim> struct Grid {
     ///@return index_generator<1> an index generator returning the indices
     ///
     index_generator<1> get_loop() const{
-        return serial_index(std::array<idx_t, Dim>{}, m_dimensions, m_dimensions);
+        return serial_index(std::array<idx_t, Dim>{}, dimensions(), dimensions());
     }
 
 
-
-    ///
-    ///@brief Get the number of points in each direction
-    ///
-    ///@return const std::array<idx_t, Dim>& number of points in all directions
-    ///
-    const std::array<idx_t, Dim>& dimensions() const { return m_dimensions; }
 
     ///
     ///@brief Get the direction specific grid point count
@@ -66,7 +64,7 @@ template <idx_t Dim> struct Grid {
     ///
     idx_t dimension(Direction dir) const {
         const idx_t dir_idx = DirectionMap<Dim>::dir_to_idx(dir);
-        return m_dimensions[dir_idx];
+        return dimensions()[dir_idx];
     }
 
     ///
@@ -89,8 +87,22 @@ template <idx_t Dim> struct Grid {
         }
     }
 
-private:
-    std::array<idx_t, Dim> m_dimensions;
+
+
+protected:
+    template<class ElementType>
+    static idx_t multiply_each(std::array<ElementType, Dim> array){
+
+        return std::accumulate(array.begin(),
+                               array.end(),
+                               ElementType(1),
+                               std::multiplies<ElementType>());
+
+    }
+
+
+
 };
+
 
 } // namespace JADA
