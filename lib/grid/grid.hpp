@@ -3,6 +3,8 @@
 #include <numeric>
 #include <array>
 
+#include "grid/point.hpp"
+#include "grid/grid_dimensions.hpp"
 #include "grid/direction.hpp"
 #include "loops/index_type.hpp"
 #include "loops/serial_index_loops.hpp"
@@ -18,9 +20,9 @@ struct Grid{
     ///
     ///@brief CRTP injection of dimensions function
     ///
-    ///@return std::array<idx_t, Dim> number of nodes in each spatial direction
+    ///@return GridDims<Dim> number of nodes in each spatial direction
     ///
-    std::array<idx_t, Dim> dimensions() const {
+    GridDims<Dim> dimensions() const {
         return static_cast<const Derived*>(this)->get_dimensions();
     }
 
@@ -30,7 +32,7 @@ struct Grid{
     ///
     ///@return const std::vector<std::array<idx_t, Dim>>& all point coordinates of the grid
     ///
-    const std::vector<std::array<idx_t, Dim>>& points() const {
+    const std::vector<Point<Dim>>& points() const {
         return static_cast<const Derived*>(this)->get_dimensions();
     }
 
@@ -41,7 +43,7 @@ struct Grid{
     ///@return idx_t total point count 
     ///
     idx_t size() const {
-        return multiply_each(dimensions());
+        return elementwise_product(dimensions());
     }
 
 
@@ -90,8 +92,17 @@ struct Grid{
 
 
 protected:
+
+
+    ///
+    ///@brief Computes an elementwise product of the given array
+    ///
+    ///@tparam ElementType any type that supports multiplication
+    ///@param array an array to multiply
+    ///@return ElementType the product of the elements  
+    ///
     template<class ElementType>
-    static idx_t multiply_each(std::array<ElementType, Dim> array){
+    static ElementType elementwise_product(std::array<ElementType, Dim> array){
 
         return std::accumulate(array.begin(),
                                array.end(),
