@@ -9,15 +9,23 @@
 #include "utils/runtime_assert.hpp"
 namespace JADA {
 
-template <idx_t Dim> struct Domain {
+
+
+template <class GridType> struct Domain {
+
+    static constexpr idx_t Dim = GridType::n_spatial_dims;
+
 
     using boundary_array = std::array<std::pair<Boundary, Boundary>, Dim>;
 
-
     Domain(
+           std::array<double, Dim>            begin_coord,
+           std::array<double, Dim>           end_coord,
            std::array<idx_t, Dim>            node_count,
            boundary_array boundary_types)
-        : m_decomposition(1, node_count, periodic_directions(boundary_types), std::array<idx_t, Dim>{}) 
+        : m_decomposition(1, node_count, periodic_directions(boundary_types), std::array<idx_t, Dim>{})
+        , m_begin_coord(begin_coord)
+        , m_end_coord(end_coord)
         , m_boundaries(boundary_types) {}
 
 
@@ -58,7 +66,15 @@ template <idx_t Dim> struct Domain {
 
 private:
     Decomposition<Dim>                m_decomposition;
+    GridType                          m_grid;
+    std::array<double, Dim>           m_begin_coord;
+    std::array<double, Dim>           m_end_coord;
     std::array<std::pair<Boundary, Boundary>, Dim> m_boundaries;
+
+
+
+
+
 //    UniformGrid<Dim>                    m_grid; 
 
     static std::array<idx_t, Dim> periodic_directions(boundary_array b){
@@ -73,5 +89,6 @@ private:
 
 
 };
+
 
 } // namespace JADA

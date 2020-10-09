@@ -377,7 +377,8 @@ TEST_CASE("Test Domain"){
     SECTION("Constructors"){
         //std::array<double, 2> pdims = {1.0, 1.0};
         std::array<idx_t, 2>  nc = {10, 10};
-
+        std::array<double, 2> begin{0.0, 0.0};
+        std::array<double, 2> end{1.0, 1.0};
         std::array<std::pair<Boundary, Boundary>, 2> boundaries = {
             std::make_pair(Boundary(BoundaryType::physical, BoundaryLocation::begin),
                            Boundary(BoundaryType::physical, BoundaryLocation::end)),
@@ -385,7 +386,7 @@ TEST_CASE("Test Domain"){
                            Boundary(BoundaryType::physical, BoundaryLocation::end))
         };
 
-        REQUIRE_NOTHROW(Domain<2>(nc, boundaries));
+        REQUIRE_NOTHROW(Domain<UniformGrid<2>>(begin, end, nc, boundaries));
 
 //        REQUIRE_NOTHROW(Domain<2>(4, pdims, nc, boundaries));
 
