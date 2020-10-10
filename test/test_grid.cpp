@@ -160,6 +160,31 @@ TEST_CASE("Test UniformGrid") {
 
     using namespace JADA;
 
+
+    SECTION("Constructors"){
+        SECTION("1D"){
+            Point<1> begin{};
+            Point<1> end{1.0};
+            GridDims<1> dims{2};
+
+            UniformGrid<1> grid1(begin, end, dims);
+
+            CHECK(grid1.dimensions() == dims);
+
+            CHECK(grid1.stepsize() == std::array<double, 1>{0.5});
+            CHECK(grid1.size() == 2);
+            CHECK(grid1.points().size() == 2);
+            CHECK(grid1.points() == std::vector<Point<1>>{
+                Point<1>{0.25},
+                Point<1>{0.75}
+            });
+        }
+
+
+    }
+
+
+
     SECTION("1D loop tests"){
         std::vector<int> test = {0, 0, 0, 0};
         UniformGrid<1>          grid({test.size()});

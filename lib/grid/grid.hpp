@@ -15,6 +15,9 @@ template<idx_t N, class Derived>
 struct Grid{
 
 
+    static_assert(N < 4, "Only up to 3 dimensions supported");
+
+
     static constexpr idx_t Dim = N;
 
     ///
@@ -33,7 +36,7 @@ struct Grid{
     ///@return const std::vector<std::array<idx_t, Dim>>& all point coordinates of the grid
     ///
     const std::vector<Point<Dim>>& points() const {
-        return static_cast<const Derived*>(this)->get_dimensions();
+        return static_cast<const Derived*>(this)->get_points();
     }
 
 
