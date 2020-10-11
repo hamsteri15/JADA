@@ -183,11 +183,11 @@ TEST_CASE("Test UniformGrid") {
         SECTION("2D"){
             Point<2> begin{};
             Point<2> end{1.0, 1.0};
-            GridDims<2> dims{2, 1};
+            GridDims<2> dims1{2, 1};
 
-            UniformGrid<2> grid1(begin, end, dims);
+            UniformGrid<2> grid1(begin, end, dims1);
 
-            CHECK(grid1.dimensions() == dims);
+            CHECK(grid1.dimensions() == dims1);
 
             CHECK(grid1.stepsize() == std::array<double, 2>{0.5, 1.0});
             CHECK(grid1.size() == 2);
@@ -196,6 +196,22 @@ TEST_CASE("Test UniformGrid") {
                 Point<2>{0.25, 0.5},
                 Point<2>{0.75, 0.5}
             });
+
+
+
+            GridDims<2> dims2{1, 1};
+            UniformGrid<2> grid2(begin, end, dims2);
+
+            CHECK(grid2.dimensions() == dims2);
+
+            CHECK(grid2.stepsize() == std::array<double, 2>{1.0, 1.0});
+            CHECK(grid2.size() == 1);
+            CHECK(grid2.points().size() == 1);
+            CHECK(grid2.points() == std::vector<Point<2>>{
+                Point<2>{0.5, 0.5},
+            });
+
+
         }
 
     }
