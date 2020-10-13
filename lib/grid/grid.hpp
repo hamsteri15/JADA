@@ -6,6 +6,7 @@
 #include "grid/point.hpp"
 #include "grid/grid_dimensions.hpp"
 #include "grid/direction.hpp"
+#include "grid/domain.hpp"
 #include "loops/index_type.hpp"
 #include "loops/serial_index_loops.hpp"
 

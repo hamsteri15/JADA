@@ -5,33 +5,28 @@
 #include "grid/boundary.hpp"
 #include "grid/decomposition.hpp"
 #include "grid/direction.hpp"
+#include "grid/grid_dimensions.hpp"
+#include "grid/point.hpp"
 #include "loops/index_type.hpp"
+#include "loops/unflatten_index.hpp"
 #include "utils/runtime_assert.hpp"
+
 namespace JADA {
 
-template <class GridType> struct Domain {
-
-    static constexpr idx_t Dim = GridType::Dim;
+template <idx_t Dim> struct Domain {
 
     using boundary_array = std::array<std::pair<Boundary, Boundary>, Dim>;
 
-
-
-
-
-
-    Domain(std::array<double, Dim> begin_coord,
-           std::array<double, Dim> end_coord,
-           std::array<idx_t, Dim>  node_count,
-           boundary_array          boundary_types)
-        : m_decomposition(1,
-                          node_count,
-                          periodic_directions(boundary_types),
-                          std::array<idx_t, Dim>{})
-        , m_begin_coord(begin_coord)
-        , m_end_coord(end_coord)
-        , m_boundaries(boundary_types) {}
-
+    Domain(Point<Dim>     begin_coord,
+           Point<Dim>     end_coord,
+           boundary_array boundary_types)
+        : m_begin(begin_coord)
+        , m_end(end_coord)
+        , m_boundaries(boundary_types) {
+        Utils::runtime_assert(begin_coord <= end_coord,
+                              "The domain bounds must be such that the begin "
+                              "coord is smaller than the end coord.");
+    }
 
     std::pair<Boundary, Boundary> get_boundaries(Direction dir) const {
 
@@ -54,13 +49,10 @@ template <class GridType> struct Domain {
     }
 
 private:
-    Decomposition<Dim>                             m_decomposition;
-    GridType                                       m_grid;
-    std::array<double, Dim>                        m_begin_coord;
-    std::array<double, Dim>                        m_end_coord;
+    Point<Dim>                                     m_begin;
+    Point<Dim>                                     m_end;
     std::array<std::pair<Boundary, Boundary>, Dim> m_boundaries;
 
-    //    UniformGrid<Dim>                    m_grid;
 
     static std::array<idx_t, Dim> periodic_directions(boundary_array b) {
 
@@ -72,5 +64,13 @@ private:
         return ret;
     }
 };
+
+
+
+
+
+
+
+
 
 } // namespace JADA
