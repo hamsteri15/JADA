@@ -11,7 +11,7 @@ template <idx_t Dim> struct SubDomain : public Domain<Dim> {
     using base_type      = Domain<Dim>;
     using boundary_array = typename base_type::boundary_array;
 
-    SubDomain(Domain<Dim> parent, Decomposition<Dim> dec, idx_t domain_id)
+    SubDomain(const Domain<Dim>& parent, Decomposition<Dim> dec, idx_t domain_id)
         : Domain<Dim>(compute_grid_dims(dec, domain_id),
                       create_boundaries(parent, dec, domain_id)) {}
 
@@ -36,7 +36,7 @@ private:
         return dec.get_local_dimensions(domain_coords);
     }
 
-    static boundary_array create_boundaries(Domain<Dim>        parent,
+    static boundary_array create_boundaries(const Domain<Dim>&        parent,
                                             Decomposition<Dim> dec,
                                             idx_t              domain_id) {
 

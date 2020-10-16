@@ -485,6 +485,18 @@ TEST_CASE("Test Domain"){
         REQUIRE_THROWS(d3.get_boundaries(Direction::j));
 
 
+        SECTION("Subdomain from subdomain"){
+
+            Decomposition<1> dec2(2, d3.grid_dimensions(), d3.periodic_directions(), GridDims<1>{});
+
+            auto dd3 = SubDomain<1>(d3, dec2, 0 );
+
+            CHECK(dd3.grid_dimensions() == GridDims<1>{1});
+
+
+        }
+
+
 
     }
 
