@@ -457,7 +457,7 @@ TEST_CASE("Test Domain"){
         Decomposition<1> dec(n_subdomains, global.grid_dimensions(), global.periodic_directions(), GridDims<1>{});
 
         
-        auto d0 = SubDomain<1>(global, dec, 0);
+        auto d0 = SubDomain<1>(global, n_subdomains, 0);
 
         CHECK(d0.grid_dimensions() == GridDims<1>{2});
 
@@ -465,7 +465,7 @@ TEST_CASE("Test Domain"){
         CHECK(d0.get_boundary(Direction::i, BoundaryLocation::end).type == BoundaryType::processor);
 
 
-        auto d2 = SubDomain<1>(global, dec, 2);
+        auto d2 = SubDomain<1>(global, n_subdomains, 2);
 
         CHECK(d2.grid_dimensions() == GridDims<1>{2});
 
@@ -473,7 +473,7 @@ TEST_CASE("Test Domain"){
         CHECK(d2.get_boundary(Direction::i, BoundaryLocation::end).type == BoundaryType::processor);
 
 
-        auto d3 = SubDomain<1>(global, dec, 3);
+        auto d3 = SubDomain<1>(global, n_subdomains, 3);
 
         CHECK(d3.grid_dimensions() == GridDims<1>{3});
 
@@ -487,9 +487,8 @@ TEST_CASE("Test Domain"){
 
         SECTION("Subdomain from subdomain"){
 
-            Decomposition<1> dec2(2, d3.grid_dimensions(), d3.periodic_directions(), GridDims<1>{});
 
-            auto dd3 = SubDomain<1>(d3, dec2, 0 );
+            auto dd3 = SubDomain<1>(d3, 2, 0 );
 
             CHECK(dd3.grid_dimensions() == GridDims<1>{1});
 
@@ -512,7 +511,7 @@ TEST_CASE("Test Domain"){
         Decomposition<2> dec(n_subdomains, global.grid_dimensions(), global.periodic_directions(), GridDims<2>{});
 
         //"upper left"
-        auto d0 = SubDomain<2>(global, dec, 0);
+        auto d0 = SubDomain<2>(global, n_subdomains, 0);
 
         CHECK(d0.grid_dimensions() == GridDims<2>{5,5});
 
@@ -523,7 +522,7 @@ TEST_CASE("Test Domain"){
         CHECK(d0.get_boundary(Direction::j, BoundaryLocation::end).type == BoundaryType::processor);
 
         //upper right
-        auto d1 = SubDomain<2>(global, dec, 1);
+        auto d1 = SubDomain<2>(global, n_subdomains, 1);
 
         CHECK(d1.grid_dimensions() == GridDims<2>{5,5});
 
@@ -536,7 +535,6 @@ TEST_CASE("Test Domain"){
 
 
     }
-
 
 
 }
