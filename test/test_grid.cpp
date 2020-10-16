@@ -432,7 +432,9 @@ TEST_CASE("Test Domain"){
                            Boundary(BoundaryType::physical, BoundaryLocation::end))
         };
 
-        REQUIRE_NOTHROW(Domain<2>(begin, end, boundaries));
+        GridDims<2> dims{10,10};
+
+        REQUIRE_NOTHROW(Domain<2>(begin, end, dims, boundaries));
 
 //        REQUIRE_NOTHROW(Domain<2>(4, pdims, nc, boundaries));
 

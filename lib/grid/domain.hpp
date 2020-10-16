@@ -19,9 +19,11 @@ template <idx_t Dim> struct Domain {
 
     Domain(Point<Dim>     begin_coord,
            Point<Dim>     end_coord,
+           GridDims<Dim>  grid_dims,
            boundary_array boundary_types)
         : m_begin(begin_coord)
         , m_end(end_coord)
+        , m_grid_dims(grid_dims)
         , m_boundaries(boundary_types) {
         Utils::runtime_assert(begin_coord <= end_coord,
                               "The domain bounds must be such that the begin "
@@ -48,9 +50,12 @@ template <idx_t Dim> struct Domain {
         return boundaries.second;
     }
 
+
+
 private:
     Point<Dim>                                     m_begin;
     Point<Dim>                                     m_end;
+    GridDims<Dim>                                  m_grid_dims;
     std::array<std::pair<Boundary, Boundary>, Dim> m_boundaries;
 
 
@@ -65,6 +70,15 @@ private:
     }
 };
 
+
+template<idx_t Dim>
+struct SubDomain : public Domain<Dim>{
+
+
+private:
+    Decomposition<Dim> m_dec;
+
+};
 
 
 
