@@ -31,6 +31,8 @@ template <idx_t N> struct UniformGrid : public Grid<N, UniformGrid<N>> {
         , m_stepsize(compute_stepsize(dimensions, point_difference(begin, end)))
         , m_points(create_points(begin, end, dimensions)) {}
 
+
+
     std::array<double, N> stepsize() const { return m_stepsize; }
 
     const std::vector<Point<N>>& get_points() const {

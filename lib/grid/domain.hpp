@@ -17,12 +17,9 @@ template <idx_t Dim> struct Domain {
 
     using boundary_array = std::array<std::pair<Boundary, Boundary>, Dim>;
 
-    Domain(
-           GridDims<Dim>  grid_dims,
-           boundary_array boundary_types)
+    Domain(GridDims<Dim> grid_dims, boundary_array boundary_types)
         : m_grid_dims(grid_dims)
-        , m_boundaries(boundary_types) {
-    }
+        , m_boundaries(boundary_types) {}
 
     std::pair<Boundary, Boundary> get_boundaries(Direction dir) const {
 
@@ -36,8 +33,6 @@ template <idx_t Dim> struct Domain {
                               "Invalid boundary order");
 
         return m_boundaries[dir_idx];
-
-        
     }
 
     Boundary get_boundary(Direction dir, BoundaryLocation location) const {
@@ -47,27 +42,18 @@ template <idx_t Dim> struct Domain {
         return boundaries.second;
     }
 
-    boundary_array get_boundaries() const {
-        return m_boundaries;
-    }
+    boundary_array get_boundaries() const { return m_boundaries; }
 
-    GridDims<Dim> grid_dimensions() const {
-        return m_grid_dims;
-    }
+    GridDims<Dim> grid_dimensions() const { return m_grid_dims; }
 
-
-    std::array<idx_t, Dim> periodic_directions() const{
+    std::array<idx_t, Dim> periodic_directions() const {
         return periodic_directions(m_boundaries);
     }
 
 protected:
-
-
-
 private:
     GridDims<Dim>                                  m_grid_dims;
     std::array<std::pair<Boundary, Boundary>, Dim> m_boundaries;
-
 
     static std::array<idx_t, Dim> periodic_directions(boundary_array b) {
 
@@ -79,14 +65,5 @@ private:
         return ret;
     }
 };
-
-
-
-
-
-
-
-
-
 
 } // namespace JADA
