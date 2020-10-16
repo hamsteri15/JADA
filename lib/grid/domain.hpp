@@ -17,30 +17,27 @@ template <idx_t Dim> struct Domain {
 
     using boundary_array = std::array<std::pair<Boundary, Boundary>, Dim>;
 
-    Domain(Point<Dim>     begin_coord,
-           Point<Dim>     end_coord,
+    Domain(
            GridDims<Dim>  grid_dims,
            boundary_array boundary_types)
-        : m_begin(begin_coord)
-        , m_end(end_coord)
-        , m_grid_dims(grid_dims)
+        : m_grid_dims(grid_dims)
         , m_boundaries(boundary_types) {
-        Utils::runtime_assert(begin_coord <= end_coord,
-                              "The domain bounds must be such that the begin "
-                              "coord is smaller than the end coord.");
     }
 
     std::pair<Boundary, Boundary> get_boundaries(Direction dir) const {
 
         idx_t dir_idx = DirectionMap<Dim>::dir_to_idx(dir);
-        return m_boundaries[dir_idx];
 
-        Utils::runtime_assert(m_boundaries.first.location ==
+        Utils::runtime_assert(m_boundaries[dir_idx].first.location ==
                                   BoundaryLocation::begin,
                               "Invalid boundary order.");
-        Utils::runtime_assert(m_boundaries.second.location ==
+        Utils::runtime_assert(m_boundaries[dir_idx].second.location ==
                                   BoundaryLocation::end,
                               "Invalid boundary order");
+
+        return m_boundaries[dir_idx];
+
+        
     }
 
     Boundary get_boundary(Direction dir, BoundaryLocation location) const {
@@ -50,11 +47,24 @@ template <idx_t Dim> struct Domain {
         return boundaries.second;
     }
 
+    boundary_array get_boundaries() const {
+        return m_boundaries;
+    }
+
+    GridDims<Dim> grid_dimensions() const {
+        return m_grid_dims;
+    }
+
+
+    std::array<idx_t, Dim> periodic_directions() const{
+        return periodic_directions(m_boundaries);
+    }
+
+protected:
+
 
 
 private:
-    Point<Dim>                                     m_begin;
-    Point<Dim>                                     m_end;
     GridDims<Dim>                                  m_grid_dims;
     std::array<std::pair<Boundary, Boundary>, Dim> m_boundaries;
 
@@ -71,14 +81,6 @@ private:
 };
 
 
-template<idx_t Dim>
-struct SubDomain : public Domain<Dim>{
-
-
-private:
-    Decomposition<Dim> m_dec;
-
-};
 
 
 

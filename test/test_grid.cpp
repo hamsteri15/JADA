@@ -10,6 +10,7 @@
 #include "grid/partition.hpp"
 #include "grid/create_partition.hpp"
 #include "grid/domain.hpp"
+#include "grid/subdomain.hpp"
 
 #include "operation/fdm_operations.hpp"
 
@@ -410,40 +411,119 @@ TEST_CASE("Test Domain"){
 
     using namespace JADA;
 
-    /*
-
-    Domain(std::array<double, Dim>           phys_dims,
-           std::array<idx_t, Dim>            node_count,
-           std::array<std::pair<Boundary, Boundary>, Dim> boundary_types)
-        : m_phys_dims(phys_dims)
-        , m_node_count(node_count)
-        , m_boundaries(boundary_types) {}
-    */
+    [[maybe_unused]] std::array<std::pair<Boundary, Boundary>, 1>  all_physical_1d = {
+            std::make_pair(Boundary(BoundaryType::physical, BoundaryLocation::begin),
+                           Boundary(BoundaryType::physical, BoundaryLocation::end))
+        };
 
 
-    SECTION("Constructors"){
-        //std::array<double, 2> pdims = {1.0, 1.0};
-        std::array<double, 2> begin{0.0, 0.0};
-        std::array<double, 2> end{1.0, 1.0};
-        std::array<std::pair<Boundary, Boundary>, 2> boundaries = {
+    [[maybe_unused]] std::array<std::pair<Boundary, Boundary>, 2> all_physical_2d = {
             std::make_pair(Boundary(BoundaryType::physical, BoundaryLocation::begin),
                            Boundary(BoundaryType::physical, BoundaryLocation::end)),
             std::make_pair(Boundary(BoundaryType::physical, BoundaryLocation::begin),
                            Boundary(BoundaryType::physical, BoundaryLocation::end))
         };
 
+    [[maybe_unused]] std::array<std::pair<Boundary, Boundary>, 3> all_physical_3d = {
+            std::make_pair(Boundary(BoundaryType::physical, BoundaryLocation::begin),
+                           Boundary(BoundaryType::physical, BoundaryLocation::end)),
+            std::make_pair(Boundary(BoundaryType::physical, BoundaryLocation::begin),
+                           Boundary(BoundaryType::physical, BoundaryLocation::end)),
+            std::make_pair(Boundary(BoundaryType::physical, BoundaryLocation::begin),
+                           Boundary(BoundaryType::physical, BoundaryLocation::end))
+
+        };
+
+
+
+
+    SECTION("Domain Constructors"){
+
         GridDims<2> dims{10,10};
 
-        REQUIRE_NOTHROW(Domain<2>(begin, end, dims, boundaries));
+        REQUIRE_NOTHROW(Domain<2>(dims, all_physical_2d));
 
-//        REQUIRE_NOTHROW(Domain<2>(4, pdims, nc, boundaries));
 
+    }
+
+    SECTION("SubDomain<1> Constructors"){
+
+        GridDims<1> global_dims{10};
+        Domain<1> global(global_dims, all_physical_1d);        
+
+
+        idx_t n_subdomains = 4;
+
+        Decomposition<1> dec(n_subdomains, global.grid_dimensions(), global.periodic_directions(), GridDims<1>{});
+
+        
+        auto d0 = SubDomain<1>(global, dec, 0);
+
+        CHECK(d0.grid_dimensions() == GridDims<1>{2});
+
+        CHECK(d0.get_boundary(Direction::i, BoundaryLocation::begin).type == BoundaryType::physical);
+        CHECK(d0.get_boundary(Direction::i, BoundaryLocation::end).type == BoundaryType::processor);
+
+
+        auto d2 = SubDomain<1>(global, dec, 2);
+
+        CHECK(d2.grid_dimensions() == GridDims<1>{2});
+
+        CHECK(d2.get_boundary(Direction::i, BoundaryLocation::begin).type == BoundaryType::processor);
+        CHECK(d2.get_boundary(Direction::i, BoundaryLocation::end).type == BoundaryType::processor);
+
+
+        auto d3 = SubDomain<1>(global, dec, 3);
+
+        CHECK(d3.grid_dimensions() == GridDims<1>{3});
+
+        CHECK(d3.get_boundary(Direction::i, BoundaryLocation::begin).type == BoundaryType::processor);
+        CHECK(d3.get_boundary(Direction::i, BoundaryLocation::end).type == BoundaryType::physical);
+
+
+        REQUIRE_THROWS(d3.get_boundary(Direction::j, BoundaryLocation::begin));
+        REQUIRE_THROWS(d3.get_boundaries(Direction::j));
 
 
 
     }
 
 
+    SECTION("SubDomain< Constructors"){
+
+        GridDims<2> global_dims{10,10};
+        Domain<2> global(global_dims, all_physical_2d);        
+
+
+        idx_t n_subdomains = 4;
+
+        Decomposition<2> dec(n_subdomains, global.grid_dimensions(), global.periodic_directions(), GridDims<2>{});
+
+        //"upper left"
+        auto d0 = SubDomain<2>(global, dec, 0);
+
+        CHECK(d0.grid_dimensions() == GridDims<2>{5,5});
+
+        CHECK(d0.get_boundary(Direction::i, BoundaryLocation::begin).type == BoundaryType::physical);
+        CHECK(d0.get_boundary(Direction::i, BoundaryLocation::end).type == BoundaryType::processor);
+
+        CHECK(d0.get_boundary(Direction::j, BoundaryLocation::begin).type == BoundaryType::physical);
+        CHECK(d0.get_boundary(Direction::j, BoundaryLocation::end).type == BoundaryType::processor);
+
+        //upper right
+        auto d1 = SubDomain<2>(global, dec, 1);
+
+        CHECK(d1.grid_dimensions() == GridDims<2>{5,5});
+
+        CHECK(d1.get_boundary(Direction::i, BoundaryLocation::end).type == BoundaryType::physical);
+        CHECK(d1.get_boundary(Direction::i, BoundaryLocation::begin).type == BoundaryType::processor);
+
+        CHECK(d1.get_boundary(Direction::j, BoundaryLocation::begin).type == BoundaryType::physical);
+        CHECK(d1.get_boundary(Direction::j, BoundaryLocation::end).type == BoundaryType::processor);
+
+
+
+    }
 
 
 
