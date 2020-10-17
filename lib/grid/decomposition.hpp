@@ -69,7 +69,7 @@ public:
                         global_dims,
                         periodic_directions,
                         barriers,
-                        split(subdomain_count, global_dims)) {}
+                        split(global_dims, subdomain_count)) {}
 
 
     ///

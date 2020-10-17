@@ -11,7 +11,7 @@
 #include "grid/create_partition.hpp"
 #include "grid/domain.hpp"
 #include "grid/subdomain.hpp"
-
+#include "grid/block.hpp"
 #include "operation/fdm_operations.hpp"
 
 
@@ -31,10 +31,25 @@ TEST_CASE("Test split") {
 
     std::array<idx_t, 3> global_dims = {101, 1, 444};
 
-    for (size_t i = 15; i < 81; ++i) { REQUIRE_NOTHROW(split(i, global_dims)); }
+    for (size_t i = 15; i < 81; ++i) { REQUIRE_NOTHROW(split(global_dims, i)); }
 
     global_dims = {10, 10, 1};
-    REQUIRE_THROWS(split(101, global_dims));
+    REQUIRE_THROWS(split(global_dims, 101));
+
+
+
+
+    
+    Block<1> parent({5});
+
+    auto sub_blocks = split(parent, 5);
+
+    for (auto s : sub_blocks){
+        CHECK(s.dimensions == BlockDims<1>{1});
+    }
+
+
+
 }
 
 TEST_CASE("Test LocalGlobalMapping") {

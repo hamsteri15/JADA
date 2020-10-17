@@ -5,6 +5,8 @@
 
 namespace JADA {
 
+
+//TODO: rename this class 
 template <size_t N> class LocalGlobalMapping {
 
 public:
@@ -18,9 +20,9 @@ public:
     ///@param subdomain_coords subdomain coordinates
     ///@return std::pair a pair containing the start (first) and end (second)
     ///
-    auto get_bounds(const std::array<size_t, N>& global_dimensions,
+    static auto get_bounds(const std::array<size_t, N>& global_dimensions,
                     const std::array<size_t, N>& domain_splits,
-                    const std::array<size_t, N>& subdomain_coords) const {
+                    const std::array<size_t, N>& subdomain_coords) {
 
         using namespace Utils::ArrayOpOverloads;
 
@@ -37,9 +39,9 @@ public:
     ///@param subdomain_coords subdomain coordinates
     ///@return std::array<size_t, N> local extent in each direction
     ///
-    std::array<size_t, N> local_extent(const std::array<size_t, N>& global_dimensions,
+    static std::array<size_t, N> local_extent(const std::array<size_t, N>& global_dimensions,
                                        const std::array<size_t, N>& domain_splits,
-                                       const std::array<size_t, N>& subdomain_coords) const {
+                                       const std::array<size_t, N>& subdomain_coords) {
         using namespace Utils::ArrayOpOverloads;
 
         const auto bounds = get_bounds(global_dimensions, domain_splits, subdomain_coords);
@@ -54,9 +56,9 @@ public:
     ///@param subdomain_coords subdomain coordinates
     ///@return std::array<size_t, N> first index of the subdomain w.r.t to global indices
     ///
-    std::array<size_t, N> start(const std::array<size_t, N>& global_dimensions,
+    static std::array<size_t, N> start(const std::array<size_t, N>& global_dimensions,
                                 const std::array<size_t, N>& domain_splits,
-                                const std::array<size_t, N>& subdomain_coords) const {
+                                const std::array<size_t, N>& subdomain_coords) {
 
         return get_bounds(global_dimensions, domain_splits, subdomain_coords).first;
     }
@@ -69,9 +71,9 @@ public:
     ///@param global_idx the indices to determine the coordinates from
     ///@return std::array<size_t, N> coordinates of the subdomain containing global_idx
     ///
-    std::array<size_t, N> find_subdomain_coords(const std::array<size_t, N>& global_dimensions,
+    static std::array<size_t, N> find_subdomain_coords(const std::array<size_t, N>& global_dimensions,
                                                 const std::array<size_t, N>& domain_splits,
-                                                const std::array<size_t, N>& global_idx) const {
+                                                const std::array<size_t, N>& global_idx) {
 
         using namespace Utils::ArrayOpOverloads;
 
@@ -98,10 +100,10 @@ public:
     ///@param local_idx local indices to convert
     ///@return std::array<size_t, N> global indices
     ///
-    std::array<size_t, N> local_to_global(const std::array<size_t, N>& global_dimensions,
+    static std::array<size_t, N> local_to_global(const std::array<size_t, N>& global_dimensions,
                                           const std::array<size_t, N>& domain_splits,
                                           const std::array<size_t, N>& subdomain_coords,
-                                          const std::array<size_t, N>& local_idx) const {
+                                          const std::array<size_t, N>& local_idx) {
 
         using namespace Utils::ArrayOpOverloads;
 
@@ -116,9 +118,9 @@ public:
     ///@param global_idx global indices to convert
     ///@return std::pair containing the subdomain coordinates (first) and the local indices (second)
     ///
-    auto global_to_local(const std::array<size_t, N>& global_dimensions,
+    static auto global_to_local(const std::array<size_t, N>& global_dimensions,
                          const std::array<size_t, N>& domain_splits,
-                         const std::array<size_t, N>& global_idx) const {
+                         const std::array<size_t, N>& global_idx) {
 
         using namespace Utils::ArrayOpOverloads;
 
