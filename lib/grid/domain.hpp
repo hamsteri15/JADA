@@ -33,7 +33,39 @@ private:
     
 
 };
+/*
 
+static boundary_array create_boundaries(const Domain<Dim>& parent,
+                                            Decomposition<Dim> dec,
+                                            idx_t              domain_id) {
+
+        auto domain_coords = id_to_domain_coords(dec, domain_id);
+        auto domain_counts = dec.get_subdomain_counts();
+
+        boundary_array boundaries;
+
+        for (idx_t i = 0; i < Dim; ++i) {
+            Boundary begin;
+            begin.location = BoundaryLocation::begin;
+            begin.type     = parent.get_boundaries()[i].first.type;
+
+            Boundary end;
+            end.location = BoundaryLocation::end;
+            end.type     = parent.get_boundaries()[i].second.type;
+
+            if (domain_coords[i] != 0) { begin.type = BoundaryType::processor; }
+
+            if (domain_coords[i] != domain_counts[i] - 1) {
+                end.type = BoundaryType::processor;
+            }
+
+            boundaries[i] = std::make_pair(begin, end);
+        }
+
+        return boundaries;
+    }
+
+*/
 
 
 template <idx_t Dim> struct Domain {

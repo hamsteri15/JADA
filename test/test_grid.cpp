@@ -10,7 +10,6 @@
 #include "grid/partition.hpp"
 #include "grid/create_partition.hpp"
 #include "grid/domain.hpp"
-#include "grid/subdomain.hpp"
 #include "grid/block.hpp"
 #include "grid/block_topology.hpp"
 #include "operation/fdm_operations.hpp"
@@ -458,7 +457,7 @@ TEST_CASE("Test Partition") {
 
 
 }
-
+/*
 TEST_CASE("Test Domain"){
 
     using namespace JADA;
@@ -590,3 +589,4 @@ TEST_CASE("Test Domain"){
 
 
 }
+*/
