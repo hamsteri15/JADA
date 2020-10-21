@@ -13,6 +13,29 @@
 
 namespace JADA {
 
+template<idx_t Dim> struct DomainNew{
+
+    using boundary_array = std::array<std::pair<Boundary, Boundary>, Dim>;
+
+    DomainNew(Point<Dim> begin, Point<Dim> end, boundary_array boundaries) : 
+    m_begin(begin),
+    m_end(end),
+    m_boundaries(boundaries)
+    {}
+
+
+private:
+    Point<Dim> m_begin;
+    Point<Dim> m_end;
+    boundary_array m_boundaries;
+
+
+    
+
+};
+
+
+
 template <idx_t Dim> struct Domain {
 
     using boundary_array = std::array<std::pair<Boundary, Boundary>, Dim>;

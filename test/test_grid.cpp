@@ -12,6 +12,7 @@
 #include "grid/domain.hpp"
 #include "grid/subdomain.hpp"
 #include "grid/block.hpp"
+#include "grid/block_topology.hpp"
 #include "operation/fdm_operations.hpp"
 
 
@@ -40,7 +41,7 @@ TEST_CASE("Test split") {
 
 
     
-    Block<1> parent({5});
+    Block<1> parent({5},0);
 
     auto sub_blocks = split(parent, 5);
 
@@ -50,7 +51,43 @@ TEST_CASE("Test split") {
 
 
 
+
+
+
+
+
 }
+
+TEST_CASE("Test BlockTopology"){
+
+    using namespace JADA;
+    Block<2> parent{{10, 10}, 0};
+
+    REQUIRE_NOTHROW(BlockTopology<2>(parent, 4));
+
+    BlockTopology<2> topo(parent, 4);
+
+    CHECK(topo.get_children().size() == 4);
+    for (auto child : topo.get_children()){
+        CHECK(child.dimensions == BlockDims<2>{5,5});
+    }
+
+
+    std::cout << "Local: " << std::endl;
+    for (auto [j,i] : topo.local_md_indices(1)){
+        std::cout << j << " " << i << std::endl;
+    }
+
+
+    std::cout << "Global: " << std::endl;
+    for (auto [j,i] : topo.global_md_indices(1)){
+        std::cout << j << " " << i << std::endl;
+    }
+
+
+}
+
+
 
 TEST_CASE("Test LocalGlobalMapping") {
 

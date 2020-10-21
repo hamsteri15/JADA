@@ -15,6 +15,7 @@ template <idx_t N> struct UniformGrid : public Grid<N, UniformGrid<N>> {
 
     UniformGrid() = default;
 
+
     ///
     ///@brief Construct from a given point count. Sets unity stepsize in each
     ///direction.

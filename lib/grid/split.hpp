@@ -44,23 +44,9 @@ static inline std::vector<Block<N>> split(Block<N> block, idx_t n){
 
     idx_t counter = 0;
     for (auto pos : md_indices(std::array<idx_t, N>{}, splits)) {
-
-        Block<N> new_block;
-
         auto coords = pos;
-        
         auto new_dims = LocalGlobalMapping<N>::local_extent(block.dimensions, splits, coords);
-        
-        new_block.dimensions = new_dims;
-        new_block.parent_dimensions = block.dimensions;
-        new_block.level = block.level + 1;
-        new_block.id = counter;
-        new_block.n_siblings = n;
-
-
-
-
-        blocks[counter] = new_block;
+        blocks[counter] = Block(new_dims, counter);
         counter++;
     }
 
