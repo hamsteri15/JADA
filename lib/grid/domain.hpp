@@ -13,26 +13,6 @@
 
 namespace JADA {
 
-template<idx_t Dim> struct DomainNew{
-
-    using boundary_array = std::array<std::pair<Boundary, Boundary>, Dim>;
-
-    DomainNew(Point<Dim> begin, Point<Dim> end, boundary_array boundaries) : 
-    m_begin(begin),
-    m_end(end),
-    m_boundaries(boundaries)
-    {}
-
-
-private:
-    Point<Dim> m_begin;
-    Point<Dim> m_end;
-    boundary_array m_boundaries;
-
-
-    
-
-};
 /*
 
 static boundary_array create_boundaries(const Domain<Dim>& parent,
@@ -67,13 +47,13 @@ static boundary_array create_boundaries(const Domain<Dim>& parent,
 
 */
 
-
 template <idx_t Dim> struct Domain {
 
     using boundary_array = std::array<std::pair<Boundary, Boundary>, Dim>;
 
-    Domain(GridDims<Dim> grid_dims, boundary_array boundary_types)
-        : m_grid_dims(grid_dims)
+    Domain(Point<Dim> begin, Point<Dim> end, boundary_array boundary_types)
+        : m_begin(begin)
+        , m_end(end)
         , m_boundaries(boundary_types) {}
 
     std::pair<Boundary, Boundary> get_boundaries(Direction dir) const {
@@ -99,16 +79,15 @@ template <idx_t Dim> struct Domain {
 
     boundary_array get_boundaries() const { return m_boundaries; }
 
-    GridDims<Dim> grid_dimensions() const { return m_grid_dims; }
-
     std::array<idx_t, Dim> periodic_directions() const {
         return periodic_directions(m_boundaries);
     }
 
 protected:
 private:
-    GridDims<Dim>                                  m_grid_dims;
-    std::array<std::pair<Boundary, Boundary>, Dim> m_boundaries;
+    Point<Dim>     m_begin;
+    Point<Dim>     m_end;
+    boundary_array m_boundaries;
 
     static std::array<idx_t, Dim> periodic_directions(boundary_array b) {
 
