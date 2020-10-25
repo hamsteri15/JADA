@@ -31,6 +31,14 @@ struct Grid{
     }
 
 
+    /*
+    Point<Dim> point_coord(position<Dim> pos) const {
+        return static_cast<const Derived*>(this)->get_point_coord(pos);
+    }
+
+    */
+
+
     ///
     ///@brief CRTP injection of points function
     ///
@@ -39,6 +47,10 @@ struct Grid{
     const std::vector<Point<Dim>>& points() const {
         return static_cast<const Derived*>(this)->get_points();
     }
+
+
+
+
 
 
     ///

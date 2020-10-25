@@ -12,6 +12,8 @@
 #include "grid/domain.hpp"
 #include "grid/block.hpp"
 #include "grid/block_topology.hpp"
+#include "grid/boundary_condition.hpp"
+#include "grid/boundary_conditions.hpp"
 #include "operation/fdm_operations.hpp"
 
 
@@ -457,45 +459,76 @@ TEST_CASE("Test Partition") {
 
 
 }
-/*
+
+TEST_CASE("Test BoundaryCondition"){
+
+    using namespace JADA;
+    
+    BoundaryCondition bc1(Direction::i, BcLoc::begin, BcType::periodic);
+    BoundaryCondition bc2(Direction::i, BcLoc::end, BcType::custom);
+    CHECK(bc1.is_periodic());
+    CHECK(bc2.is_periodic() == false);
+
+
+}
+
+TEST_CASE("Test BoundaryConditions"){
+
+    using namespace JADA;
+
+    BoundaryConditions<1> bc_1d{
+        {
+            BoundaryCondition(Direction::i, BcLoc::begin, BcType::periodic),
+            BoundaryCondition(Direction::i, BcLoc::end, BcType::periodic)
+
+        }
+    };
+
+    CHECK(bc_1d.is_periodic(Direction::i));
+
+
+
+}
+
+
 TEST_CASE("Test Domain"){
 
     using namespace JADA;
 
-    [[maybe_unused]] std::array<std::pair<Boundary, Boundary>, 1>  all_physical_1d = {
-            std::make_pair(Boundary(BoundaryType::physical, BoundaryLocation::begin),
-                           Boundary(BoundaryType::physical, BoundaryLocation::end))
-        };
-
-
-    [[maybe_unused]] std::array<std::pair<Boundary, Boundary>, 2> all_physical_2d = {
-            std::make_pair(Boundary(BoundaryType::physical, BoundaryLocation::begin),
-                           Boundary(BoundaryType::physical, BoundaryLocation::end)),
-            std::make_pair(Boundary(BoundaryType::physical, BoundaryLocation::begin),
-                           Boundary(BoundaryType::physical, BoundaryLocation::end))
-        };
-
-    [[maybe_unused]] std::array<std::pair<Boundary, Boundary>, 3> all_physical_3d = {
-            std::make_pair(Boundary(BoundaryType::physical, BoundaryLocation::begin),
-                           Boundary(BoundaryType::physical, BoundaryLocation::end)),
-            std::make_pair(Boundary(BoundaryType::physical, BoundaryLocation::begin),
-                           Boundary(BoundaryType::physical, BoundaryLocation::end)),
-            std::make_pair(Boundary(BoundaryType::physical, BoundaryLocation::begin),
-                           Boundary(BoundaryType::physical, BoundaryLocation::end))
-
-        };
-
-
-
 
     SECTION("Domain Constructors"){
 
-        GridDims<2> dims{10,10};
+        SECTION("1D"){
 
-        REQUIRE_NOTHROW(Domain<2>(dims, all_physical_2d));
+            BoundaryConditions<1> bcs(
+                {
+                    BoundaryCondition(Direction::i, BcLoc::begin, BcType::periodic),
+                    BoundaryCondition(Direction::i, BcLoc::end, BcType::periodic)
+                }
+            );        
+
+            REQUIRE_NOTHROW(Domain<1>({0}, {1}, bcs));
+        }
+
+        SECTION("2D"){
+
+            BoundaryConditions<2> bcs(
+                {
+                    BoundaryCondition(Direction::i, BcLoc::begin, BcType::periodic),
+                    BoundaryCondition(Direction::j, BcLoc::end, BcType::periodic),
+                    BoundaryCondition(Direction::i, BcLoc::end, BcType::periodic),
+                    BoundaryCondition(Direction::j, BcLoc::begin, BcType::periodic)
+                }
+            );        
+
+            REQUIRE_NOTHROW(Domain<2>({0,0}, {1,1}, bcs));
+        }
+
 
 
     }
+
+    /*
 
     SECTION("SubDomain<1> Constructors"){
 
@@ -549,7 +582,10 @@ TEST_CASE("Test Domain"){
 
 
     }
+    */
 
+
+    /*
 
     SECTION("SubDomain< Constructors"){
 
@@ -587,6 +623,5 @@ TEST_CASE("Test Domain"){
 
     }
 
-
+    */
 }
-*/
