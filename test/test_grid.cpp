@@ -209,7 +209,7 @@ TEST_CASE("Test Decomposition") {
 }
 
 
-
+/*
 TEST_CASE("Test UniformGrid") {
 
     using namespace JADA;
@@ -459,7 +459,7 @@ TEST_CASE("Test Partition") {
 
 
 }
-
+*/
 TEST_CASE("Test BoundaryCondition"){
 
     using namespace JADA;

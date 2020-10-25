@@ -1,7 +1,7 @@
 #pragma once
 
 #include "grid/direction.hpp"
-#include "grid/grid.hpp"
+#include "grid/grid_base.hpp"
 #include "loops/index_type.hpp"
 #include "loops/index_generator.hpp"
 #include "stencil/stencil_picker.hpp"

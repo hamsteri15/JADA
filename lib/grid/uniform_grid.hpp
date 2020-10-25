@@ -1,13 +1,15 @@
 #pragma once
-#include "grid/grid.hpp"
+#include "grid/grid_base.hpp"
 #include "loops/md_index_loops.hpp"
 #include "utils/runtime_assert.hpp"
 
 namespace JADA {
 
-template <idx_t N> struct UniformGrid : public Grid<N, UniformGrid<N>> {
 
-    using base_type = Grid<N, UniformGrid<N>>;
+/*
+template <idx_t N> struct UniformGrid : public GridBase<N, UniformGrid<N>> {
+
+    using base_type = GridBase<N, UniformGrid<N>>;
 
     using base_type::elementwise_product;
 
@@ -98,5 +100,6 @@ private:
         return points;
     }
 };
+*/
 
 } // namespace JADA
