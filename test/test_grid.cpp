@@ -14,6 +14,7 @@
 #include "grid/block_topology.hpp"
 #include "grid/boundary_condition.hpp"
 #include "grid/boundary_conditions.hpp"
+#include "grid/grid_base.hpp"
 #include "operation/fdm_operations.hpp"
 
 
@@ -73,7 +74,7 @@ TEST_CASE("Test BlockTopology"){
         CHECK(child.dimensions == BlockDims<2>{5,5});
     }
 
-
+    /*
     std::cout << "Local: " << std::endl;
     for (auto [j,i] : topo.local_md_indices(1)){
         std::cout << j << " " << i << std::endl;
@@ -84,7 +85,7 @@ TEST_CASE("Test BlockTopology"){
     for (auto [j,i] : topo.global_md_indices(1)){
         std::cout << j << " " << i << std::endl;
     }
-
+    */
 
 }
 
@@ -208,6 +209,39 @@ TEST_CASE("Test Decomposition") {
     }
 }
 
+TEST_CASE("Test Grid"){
+
+    using namespace JADA;
+
+
+
+
+    REQUIRE_NOTHROW(Grid<3>());
+
+    Grid<3> g({1,2,3});
+    //auto t = dimensions(g);
+
+    CHECK(size(g) == 1 * 2 * 3);
+
+    std::vector<int> v(size(g));
+
+    for (auto [i] : indices(g)){
+        v[i] = int(i);
+    } 
+
+    CHECK(v == std::vector<int>{0,1,2,3,4,5});
+
+
+    for (auto [k,j,i] : md_indices(g)){
+        REQUIRE(k == 0);
+        REQUIRE(j <= 1);
+        REQUIRE(i <= 3);
+    }
+
+
+
+
+}
 
 /*
 TEST_CASE("Test UniformGrid") {
