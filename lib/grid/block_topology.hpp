@@ -15,7 +15,7 @@ struct BlockTopology : private LocalGlobalMapping<Dim>{
 
     BlockTopology(Block<Dim> parent, idx_t n_children) : 
     m_parent(parent),
-    m_dimensions(split(parent.dimensions, n_children)),
+    m_dimensions(split(parent.density, n_children)),
     m_children(create_children(parent, m_dimensions, n_children))
     {}
 
@@ -67,8 +67,8 @@ private:
         idx_t counter = 0;
         for (auto pos : md_indices(std::array<idx_t, Dim>{}, topo_dims)) {
             auto coords = pos;
-            auto new_dims = BlockTopology::local_extent(parent.dimensions, topo_dims, coords);
-            blocks[counter] = Block(new_dims, counter);
+            auto new_density = BlockTopology::local_extent(parent.density, topo_dims, coords);
+            blocks[counter] = Block(new_density, counter);
             counter++;
         }
 

@@ -48,7 +48,7 @@ TEST_CASE("Test split") {
     auto sub_blocks = split(parent, 5);
 
     for (auto s : sub_blocks){
-        CHECK(s.dimensions == BlockDims<1>{1});
+        CHECK(s.density == BlockDensity<1>{1});
     }
 
 
@@ -71,7 +71,7 @@ TEST_CASE("Test BlockTopology"){
 
     CHECK(topo.get_children().size() == 4);
     for (auto child : topo.get_children()){
-        CHECK(child.dimensions == BlockDims<2>{5,5});
+        CHECK(child.density == BlockDensity<2>{5,5});
     }
 
     /*
