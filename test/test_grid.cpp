@@ -42,24 +42,23 @@ TEST_CASE("Test split") {
 
 
 
-    
-    Block<1> parent({5},0);
+}
 
-    auto sub_blocks = split(parent, 5);
+TEST_CASE("Test Block"){
 
-    for (auto s : sub_blocks){
-        CHECK(s.density == BlockDensity<1>{1});
-    }
+    using namespace JADA;
 
+    Point<2> p0{0,0};
+    Point<2> p1{1,1};
 
-
-
-
+    REQUIRE_NOTHROW(Block<2>({10,10}, p0, p1, 1));
+    REQUIRE_THROWS(Block<2>({0,10}, p0, p1, 1));
+    REQUIRE_THROWS(Block<2>({3,10}, p1, p0, 1));
 
 
 
 }
-
+/*
 TEST_CASE("Test BlockTopology"){
 
     using namespace JADA;
@@ -74,7 +73,7 @@ TEST_CASE("Test BlockTopology"){
         CHECK(child.density == BlockDensity<2>{5,5});
     }
 
-    /*
+    
     std::cout << "Local: " << std::endl;
     for (auto [j,i] : topo.local_md_indices(1)){
         std::cout << j << " " << i << std::endl;
@@ -85,10 +84,10 @@ TEST_CASE("Test BlockTopology"){
     for (auto [j,i] : topo.global_md_indices(1)){
         std::cout << j << " " << i << std::endl;
     }
-    */
+    
 
 }
-
+*/
 
 
 TEST_CASE("Test LocalGlobalMapping") {

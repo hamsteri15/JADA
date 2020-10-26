@@ -10,6 +10,30 @@
 
 namespace JADA{
 
+
+template<idx_t Dim>
+struct BlockTopology{
+
+    BlockTopology(Point<Dim> p0, Point<Dim> p1, BlockDensity<Dim> density, idx_t n_blocks)
+    {
+
+    }
+
+
+private:
+    std::vector<Block<Dim>> m_blocks;
+
+
+    std::vector<Block<Dim>> create_blocks(){
+
+        return std::vector<Block<Dim>>();
+    }
+
+
+
+};
+
+/*
 template<idx_t Dim>
 struct BlockTopology : private LocalGlobalMapping<Dim>{
 
@@ -89,6 +113,7 @@ private:
 
 
 };
+*/
 
 
 

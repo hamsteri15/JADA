@@ -34,7 +34,7 @@ static inline std::array<idx_t, N> split(
 }
 
 
-
+/*
 template<idx_t N>
 static inline std::vector<Block<N>> split(Block<N> block, idx_t n){
 
@@ -53,7 +53,7 @@ static inline std::vector<Block<N>> split(Block<N> block, idx_t n){
     
     return blocks;
 
-}
+}*/
 
 
 
