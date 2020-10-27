@@ -1,7 +1,7 @@
 #pragma once
 
 #include <array>
-
+#include <numeric> //std::accumulate
 #include "utils/runtime_assert.hpp"
 #include "utils/can_throw.hpp"
 
@@ -12,7 +12,7 @@ constexpr std::array<INT, 1> unflatten(const std::array<INT, 1>& dimension,
                                        INT idx) noexcept(Utils::can_throw) {
 
 #ifdef DEBUG
-    INT total = dimension[0];
+    INT total = std::accumulate(dimension.begin(), dimension.end(), INT(1), std::multiplies<INT>{});
     Utils::runtime_assert(idx < total, "Index unflatten out of bounds.");
 #endif
 
@@ -24,7 +24,7 @@ constexpr std::array<INT, 2> unflatten(const std::array<INT, 2>& dimension,
                                        INT idx) noexcept(Utils::can_throw) {
 
 #ifdef DEBUG
-    INT total = dimension[0] * dimension[1];
+    INT total = std::accumulate(dimension.begin(), dimension.end(), INT(1), std::multiplies<INT>{});
     Utils::runtime_assert(idx < total, "Index unflatten out of bounds.");
 #endif
 
@@ -39,7 +39,7 @@ constexpr std::array<INT, 3> unflatten(const std::array<INT, 3>& dimension,
                                        INT idx) noexcept(Utils::can_throw) {
 
 #ifdef DEBUG
-    INT total = dimension[0] * dimension[1] * dimension[2];
+    INT total = std::accumulate(dimension.begin(), dimension.end(), INT(1), std::multiplies<INT>{});
     Utils::runtime_assert(idx < total, "Index unflatten out of bounds.");
 #endif
 

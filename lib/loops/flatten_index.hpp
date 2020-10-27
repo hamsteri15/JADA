@@ -7,16 +7,18 @@
 
 namespace JADA {
 
-constexpr size_t flatten(const std::array<size_t, 1>& dimension,
-                         size_t                       i) noexcept(Utils::can_throw) {
+template< class INT>
+constexpr INT flatten(const std::array<INT, 1>& dimension,
+                         INT                       i) noexcept(Utils::can_throw) {
 
-    Utils::runtime_assert(i < dimension[0], "Index<0> Out of bounds");
+    Utils::runtime_assert(i < dimension[0], "Index 0 Out of bounds");
 
     return i;
 }
 
-constexpr size_t
-flatten(const std::array<size_t, 2>& dimension, size_t j, size_t i) noexcept(Utils::can_throw) {
+template< class INT>
+constexpr INT
+flatten(const std::array<INT, 2>& dimension, INT j, INT i) noexcept(Utils::can_throw) {
 
     Utils::runtime_assert(j < dimension[0], "Index 0 Out of bounds");
     Utils::runtime_assert(i < dimension[1], "Index 1 Out of bounds");
@@ -24,10 +26,11 @@ flatten(const std::array<size_t, 2>& dimension, size_t j, size_t i) noexcept(Uti
     return i + dimension[1] * j;
 }
 
-constexpr size_t flatten(const std::array<size_t, 3>& dimension,
-                         size_t                       k,
-                         size_t                       j,
-                         size_t                       i) noexcept(Utils::can_throw) {
+template< class INT>
+constexpr INT flatten(const std::array<INT, 3>& dimension,
+                         INT                       k,
+                         INT                       j,
+                         INT                       i) noexcept(Utils::can_throw) {
 
     Utils::runtime_assert(k < dimension[0], "Index 0 Out of bounds");
     Utils::runtime_assert(j < dimension[1], "Index 1 Out of bounds");
@@ -36,11 +39,12 @@ constexpr size_t flatten(const std::array<size_t, 3>& dimension,
     return i + j * dimension[2] + k * dimension[1] * dimension[2];
 }
 
-constexpr size_t flatten(const std::array<size_t, 4>& dimension,
-                         size_t                       l,
-                         size_t                       k,
-                         size_t                       j,
-                         size_t                       i) noexcept(Utils::can_throw) {
+template< class INT>
+constexpr INT flatten(const std::array<INT, 4>& dimension,
+                         INT                       l,
+                         INT                       k,
+                         INT                       j,
+                         INT                       i) noexcept(Utils::can_throw) {
 
     Utils::runtime_assert(l < dimension[0], "Index 0 Out of bounds");
     Utils::runtime_assert(k < dimension[1], "Index 1 Out of bounds");

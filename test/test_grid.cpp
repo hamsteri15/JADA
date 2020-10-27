@@ -58,6 +58,34 @@ TEST_CASE("Test Block"){
 
 
 }
+
+TEST_CASE("Test BlockTopologyNearest"){
+
+    using namespace JADA;
+
+
+    Block<1> b1({10}, {0}, {0.5}, 0);
+    Block<1> b2({10}, {0.5}, {1.0}, 1);
+
+    std::vector<Block<1>> blocks({b1, b2});
+
+
+    std::array<idx_t,1> topo_dims{2};
+
+
+    REQUIRE_NOTHROW(unflatten(topo_dims, idx_t(b1.id)));
+    REQUIRE_NOTHROW(unflatten(topo_dims, idx_t(b2.id)));
+    REQUIRE_NOTHROW(unflatten(topo_dims, idx_t(1)));
+
+
+    REQUIRE_NOTHROW(
+        BlockTopologyNearest<1>(blocks, topo_dims, {0})
+    );
+
+
+
+}
+
 /*
 TEST_CASE("Test BlockTopology"){
 

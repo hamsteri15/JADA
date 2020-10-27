@@ -3,7 +3,6 @@
 #include "grid/point.hpp"
 #include "loops/index_type.hpp"
 #include "utils/runtime_assert.hpp"
-
 namespace JADA {
 
 template <idx_t N> using BlockDensity    = std::array<idx_t, N>;
@@ -16,7 +15,7 @@ template <idx_t Dim> struct Block {
     explicit Block(BlockDensity<Dim> density_,
                    Point<Dim>        p0_,
                    Point<Dim>        p1_,
-                   idx_t             id_)
+                   int             id_)
         : density(density_)
         , p0(p0_)
         , p1(p1_)
@@ -28,12 +27,16 @@ template <idx_t Dim> struct Block {
             "Trying to create a block with a zero node count.");
 
         Utils::runtime_assert(p0 < p1, "Point p0 must be smaller than p1");
+
+
+
+
     }
 
     BlockDensity<Dim> density;
     Point<Dim>        p0;
     Point<Dim>        p1;
-    idx_t             id;
+    int             id;
 };
 
 } // namespace JADA
