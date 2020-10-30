@@ -55,7 +55,6 @@ template <idx_t N> struct BlockTopologyNearest : public BlockTopology<N> {
                          std::array<idx_t, N>  periods)
         : BlockTopology<N>(blocks, create_graph(blocks, topo_dims, periods)) {}
 
-private:
     static connectivity_graph
     create_graph(std::vector<Block<N>> blocks,
                  std::array<idx_t, N>  topo_dims,
@@ -70,6 +69,31 @@ private:
 
         return graph;
     }
+
+    static int coord_to_id(std::array<int, N> coords, const std::array<idx_t, N> topo_dims) {
+
+        for (size_t i = 0; i < N; ++i) {
+            if ((coords[i] < 0) || (coords[i] >= int(topo_dims[i]))) { return BLOCK_ID_NULL; }
+        }
+
+        
+
+
+        const int total  = int(std::accumulate(topo_dims.begin(),
+                                            topo_dims.end(),
+                                            idx_t(1),
+                                            std::multiplies<idx_t>{}));
+
+
+        Utils::runtime_assert(true==false, "BoxDecomposition::coord_to_id fails becuase flatten is called wrong.");
+
+        //this is the correct syntax
+        //return flatten(topo_dims, coords);
+
+        return flatten(coords, total);
+    }
+
+
 
     static std::vector<int> get_neighbours(int                id,
                                              std::array<idx_t, N> topo_dims,
@@ -91,7 +115,7 @@ private:
         for (idx_t i = 0; i < N; ++i) {
             std::array<int, N> dir{};
             dir[i] = 1;
-
+ 
             auto [source, dest] = shift(dir, coords, topo_dims, periods);
 
             neighbours.push_back(coord_to_id(source, topo_dims));
@@ -103,21 +127,6 @@ private:
     }
 
 
-    static int coord_to_id(std::array<int, N> coords, const std::array<idx_t, N> topo_dims) {
-
-        
-
-        for (size_t i = 0; i < N; ++i) {
-            if ((coords[i] < 0) || (coords[i] >= int(topo_dims[i]))) { return BLOCK_ID_NULL; }
-        }
-
-        const int total  = int(std::accumulate(topo_dims.begin(),
-                                            topo_dims.end(),
-                                            idx_t(1),
-                                            std::multiplies<idx_t>{}));
-
-        return flatten(coords, total);
-    }
 
 
 
