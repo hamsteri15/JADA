@@ -1,11 +1,86 @@
 #pragma once
 
 #include <array>
-
+#include <numeric> //std::accumulate
+#include <tuple>
+#include "loops/storage_order.hpp"
 #include "utils/runtime_assert.hpp"
 #include "utils/can_throw.hpp"
+#include "loops/index_type.hpp"
+#include "loops/position.hpp"
 
 namespace JADA {
+
+
+
+
+
+
+template<idx_t N, idx_t I, StorageOrder storage>
+constexpr idx_t compute_shift(std::array<idx_t, N> dimension){
+
+    static_assert(I < N, "Shift index out of bounds");
+
+    if constexpr (storage == StorageOrder::RowMajor){
+
+
+        return std::accumulate(std::begin(dimension) + int(I)+1, 
+                               std::end(dimension), 
+                               idx_t(1), 
+                               std::multiplies<idx_t>{});
+        
+    }
+
+    return 0;
+}
+/*
+template <size_t... Is>
+static constexpr auto get_multipliers(std::array<idx_t, sizeof...(Is)> dims,
+                                   const std::index_sequence<Is...>&) {
+
+    constexpr idx_t N = sizeof...(Is);
+
+    std::array<idx_t, N> multipliers;
+    (multipliers[Is] = compute_shift<N, Is, StorageOrder::RowMajor>(dims))...; 
+
+    return multipliers;
+
+}
+
+
+template<idx_t N, StorageOrder storage>
+constexpr std::array<idx_t, N> get_multipliers(std::array<idx_t, N> dimension){
+
+    return get_multipliers(dimension, std::make_index_sequence<N>());
+
+}
+*/
+
+
+
+
+
+/*
+template<idx_t N, StorageOrder storage = StorageOrder::RowMajor>
+constexpr idx_t flatten(position<N> idx, std::array<idx_t, N> dimension) noexcept(Utils::can_throw){
+
+    Utils::runtime_assert(idx < dimension, "Dimensions out of bounds");
+
+    if constexpr (storage == StorageOrder::RowMajor){
+
+        std::array<idx_t, N> mult = compute_multipliers<N, storage>(dimension);
+
+        idx_t index = 0;
+        for (idx_t i = 0; i < N; ++i){
+            index += idx[i] * mult[i];
+        }
+        return index;
+    }
+
+    return 0;
+
+}
+*/
 
 template< class INT>
 constexpr INT flatten(const std::array<INT, 1>& dimension,

@@ -63,7 +63,7 @@ TEST_CASE("Test BlockTopologyNearest"){
 
     using namespace JADA;
 
-
+    /*
     Block<1> b1({10}, {0}, {0.5}, 0);
     Block<1> b2({10}, {0.5}, {1.0}, 1);
 
@@ -81,7 +81,7 @@ TEST_CASE("Test BlockTopologyNearest"){
     REQUIRE_NOTHROW(
         BlockTopologyNearest<1>(blocks, topo_dims, {0})
     );
-
+    */
 
 
 }

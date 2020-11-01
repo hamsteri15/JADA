@@ -1,7 +1,38 @@
 #include "catch.hpp"
-
+#include "loops/flatten_index.hpp"
 #include "loops/md_index_loops.hpp"
 #include "loops/serial_index_loops.hpp"
+
+TEST_CASE("Test flatten"){
+
+    using namespace JADA;
+
+    idx_t ni = 10;
+    idx_t nj = 11;
+    idx_t nk = 12;
+
+    std::array<idx_t, 3> dims{nk,nj,ni};
+
+    CHECK(compute_shift<3, 0, StorageOrder::RowMajor>(dims) == ni * nj);
+    CHECK(compute_shift<3, 1, StorageOrder::RowMajor>(dims) == ni);
+    CHECK(compute_shift<3, 2, StorageOrder::RowMajor>(dims) == 1);
+
+
+    //CHECK(get_multipliers<3, StorageOrder::RowMajor>(dims) == std::array<idx_t,3>{nj*ni, ni, 1});
+
+
+    /*
+    idx_t i = 3;
+    idx_t j = 3;
+    idx_t k = 3;
+
+    position<3> idx{k,j,i};
+
+    CHECK(flatten(idx, dims) == i + ni*j + ni*nj*k);
+    */
+
+}
+
 
 TEST_CASE("Test loops") {
 
