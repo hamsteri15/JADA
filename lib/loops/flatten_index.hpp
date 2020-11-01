@@ -33,6 +33,36 @@ constexpr idx_t compute_shift(std::array<idx_t, N> dimension){
 
     return 0;
 }
+
+/*
+
+template<std::size_t N, std::size_t ...Is>
+std::array<std::size_t, N> call_shift_impl(const std::array<std::size_t, N>& dimension, std::index_sequence<Is...>) {
+    return { get_shift<Is>(dimension) ... };
+}
+template<size_t_t N>
+std::array<size_t, N> call_shift(std::array<size_t, N> dimension){
+    return call_shift_impl(dimension, std::make_index_sequence<N>());
+}
+
+
+// ... Or
+
+template<size_t I, size_t N>
+constexpr size_t get_shift(std::array<size_t, N> a);
+template< size_t N>
+constexpr auto call_shift(std::array<size_t, N> arr)
+{
+    return [&]<auto... Is>(std::index_sequence<Is...>) { 
+        return std::array<size_t, N>{ get_shift<Is, N>(arr)...};
+    }(std::make_integer_sequence <size_t, N>{});
+}
+
+
+*/
+
+
+
 /*
 template <size_t... Is>
 static constexpr auto get_multipliers(std::array<idx_t, sizeof...(Is)> dims,
