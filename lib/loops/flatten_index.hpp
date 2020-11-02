@@ -66,7 +66,7 @@ constexpr idx_t flatten(std::array<idx_t, sizeof...(Is)> dimension, Is... indice
 
 }
 
-
+/*
 
 template< class INT>
 constexpr INT flatten(const std::array<INT, 1>& dimension,
@@ -115,5 +115,8 @@ constexpr INT flatten(const std::array<INT, 4>& dimension,
     return i + j * dimension[3] + k * dimension[3] * dimension[2] +
            l * dimension[3] * dimension[2] * dimension[1];
 }
+
+*/
+
 
 } // namespace Math

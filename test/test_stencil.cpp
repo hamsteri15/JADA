@@ -91,7 +91,7 @@ TEST_CASE("Test StencilPicker") {
         size_t x_shift = 1;
         size_t y_shift = nx;
 
-        size_t current_idx = flatten({ny, nx}, current_j, current_i);
+        size_t current_idx = flatten<StorageOrder::RowMajor>({ny, nx}, current_j, current_i);
 
         auto t_x = StencilPicker::pick_stencil(v, indices, current_idx, x_shift);
         auto t_y = StencilPicker::pick_stencil(v, indices, current_idx, y_shift);

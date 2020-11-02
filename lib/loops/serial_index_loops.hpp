@@ -2,6 +2,7 @@
 
 #include "loops/index_generator.hpp"
 #include "loops/position.hpp"
+#include "loops/flatten_index.hpp"
 
 namespace JADA{
 
@@ -23,12 +24,12 @@ serial_index(position<2> begin, position<2> end, position<2> dimensions) noexcep
     const idx_t i_begin = begin[1];
     const idx_t j_end   = end[0];
     const idx_t i_end   = end[1];
-    const idx_t NI      = dimensions[1]; 
 
     for (idx_t j = j_begin; j != j_end; ++j) {
     for (idx_t i = i_begin; i != i_end; ++i) { 
-        
-        co_yield position<1>{i+NI*j};    
+
+        co_yield position<1>{flatten<StorageOrder::RowMajor>(dimensions, j, i )}; 
+        //co_yield position<1>{i+NI*j};    
     }}
     
 }
@@ -45,15 +46,14 @@ serial_index(position<3> begin, position<3> end, position<3> dimensions) noexcep
     const idx_t k_end   = end[0];
     const idx_t j_end   = end[1];
     const idx_t i_end   = end[2];
-    const idx_t NI      = dimensions[2];
-    const idx_t NINJ    = NI * dimensions[1];    
 
 
     for (idx_t k = k_begin; k != k_end; ++k) {
     for (idx_t j = j_begin; j != j_end; ++j) {
     for (idx_t i = i_begin; i != i_end; ++i) { 
         
-        co_yield position<1>{i + NI * j + NINJ*k}; 
+        co_yield position<1>{flatten<StorageOrder::RowMajor>(dimensions, k, j, i )}; 
+        //co_yield position<1>{i + NI * j + NINJ*k}; 
     }}}
 }
 
