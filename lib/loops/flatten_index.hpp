@@ -12,12 +12,8 @@
 namespace JADA {
 
 
-
-
-
-
-template<idx_t N, idx_t I, StorageOrder storage>
-constexpr idx_t compute_shift(std::array<idx_t, N> dimension){
+template<size_t N, idx_t I, StorageOrder storage>
+constexpr idx_t get_shift(std::array<idx_t, N> dimension){
 
     static_assert(I < N, "Shift index out of bounds");
 
@@ -28,89 +24,49 @@ constexpr idx_t compute_shift(std::array<idx_t, N> dimension){
                                std::end(dimension), 
                                idx_t(1), 
                                std::multiplies<idx_t>{});
-        
+
     }
 
-    return 0;
+    return std::accumulate(std::begin(dimension), 
+                            std::begin(dimension) + int(I), 
+                            idx_t(1), 
+                            std::multiplies<idx_t>{});
+
 }
 
-/*
-
-template<std::size_t N, std::size_t ...Is>
-std::array<std::size_t, N> call_shift_impl(const std::array<std::size_t, N>& dimension, std::index_sequence<Is...>) {
-    return { get_shift<Is>(dimension) ... };
-}
-template<size_t_t N>
-std::array<size_t, N> call_shift(std::array<size_t, N> dimension){
-    return call_shift_impl(dimension, std::make_index_sequence<N>());
-}
-
-
-// ... Or
-
-template<size_t I, size_t N>
-constexpr size_t get_shift(std::array<size_t, N> a);
-template< size_t N>
-constexpr auto call_shift(std::array<size_t, N> arr)
+template< size_t N, StorageOrder storage>
+constexpr std::array<idx_t, N> get_multipliers(std::array<idx_t, N> arr)
 {
     return [&]<auto... Is>(std::index_sequence<Is...>) { 
-        return std::array<size_t, N>{ get_shift<Is, N>(arr)...};
-    }(std::make_integer_sequence <size_t, N>{});
+        return std::array<idx_t, N>{ get_shift<N, Is, storage>(arr)...};
+    }(std::make_integer_sequence <idx_t, N>{});
 }
 
-
-*/
-
-
-
-/*
-template <size_t... Is>
-static constexpr auto get_multipliers(std::array<idx_t, sizeof...(Is)> dims,
-                                   const std::index_sequence<Is...>&) {
-
-    constexpr idx_t N = sizeof...(Is);
-
-    std::array<idx_t, N> multipliers;
-    (multipliers[Is] = compute_shift<N, Is, StorageOrder::RowMajor>(dims))...; 
-
-    return multipliers;
-
-}
-
-
-template<idx_t N, StorageOrder storage>
-constexpr std::array<idx_t, N> get_multipliers(std::array<idx_t, N> dimension){
-
-    return get_multipliers(dimension, std::make_index_sequence<N>());
-
-}
-*/
-
-
-
-
-
-/*
-template<idx_t N, StorageOrder storage = StorageOrder::RowMajor>
-constexpr idx_t flatten(position<N> idx, std::array<idx_t, N> dimension) noexcept(Utils::can_throw){
+template<size_t N, StorageOrder storage>
+constexpr idx_t flatten(std::array<idx_t, N> dimension, position<N> idx) noexcept(Utils::can_throw){
 
     Utils::runtime_assert(idx < dimension, "Dimensions out of bounds");
 
-    if constexpr (storage == StorageOrder::RowMajor){
+    const auto mult = get_multipliers<N, storage>(dimension);
 
-        std::array<idx_t, N> mult = compute_multipliers<N, storage>(dimension);
-
-        idx_t index = 0;
-        for (idx_t i = 0; i < N; ++i){
-            index += idx[i] * mult[i];
-        }
-        return index;
+    idx_t index = 0;
+    for (idx_t i = 0; i < N; ++i){
+        index += idx[i] * mult[i];
     }
-
-    return 0;
+    return index;
 
 }
-*/
+
+template<StorageOrder storage, class ...Is>
+constexpr idx_t flatten(std::array<idx_t, sizeof...(Is)> dimension, Is... indices){
+
+    return flatten<sizeof...(Is), storage>(
+        dimension, std::to_array<idx_t>({idx_t(indices)...})
+    );
+
+}
+
+
 
 template< class INT>
 constexpr INT flatten(const std::array<INT, 1>& dimension,
