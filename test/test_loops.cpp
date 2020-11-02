@@ -3,7 +3,7 @@
 #include "loops/md_index_loops.hpp"
 #include "loops/serial_index_loops.hpp"
 
-TEST_CASE("Test flatten"){
+TEST_CASE("Test get_shift"){
 
     using namespace JADA;
 
@@ -52,23 +52,46 @@ TEST_CASE("Test flatten"){
     }
 
 
-    idx_t nk = 1;
-    idx_t nj = 5;
-    idx_t ni = 13;
-    std::array<idx_t, 3> dims{nk, nj, ni};
+}
 
-    idx_t i = 3;
-    idx_t j = 2;
-    idx_t k = 0;
+TEST_CASE("Test flatten/unflatten"){
 
-    CHECK(flatten<StorageOrder::RowMajor>(dims, k,j,i) == k*nj*ni + ni * j + i);
+    using namespace JADA;
+    SECTION("Row major"){
 
 
-    int ii = 3;
-    int jj = 2;
-    int kk = 0;
+        idx_t nk = 1;
+        idx_t nj = 5;
+        idx_t ni = 13;
+        std::array<idx_t, 3> dims{nk, nj, ni};
 
-    CHECK(flatten<StorageOrder::RowMajor>(dims, kk, jj, ii) == idx_t(kk)*nj*ni + ni * idx_t(jj) + idx_t(ii));
+        idx_t i = 3;
+        idx_t j = 2;
+        idx_t k = 0;
+
+        CHECK(flatten<StorageOrder::RowMajor>(dims, k,j,i) == k*nj*ni + ni * j + i);
+
+        
+    }
+
+    SECTION("Col major"){
+
+
+        idx_t nk = 5;
+        idx_t nj = 6;
+        idx_t ni = 13;
+        std::array<idx_t, 3> dims{ni, nj, nk};
+
+        int i = 3;
+        int j = 2;
+        int k = 1;
+
+        CHECK(flatten<StorageOrder::ColMajor>(dims, i, j, k) == idx_t(k)*nj*ni + ni * idx_t(j) + idx_t(i));
+    }
+
+
+
+    
 
 
 

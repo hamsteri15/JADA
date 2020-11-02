@@ -2,10 +2,32 @@
 
 #include <array>
 #include <numeric> //std::accumulate
+#include "loops/storage_order.hpp"
+#include "loops/flatten_index.hpp"
 #include "utils/runtime_assert.hpp"
 #include "utils/can_throw.hpp"
 
 namespace JADA {
+
+
+
+template <size_t N, StorageOrder storage>
+constexpr std::array<idx_t, N> unravel(std::array<idx_t, N> dims, idx_t idx) {
+
+
+    auto mult = get_multipliers<N, storage>(dims);
+
+    std::array<idx_t, N> md_idx;
+    for (idx_t i = 0; i < N; ++i){
+        idx_t divisor = std::accumulate(std::begin(mult), std::end(mult), idx_t(1), std::multiplies<idx_t>{});
+        md_idx[i] = idx % divisor;
+    }
+    return md_idx;
+
+}
+
+
+
 
 template <typename INT>
 constexpr std::array<INT, 1> unflatten(const std::array<INT, 1>& dimension,
@@ -47,8 +69,10 @@ constexpr std::array<INT, 3> unflatten(const std::array<INT, 3>& dimension,
     INT temp = idx - (k * dimension[1] * dimension[2]);
     INT j    = temp / dimension[2];
     INT i    = temp % dimension[2];
-
+    
     return {k, j, i};
+
+
 }
 
 } // namespace JADA
