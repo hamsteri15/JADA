@@ -1,5 +1,6 @@
 #include "catch.hpp"
 #include "loops/flatten_index.hpp"
+#include "loops/unflatten_index.hpp"
 #include "loops/md_index_loops.hpp"
 #include "loops/serial_index_loops.hpp"
 
@@ -57,42 +58,110 @@ TEST_CASE("Test get_shift"){
 TEST_CASE("Test flatten/unflatten"){
 
     using namespace JADA;
+
     SECTION("Row major"){
 
+        SECTION("1D"){
 
-        idx_t nk = 1;
-        idx_t nj = 5;
-        idx_t ni = 13;
-        std::array<idx_t, 3> dims{nk, nj, ni};
+            idx_t ni = 10;
+            std::array<idx_t, 1> dims{ni};
 
-        idx_t i = 3;
-        idx_t j = 2;
-        idx_t k = 0;
+            idx_t idx = 0;
+            for (idx_t i = 0; i < ni; ++i){
 
-        CHECK(flatten<StorageOrder::RowMajor>(dims, k,j,i) == k*nj*ni + ni * j + i);
+                position<1> pos{i};
+                CHECK(flatten<1, StorageOrder::RowMajor>(dims, pos) == idx);
+                CHECK(unravel<1, StorageOrder::RowMajor>(dims, idx) == pos);
+
+                idx++;
+            
+            }
+        }
+
+        SECTION("2D"){
+
+            idx_t nj = 8;
+            idx_t ni = 1;
+            std::array<idx_t, 2> dims{nj, ni};
+
+            idx_t idx = 0;
+            for (idx_t j = 0; j < nj; ++j){
+            for (idx_t i = 0; i < ni; ++i){
+
+                position<2> pos{j,i};
+                REQUIRE(flatten<2, StorageOrder::RowMajor>(dims, pos) == idx);
+                REQUIRE(unravel<2, StorageOrder::RowMajor>(dims, idx) == pos);
+
+                idx++;
+            
+            }}
+        }
+        SECTION("3D"){
+
+            idx_t nk = 5;
+            idx_t nj = 6;
+            idx_t ni = 13;
+            std::array<idx_t, 3> dims{nk, nj, ni};
+
+            idx_t idx = 0;
+            for (idx_t k = 0; k < nk; ++k){
+            for (idx_t j = 0; j < nj; ++j){
+            for (idx_t i = 0; i < ni; ++i){
+
+                position<3> pos{k,j,i};
+                REQUIRE(flatten<3, StorageOrder::RowMajor>(dims, pos) == idx);
+                REQUIRE(unravel<3, StorageOrder::RowMajor>(dims, idx) == pos);
+
+                idx++;
+            
+            }}}
+        }
 
         
     }
-
+    /*
     SECTION("Col major"){
 
+        SECTION("1D"){
 
-        idx_t nk = 5;
-        idx_t nj = 6;
-        idx_t ni = 13;
-        std::array<idx_t, 3> dims{ni, nj, nk};
+            idx_t ni = 10;
+            std::array<idx_t, 1> dims{ni};
 
-        int i = 3;
-        int j = 2;
-        int k = 1;
+            idx_t idx = 0;
+            for (idx_t i = 0; i < ni; ++i){
 
-        CHECK(flatten<StorageOrder::ColMajor>(dims, i, j, k) == idx_t(k)*nj*ni + ni * idx_t(j) + idx_t(i));
+                position<1> pos{i};
+                REQUIRE(flatten<1, StorageOrder::ColMajor>(dims, pos) == idx);
+                REQUIRE(unravel<1, StorageOrder::ColMajor>(dims, idx) == pos);
+
+                idx++;
+            
+            }
+        }
+
+        SECTION("2D"){
+
+            idx_t nj = 8;
+            idx_t ni = 4;
+            std::array<idx_t, 2> dims{nj, ni};
+
+            idx_t idx = 0;
+            for (idx_t j = 0; j < nj; ++j){
+            for (idx_t i = 0; i < ni; ++i){
+
+                position<2> pos{i,j};
+                CHECK(flatten<2, StorageOrder::ColMajor>(dims, pos) == idx);
+                //CHECK(unravel<2, StorageOrder::ColMajor>(dims, idx) == pos);
+
+                idx++;
+            
+            }}
+        }
+
+
+
     }
-
-
-
-    
-
+    */
 
 
 

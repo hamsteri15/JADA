@@ -14,14 +14,20 @@ namespace JADA {
 template <size_t N, StorageOrder storage>
 constexpr std::array<idx_t, N> unravel(std::array<idx_t, N> dims, idx_t idx) {
 
+    Utils::runtime_assert(std::accumulate(std::begin(dims), std::end(dims), idx_t(1), std::multiplies<idx_t>{}) 
+                          > idx, "Index out of bounds"
+    
+    );
 
     auto mult = get_multipliers<N, storage>(dims);
 
     std::array<idx_t, N> md_idx;
+    idx_t temp_idx = idx;
     for (idx_t i = 0; i < N; ++i){
-        idx_t divisor = std::accumulate(std::begin(mult), std::end(mult), idx_t(1), std::multiplies<idx_t>{});
-        md_idx[i] = idx % divisor;
-    }
+        idx_t divisor = mult[i];
+        md_idx[i] = temp_idx / divisor;
+        temp_idx -= md_idx[i] * divisor;
+    } 
     return md_idx;
 
 }
