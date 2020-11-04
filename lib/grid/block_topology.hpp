@@ -10,6 +10,8 @@
 #include "loops/unflatten_index.hpp"
 #include "loops/flatten_index.hpp"
 #include "utils/runtime_assert.hpp"
+#include "utils/array_cast.hpp"
+
 
 namespace JADA {
 
@@ -76,21 +78,20 @@ template <idx_t N> struct BlockTopologyNearest : public BlockTopology<N> {
             if ((coords[i] < 0) || (coords[i] >= int(topo_dims[i]))) { return BLOCK_ID_NULL; }
         }
 
-        
+        //std::array<idx_t, N> casted_coords = Utils::array_cast<idx_t, int, N>(coords);
 
+        static_assert(1 == 2, "Failing on purpose on BlockTopology::coord_to_id()");
 
-        const int total  = int(std::accumulate(topo_dims.begin(),
-                                            topo_dims.end(),
-                                            idx_t(1),
-                                            std::multiplies<idx_t>{}));
+        return 4;
 
+        /*
+        //TODO: find a way to perform the array casts
+        return flatten<N, StorageOrder::RowMajor>(
+            topo_dims,
+            Utils::array_cast<idx_t>(coords)
+        );
+        */
 
-        Utils::runtime_assert(true==false, "BoxDecomposition::coord_to_id fails becuase flatten is called wrong.");
-
-        //this is the correct syntax
-        //return flatten(topo_dims, coords);
-
-        return flatten(coords, total);
     }
 
 
@@ -108,7 +109,8 @@ template <idx_t N> struct BlockTopologyNearest : public BlockTopology<N> {
         Utils::runtime_assert(id >= 0, "Negative block id.");
         Utils::runtime_assert(id < total, "Block id out of bounds");
 
-        const auto  coords = unflatten(topo_dims, idx_t(id));
+        const auto coord = unflatten<N, StorageOrder::RowMajor>(topo_dims, idx_t(id));
+
 
         std::vector<int> neighbours;
 
@@ -116,7 +118,7 @@ template <idx_t N> struct BlockTopologyNearest : public BlockTopology<N> {
             std::array<int, N> dir{};
             dir[i] = 1;
  
-            auto [source, dest] = shift(dir, coords, topo_dims, periods);
+            auto [source, dest] = shift(dir, coord, topo_dims, periods);
 
             neighbours.push_back(coord_to_id(source, topo_dims));
             neighbours.push_back(coord_to_id(dest, topo_dims));
