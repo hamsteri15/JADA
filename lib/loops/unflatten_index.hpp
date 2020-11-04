@@ -2,6 +2,7 @@
 
 #include <array>
 #include <numeric> //std::accumulate
+#include <algorithm> //std::transform
 #include "loops/storage_order.hpp"
 #include "loops/flatten_index.hpp"
 #include "utils/runtime_assert.hpp"
@@ -19,15 +20,30 @@ constexpr std::array<idx_t, N> unravel(std::array<idx_t, N> dims, idx_t idx) {
     
     );
 
-    const auto mult = get_multipliers<N, storage>(dims);
-
+    
+    
     std::array<idx_t, N> md_idx;
-    idx_t temp_idx = idx;
-    for (idx_t i = 0; i < N; ++i){
-        idx_t divisor = mult[i];
-        md_idx[i] = temp_idx / divisor;
-        temp_idx -= md_idx[i] * divisor;
-    } 
+    auto mult = get_multipliers<N, storage>(dims);
+
+
+    if constexpr (storage == StorageOrder::RowMajor){
+
+        for (idx_t i = 0; i < N; ++i){
+            md_idx[i] = idx / mult[i];
+            idx -= md_idx[i]*mult[i];
+        } 
+    }
+
+    else {
+
+        for (idx_t i=N-1; int(i) >= 0; --i){
+            md_idx[i] = idx / mult[i];
+            idx -= md_idx[i]*mult[i];
+        }
+    }
+
+
+    
     return md_idx;
 
 }
