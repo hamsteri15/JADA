@@ -42,19 +42,23 @@ template <size_t N, StorageOrder storage>
 constexpr idx_t flatten(std::array<idx_t, N> dimension,
                         position<N>          idx) noexcept(Utils::can_throw) {
 
-    Utils::runtime_assert(idx < dimension, "Dimensions out of bounds");
+    Utils::runtime_assert(std::equal(std::begin(idx),
+                                     std::end(idx),
+                                     std::begin(dimension),
+                                     std::end(dimension),
+                                     std::less{}),
+                          "Index out of bounds");
 
     const auto mult = get_multipliers<N, storage>(dimension);
 
-    idx_t index = 0;
+    idx_t index{0};
     for (idx_t i = 0; i < N; ++i) { index += idx[i] * mult[i]; }
     return index;
 }
 
 template <StorageOrder storage, class... Is>
 constexpr idx_t flatten(std::array<idx_t, sizeof...(Is)> dimension,
-                        Is... indices) {
-
+                        Is... indices) noexcept(Utils::can_throw) {
     return flatten<sizeof...(Is), storage>(
         dimension, std::to_array<idx_t>({idx_t(indices)...}));
 }

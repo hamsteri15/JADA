@@ -4,6 +4,8 @@
 #include "loops/md_index_loops.hpp"
 #include "loops/serial_index_loops.hpp"
 
+#include <iostream>
+
 TEST_CASE("Test get_shift"){
 
     using namespace JADA;
@@ -54,6 +56,139 @@ TEST_CASE("Test get_shift"){
 
 
 }
+
+
+TEST_CASE("Test flatten"){
+    using namespace JADA;
+
+    SECTION("1D"){
+
+        std::array<idx_t,1> dims{12};
+        std::array<idx_t,1> pos{3};
+        CHECK(flatten<1, StorageOrder::RowMajor>(dims, pos) == 3);
+        CHECK(flatten<1, StorageOrder::ColMajor>(dims, pos) == 3);
+
+        CHECK(flatten<1, StorageOrder::RowMajor>(dims, {0}) == 0);
+        CHECK(flatten<1, StorageOrder::ColMajor>(dims, {0}) == 0);
+
+        CHECK(flatten<1, StorageOrder::RowMajor>(dims, {11}) == 11);
+        CHECK(flatten<1, StorageOrder::ColMajor>(dims, {11}) == 11);
+
+        REQUIRE_THROWS(
+            flatten<1, StorageOrder::RowMajor>(dims, {12})
+        );
+
+        REQUIRE_THROWS(
+            flatten<1, StorageOrder::ColMajor>(dims, {12})
+        );
+    }
+
+    SECTION("2D"){
+
+        std::array<idx_t, 2> dims {4,5};
+        std::array<idx_t, 2> pos;
+
+
+        pos = {0,0};
+        CHECK(flatten<2, StorageOrder::RowMajor>(dims, pos) == 0);
+        CHECK(flatten<2, StorageOrder::ColMajor>(dims, pos) == 0);
+
+        pos = {1,1};
+        CHECK(flatten<2, StorageOrder::RowMajor>(dims, pos) == 6);
+        CHECK(flatten<2, StorageOrder::ColMajor>(dims, pos) == 5);
+
+        pos = {5,1};
+        REQUIRE_THROWS(flatten<2, StorageOrder::RowMajor>(dims, pos));
+        REQUIRE_THROWS(flatten<2, StorageOrder::ColMajor>(dims, pos));
+    }
+
+    SECTION("3D"){
+    
+        std::array<idx_t, 3> dims{4,1,6};
+        std::array<idx_t, 3> pos;
+
+        pos = {0,0,0};
+        CHECK(flatten<3, StorageOrder::RowMajor>(dims, pos) == 0);
+        CHECK(flatten<3, StorageOrder::ColMajor>(dims, pos) == 0);
+
+        pos = {1,0,3};
+        CHECK(flatten<3, StorageOrder::RowMajor>(dims, pos) == 9);
+        CHECK(flatten<3, StorageOrder::ColMajor>(dims, pos) == 13);
+
+        pos = {1,1,3};
+        REQUIRE_THROWS(flatten<3, StorageOrder::RowMajor>(dims, pos));
+        REQUIRE_THROWS(flatten<3, StorageOrder::ColMajor>(dims, pos));
+                
+
+    }
+
+
+}
+
+TEST_CASE("Test unflatten"){
+
+    using namespace JADA;
+
+    SECTION("1D"){
+
+        std::array<idx_t, 1> dims{7};
+
+        CHECK(unravel<1, StorageOrder::RowMajor>(dims, 0) == std::array<idx_t,1>{0});
+        CHECK(unravel<1, StorageOrder::ColMajor>(dims, 0) == std::array<idx_t,1>{0});
+        
+        CHECK(unravel<1, StorageOrder::RowMajor>(dims, 3) == std::array<idx_t,1>{3});
+        CHECK(unravel<1, StorageOrder::ColMajor>(dims, 3) == std::array<idx_t,1>{3});
+
+        REQUIRE_THROWS(unravel<1, StorageOrder::RowMajor>(dims, 7));
+        REQUIRE_THROWS(unravel<1, StorageOrder::ColMajor>(dims, 7));
+
+    }
+
+    SECTION("2D"){
+        std::array<idx_t, 2> dims{3, 6};
+
+        CHECK(unravel<2, StorageOrder::RowMajor>(dims, 0) == std::array<idx_t,2>{0,0});
+        CHECK(unravel<2, StorageOrder::ColMajor>(dims, 0) == std::array<idx_t,2>{0,0});
+        
+        CHECK(unravel<2, StorageOrder::RowMajor>(dims, 4) == std::array<idx_t,2>{0,4});
+        CHECK(unravel<2, StorageOrder::ColMajor>(dims, 4) == std::array<idx_t,2>{1,1});
+
+        CHECK(unravel<2, StorageOrder::RowMajor>(dims, 7) == std::array<idx_t,2>{1,1});
+        CHECK(unravel<2, StorageOrder::ColMajor>(dims, 7) == std::array<idx_t,2>{1,2});
+
+        CHECK(unravel<2, StorageOrder::RowMajor>(dims, 16) == std::array<idx_t,2>{2,4});
+        CHECK(unravel<2, StorageOrder::ColMajor>(dims, 16) == std::array<idx_t,2>{2,5});
+
+        REQUIRE_THROWS(unravel<2, StorageOrder::RowMajor>(dims, 18));
+        REQUIRE_THROWS(unravel<2, StorageOrder::ColMajor>(dims, 18));
+
+
+    }
+
+    SECTION("3D"){
+        std::array<idx_t, 3> dims{3, 1, 8};
+
+        CHECK(unravel<3, StorageOrder::RowMajor>(dims, 0) == std::array<idx_t,3>{0,0,0});
+        CHECK(unravel<3, StorageOrder::ColMajor>(dims, 0) == std::array<idx_t,3>{0,0,0});
+        
+        CHECK(unravel<3, StorageOrder::RowMajor>(dims, 6) == std::array<idx_t,3>{0,0,6});
+        CHECK(unravel<3, StorageOrder::ColMajor>(dims, 6) == std::array<idx_t,3>{0,0,2});
+
+        CHECK(unravel<3, StorageOrder::RowMajor>(dims, 1) == std::array<idx_t,3>{0,0,1});
+        CHECK(unravel<3, StorageOrder::ColMajor>(dims, 1) == std::array<idx_t,3>{1,0,0});
+
+        CHECK(unravel<3, StorageOrder::RowMajor>(dims, 23) == std::array<idx_t,3>{2,0,7});
+        CHECK(unravel<3, StorageOrder::ColMajor>(dims, 23) == std::array<idx_t,3>{2,0,7});
+
+        
+
+        REQUIRE_THROWS(unravel<3, StorageOrder::RowMajor>(dims, 24));
+        REQUIRE_THROWS(unravel<3, StorageOrder::ColMajor>(dims, 24));
+
+
+    }
+}
+
 
 TEST_CASE("Test flatten/unflatten"){
 
@@ -161,8 +296,8 @@ TEST_CASE("Test flatten/unflatten"){
 
 
     }
-    */
 
+    */
 
 
 }

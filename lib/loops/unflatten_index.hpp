@@ -19,7 +19,7 @@ constexpr std::array<idx_t, N> unravel(std::array<idx_t, N> dims, idx_t idx) {
     
     );
 
-    auto mult = get_multipliers<N, storage>(dims);
+    const auto mult = get_multipliers<N, storage>(dims);
 
     std::array<idx_t, N> md_idx;
     idx_t temp_idx = idx;
