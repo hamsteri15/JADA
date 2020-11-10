@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <numeric>
 #include "loops/index_type.hpp"
 
 namespace JADA {
@@ -91,17 +93,11 @@ public:
                                 const std::array<size_t, N>& dims,
                                 size_t                       n) {
 
-        // ensure that domaincount equal to the number of processes
-        size_t total = 1;
-        for (size_t i = 0; i < N; ++i) { total *= decomposition[i]; }
-        if (total != n) { return false; }
-
-        // ensure that none of the split directions exceed the global node count
-        // in the corresponding direction
-        for (size_t i = 0; i < N; ++i) {
-            if (decomposition[i] > dims[i]) { return false; }
-        }
-        return true;
+        return (std::accumulate(std::begin(decomposition),
+                                std::end(decomposition),
+                                size_t(1),
+                                std::multiplies{}) == n) &&
+               std::ranges::equal(decomposition, dims, std::less_equal{});
     }
 
 protected:
