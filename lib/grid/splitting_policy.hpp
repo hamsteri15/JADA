@@ -4,7 +4,7 @@
 #include <numeric>
 #include "loops/index_type.hpp"
 #include "loops/md_index_loops.hpp"
-
+#include "utils/runtime_assert.hpp"
 namespace JADA {
 
 template <size_t N> struct SplittingPolicy {
@@ -24,13 +24,33 @@ public:
     ///@return candidate_array<N> all possible splitting candidates
     ///
     static candidate_array get_candidates(size_t                       n,
-                                          const std::array<size_t, N> dims) {
+                                          [[maybe_unused]] const std::array<size_t, N> dims) {
 
         // TODO get rid of the if statement, should be possible
 
         
         candidate_array candidates;
 
+        /*
+        //This works but is very slow
+
+        candidates.reserve(n*n*n);
+
+        std::array<idx_t, N> min;
+        std::array<idx_t, N> max;
+        for (auto& m : min) {m = 1;}
+        for (auto& m : max) {m = n + 1;}
+
+
+
+        for (auto test : md_indices(min, max)){
+            if (SplittingPolicy<N>::is_valid(test, dims n)) {
+                candidates.emplace_back(test);
+            }
+        }
+        */
+       
+        
         // get all factors of n
         std::vector<size_t> factors = factor(n);
 
@@ -82,6 +102,24 @@ public:
         return candidates;
     }
 
+    
+    ///
+    ///@brief Checks is a given decomposition is valid
+    ///
+    ///@param decomposition number of splits in each direction
+    ///@param dims global dimensions
+    ///@param n total number of splits
+    ///@return true if splitting is valid
+    ///@return false if splitting is invalid
+    ///
+    static inline bool is_valid(std::array<size_t, N> decomposition,
+                                size_t                       n) {
+
+        return std::accumulate(std::begin(decomposition),
+                                std::end(decomposition),
+                                size_t(1),
+                                std::multiplies{}) == n;
+    }
     
     ///
     ///@brief Checks is a given decomposition is valid
