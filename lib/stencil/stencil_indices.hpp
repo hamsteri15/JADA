@@ -9,7 +9,7 @@
 
 namespace JADA {
 
-template <idx_t N> using StencilIndices = std::array<int, N>;
+template <size_t N> using StencilIndices = std::array<int, N>;
 
 ///
 ///@brief Take the absolute value of the indices
@@ -18,7 +18,7 @@ template <idx_t N> using StencilIndices = std::array<int, N>;
 ///@param idx indices to take the absolute value from
 ///@return constexpr StencilIndices<N> absolute value of indices
 ///
-template <idx_t N>
+template <size_t N>
 static inline constexpr StencilIndices<N> abs(const StencilIndices<N>& idx) {
 
     auto ret = idx;
@@ -33,7 +33,7 @@ static inline constexpr StencilIndices<N> abs(const StencilIndices<N>& idx) {
 ///@param idx indices to find the maximum from
 ///@return constexpr int maximum index
 ///
-template <idx_t N>
+template <size_t N>
 static inline constexpr int max(const StencilIndices<N>& idx) {
 
     return *std::max_element(idx.begin(), idx.end());
@@ -46,7 +46,7 @@ static inline constexpr int max(const StencilIndices<N>& idx) {
 ///@param idx indices to find the maximum from
 ///@return constexpr int maximum index
 ///
-template <idx_t N>
+template <size_t N>
 static inline constexpr int min(const StencilIndices<N>& idx) {
 
     return *std::min_element(idx.begin(), idx.end());
@@ -59,7 +59,7 @@ static inline constexpr int min(const StencilIndices<N>& idx) {
 ///@param idx indices to reverse
 ///@return constexpr StencilIndices<N> reversed indices
 ///
-template <idx_t N>
+template <size_t N>
 static inline constexpr StencilIndices<N>
 reverse(const StencilIndices<N>& idx) {
 
@@ -79,7 +79,7 @@ reverse(const StencilIndices<N>& idx) {
 ///from the _beginning_ of indices
 ///@return constexpr StencilIndices<N> mirrored indices
 ///
-template <idx_t N>
+template <size_t N>
 static inline constexpr StencilIndices<N>
 mirror_front(const StencilIndices<N>& idx, idx_t pivot) {
 
@@ -103,7 +103,7 @@ mirror_front(const StencilIndices<N>& idx, idx_t pivot) {
 ///from the _end_ of indices
 ///@return constexpr StencilIndices<N> mirrored indices
 ///
-template <idx_t N>
+template <size_t N>
 static inline constexpr StencilIndices<N>
 mirror_back(const StencilIndices<N>& idx, idx_t pivot) {
 

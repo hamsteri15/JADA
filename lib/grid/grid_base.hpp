@@ -50,7 +50,7 @@ inline index_generator<1> indices(const GridBase<GT>& grid) noexcept {
 }
 
 
-template<idx_t N>
+template<size_t N>
 struct Grid : public GridBase<Grid<N>>{
 
     static_assert(N <= 3, "Only up to 3 spatial dimensions supported");
@@ -78,7 +78,7 @@ private:
 };
 
 
-template<idx_t N>
+template<size_t N>
 inline index_generator<N> md_indices(const Grid<N>& grid){
     return md_indices(GridDims<N>{}, dimensions(grid));
 }
@@ -86,7 +86,7 @@ inline index_generator<N> md_indices(const Grid<N>& grid){
 
 
 
-template<idx_t N>
+template<size_t N>
 struct StructuredGrid : public Grid<N>{
 
 

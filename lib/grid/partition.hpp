@@ -11,7 +11,7 @@
 namespace JADA {
 
 
-template <idx_t Dim> struct Partition {
+template <size_t Dim> struct Partition {
 
     Partition(std::array<idx_t, Dim> parent_dims,
               std::array<idx_t, Dim> begin,

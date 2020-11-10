@@ -10,7 +10,7 @@
 namespace JADA{
 
 
-template<idx_t Dim>
+template<size_t Dim>
 class BoundaryConditions{
 
 public:

@@ -20,7 +20,7 @@ static constexpr int BLOCK_ID_NULL = -1;
 
 
 
-template <idx_t Dim> struct BlockTopology {
+template <size_t Dim> struct BlockTopology {
 
     using block_vector       = std::vector<Block<Dim>>;
     using connectivity_graph = std::map<int, std::vector<int>>;
@@ -46,7 +46,7 @@ private:
     connectivity_graph m_connectivity;
 };
 
-template <idx_t N> struct BlockTopologyNearest : public BlockTopology<N> {
+template <size_t N> struct BlockTopologyNearest : public BlockTopology<N> {
 
     using base_type = BlockTopology<N>;
     using connectivity_graph = typename base_type::connectivity_graph;
@@ -186,7 +186,7 @@ template <idx_t N> struct BlockTopologyNearest : public BlockTopology<N> {
     }
 };
 
-template <idx_t N>
+template <size_t N>
 BlockTopology<N> build_blocks(Point<N>             p0,
                               Point<N>             p1,
                               std::array<idx_t, N> dims,

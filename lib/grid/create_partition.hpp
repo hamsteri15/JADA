@@ -10,7 +10,7 @@ namespace JADA{
 template<class GridType, class Stencil>
 auto create_partitions(const GridType& grid, Direction dir, Stencil stencil){
 
-    static constexpr idx_t Dim = GridType::Dim;
+    static constexpr size_t Dim = GridType::Dim;
 
     idx_t begin_begin = 0;
     idx_t middle_begin = stencil.left_halfwidth();

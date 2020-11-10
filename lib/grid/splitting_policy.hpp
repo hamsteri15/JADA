@@ -4,7 +4,7 @@
 
 namespace JADA {
 
-template <idx_t N> struct SplittingPolicy {
+template <size_t N> struct SplittingPolicy {
 
     static_assert(N <= 3, "Only up to 3 dimensions supported.");
 
@@ -112,7 +112,7 @@ protected:
     ///@param n the number to factor
     ///@return std::vector<idx_t> all factors
     ///
-    static inline std::vector<idx_t> factor(idx_t n) {
+    static inline std::vector<idx_t> factor(size_t n) {
 
         std::vector<idx_t> ret;
 

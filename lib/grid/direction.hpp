@@ -8,7 +8,7 @@ namespace JADA {
 
 enum Direction { k = 0, j = 1, i = 2 };
 
-template<idx_t Dim>
+template<size_t Dim>
 struct DirectionMap{};
 
 //TODO: make the function parameter constexpr when the standard allows

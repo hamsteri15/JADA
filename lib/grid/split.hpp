@@ -19,10 +19,10 @@ namespace JADA {
 ///@param n number of smaller boxes
 ///@return std::array<size_t, N> number of smaller boxes in each direction N
 ///
-template <idx_t N, class Policy = SplittingPolicyMinDiff<N>>
+template <size_t N, class Policy = SplittingPolicyMinDiff<N>>
 static inline std::array<idx_t, N> split(
                                          const std::array<idx_t, N>& dims,
-                                         idx_t n) {
+                                         size_t n) {
 
     auto candidates = Policy::get_candidates(n, dims);
     if (candidates.size() == 0) {
@@ -35,8 +35,8 @@ static inline std::array<idx_t, N> split(
 
 
 /*
-template<idx_t N>
-static inline std::vector<Block<N>> split(Block<N> block, idx_t n){
+template<size_t N>
+static inline std::vector<Block<N>> split(Block<N> block, size_t N){
 
     auto splits = split(block.density, n);
 

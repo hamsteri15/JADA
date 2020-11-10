@@ -51,7 +51,7 @@ static boundary_array create_boundaries(const Domain<Dim>& parent,
 
 */
 
-template <idx_t Dim> struct Domain {
+template <size_t Dim> struct Domain {
 
 
     Domain(Point<Dim> begin, Point<Dim> end, BoundaryConditions<Dim> bcs)

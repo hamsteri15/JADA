@@ -7,7 +7,7 @@ namespace JADA {
 
 
 /*
-template <idx_t N> struct UniformGrid : public GridBase<N, UniformGrid<N>> {
+template <size_t N> struct UniformGrid : public GridBase<N, UniformGrid<N>> {
 
     using base_type = GridBase<N, UniformGrid<N>>;
 

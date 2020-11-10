@@ -6,7 +6,7 @@
 
 namespace JADA {
 
-template <idx_t N> using GridDims = std::array<idx_t, N>;
+template <size_t N> using GridDims = std::array<idx_t, N>;
 
 
 

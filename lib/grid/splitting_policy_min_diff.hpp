@@ -8,7 +8,7 @@ namespace JADA {
 
 // This policy minimizes the global difference of the dimensions of the small boxes.
 
-template <idx_t N> class SplittingPolicyMinDiff : public SplittingPolicy<N> {
+template <size_t N> class SplittingPolicyMinDiff : public SplittingPolicy<N> {
 
 
     using typename SplittingPolicy<N>::candidate_array;

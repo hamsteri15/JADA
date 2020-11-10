@@ -9,7 +9,7 @@
 namespace JADA{
 
 /*
-template<idx_t Dim, Direction dir, class StencilOp>
+template<size_t Dim, Direction dir, class StencilOp>
 struct FdmDerivative{
 
     using stencil_op_t = StencilOp;

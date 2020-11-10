@@ -5,10 +5,10 @@
 #include "utils/runtime_assert.hpp"
 namespace JADA {
 
-template <idx_t N> using BlockDensity    = std::array<idx_t, N>;
-template <idx_t N> using BlockDimensions = std::array<double, N>;
+template <size_t N> using BlockDensity    = std::array<idx_t, N>;
+template <size_t N> using BlockDimensions = std::array<double, N>;
 
-template <idx_t Dim> struct Block {
+template <size_t Dim> struct Block {
 
     Block() = default;
 
