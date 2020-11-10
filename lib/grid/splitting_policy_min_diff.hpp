@@ -1,5 +1,5 @@
 #pragma once
-
+#include <algorithm>
 #include "grid/splitting_policy.hpp"
 
 
@@ -26,20 +26,25 @@ public:
     find_optimal(const candidate_array&       candidates,
                  const std::array<idx_t, N>& dims) {
 
-        auto is_more_square = [&](const std::array<idx_t, N>& lhs, const std::array<idx_t, N> rhs){
-
+        auto is_more_square = [&](const std::array<idx_t, N>& lhs,
+                                  const std::array<idx_t, N>& rhs) {
             std::array<idx_t, N> lhs_dims{};
             std::array<idx_t, N> rhs_dims{};
-            for (idx_t i = 0; i < N; ++i){
-                lhs_dims[i] = dims[i] / lhs[i];
-                rhs_dims[i] = dims[i] / rhs[i];
-            }
+
+            std::transform(std::cbegin(dims),
+                           std::cend(dims),
+                           std::cbegin(lhs),
+                           std::begin(lhs_dims),
+                           std::divides<>{});
+            std::transform(std::cbegin(dims),
+                           std::cend(dims),
+                           std::cbegin(rhs),
+                           std::begin(lhs_dims),
+                           std::divides<>{});
+
 
             return sum_abs_diff(lhs_dims) < sum_abs_diff(rhs_dims);
-            //return sum_abs_diff(local_dims);
-
         };
-
 
         return *std::min_element(candidates.begin(), candidates.end(), is_more_square);
     }
