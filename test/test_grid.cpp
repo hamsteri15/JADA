@@ -59,6 +59,7 @@ TEST_CASE("Test Block"){
 
 }
 
+/*
 TEST_CASE("Test BlockTopologyNearest"){
 
     using namespace JADA;
@@ -93,7 +94,7 @@ TEST_CASE("Test BlockTopologyNearest"){
 
 
 }
-
+*/
 /*
 TEST_CASE("Test BlockTopology"){
 

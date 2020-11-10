@@ -12,7 +12,7 @@ namespace JADA {
 
 ///
 ///@brief Get the shift between consequtive indices in direction I based on the
-///storage order
+/// storage order
 ///
 ///@tparam N number of dimensions
 ///@tparam I the component (direction) to get the shift for
@@ -41,7 +41,7 @@ constexpr idx_t get_shift(std::array<idx_t, N> dimension) {
 
 ///
 ///@brief Get the shifts between consequtive indices in all N directions of a
-///multidimensional (flattened) array
+/// multidimensional (flattened) array
 ///
 ///@tparam N number of dimensions
 ///@tparam storage storage order
@@ -58,7 +58,7 @@ constexpr std::array<idx_t, N> get_shifts(std::array<idx_t, N> dimension) {
 
 ///
 ///@brief Given an array of multidimensional indices ([k,j,i] for example)
-///computes the flat index based on the storage order and dimensions
+/// computes the flat index based on the storage order and dimensions
 ///
 ///@tparam N number of dimensions
 ///@tparam storage storage order
@@ -79,14 +79,13 @@ constexpr idx_t flatten(std::array<idx_t, N> dimension,
 
     const auto mult = get_shifts<N, storage>(dimension);
 
-    idx_t index{0};
-    for (idx_t i = 0; i < N; ++i) { index += idx[i] * mult[i]; }
-    return index;
+    return std::inner_product(
+        std::begin(idx), std::end(idx), std::begin(mult), idx_t(0));
 }
 
 ///
 ///@brief Given N indices computes the flat index based on the storage order and
-///dimensions
+/// dimensions
 ///
 ///@tparam storage storage order
 ///@tparam Is type of the indices
