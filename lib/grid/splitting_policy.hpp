@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <numeric>
 #include "loops/index_type.hpp"
+#include "loops/md_index_loops.hpp"
 
 namespace JADA {
 
@@ -23,14 +24,15 @@ public:
     ///@return candidate_array<N> all possible splitting candidates
     ///
     static candidate_array get_candidates(size_t                       n,
-                                          const std::array<size_t, N>& dims) {
+                                          const std::array<size_t, N> dims) {
 
         // TODO get rid of the if statement, should be possible
 
+        
+        candidate_array candidates;
+
         // get all factors of n
         std::vector<size_t> factors = factor(n);
-
-        candidate_array candidates;
 
         if constexpr (N == 1) {
 
@@ -75,6 +77,7 @@ public:
                 }
             }
         }
+        
 
         return candidates;
     }
@@ -89,8 +92,8 @@ public:
     ///@return true if splitting is valid
     ///@return false if splitting is invalid
     ///
-    static inline bool is_valid(const std::array<size_t, N>& decomposition,
-                                const std::array<size_t, N>& dims,
+    static inline bool is_valid(std::array<size_t, N> decomposition,
+                                std::array<size_t, N> dims,
                                 size_t                       n) {
 
         return (std::accumulate(std::begin(decomposition),

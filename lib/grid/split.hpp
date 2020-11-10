@@ -34,27 +34,6 @@ static inline std::array<idx_t, N> split(
 }
 
 
-/*
-template<size_t N>
-static inline std::vector<Block<N>> split(Block<N> block, size_t N){
-
-    auto splits = split(block.density, n);
-
-    std::vector<Block<N>> blocks(n);
-
-    idx_t counter = 0;
-    for (auto pos : md_indices(std::array<idx_t, N>{}, splits)) {
-        auto coords = pos;
-        auto new_density = LocalGlobalMapping<N>::local_extent(block.density, splits, coords);
-        blocks[counter] = Block(new_density, counter);
-        counter++;
-    }
-
-    
-    return blocks;
-
-}*/
-
 
 
 
