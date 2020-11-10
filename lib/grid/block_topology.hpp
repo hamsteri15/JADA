@@ -80,7 +80,8 @@ template <idx_t N> struct BlockTopologyNearest : public BlockTopology<N> {
 
         //std::array<idx_t, N> casted_coords = Utils::array_cast<idx_t, int, N>(coords);
 
-        static_assert(1 == 2, "Failing on purpose on BlockTopology::coord_to_id()");
+        throw "Failing on coord_to_id because not implemented";
+
 
         return 4;
 
