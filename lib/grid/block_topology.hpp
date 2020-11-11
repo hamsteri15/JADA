@@ -15,11 +15,6 @@
 
 namespace JADA {
 
-
-static constexpr int BLOCK_ID_NULL = -1;
-
-
-
 template <size_t Dim> struct BlockTopology {
 
     using block_vector       = std::vector<Block<Dim>>;
@@ -33,18 +28,62 @@ template <size_t Dim> struct BlockTopology {
         return m_connectivity.at(id); //[id];
     }
 
-
     Block<Dim> get_block(int id) const {
-
-        return *std::find_if(m_blocks.begin(), m_blocks.end(), [&](Block<Dim> b){return b.id == id;});
-
+        return *std::find_if(m_blocks.begin(),
+                             m_blocks.end(),
+                             [&](Block<Dim> b) { return b.id == id; });
     }
-
 
 private:
     block_vector       m_blocks;
     connectivity_graph m_connectivity;
 };
+
+
+template <size_t N>
+BlockTopology<N> build_sub_blocks(Block<N> parent,
+                              idx_t                n_blocks) {
+
+    auto b_grid = split(parent.density, n_blocks);
+
+    std::array<double, N> stepsize;
+
+    for (idx_t i = 0; i < N; ++i) {
+        stepsize[i] = (parent.p1[i] - parent.p0[i]) / double(parent.density[i]);
+    }
+
+    std::vector<Block<N>> blocks(n_blocks);
+
+    /*
+    for (auto coord : md_indices(std::array<idx_t, N>{}, b_grid)) {
+
+        auto block_density =
+            LocalGlobalMapping<N>::local_extent(dims, b_grid, coord);
+
+        auto [begin, end] =
+            LocalGlobalMapping<N>::get_bounds(dims, b_grid, coord);
+
+        Point<N> block_p0;
+        Point<N> block_p1;
+
+        for (idx_t i = 0; i < N; ++i) {
+            block_p0[i] = begin[i] * stepsize[i];
+            block_p1[i] = end[i] * stepsize[i];
+        }
+
+        Block<N> block(block_density, block_p0, block_p1, id);
+
+        blocks.push_back(block);
+
+        id++;
+    }
+    */
+}
+
+
+
+
+/*
 
 template <size_t N> struct BlockTopologyNearest : public BlockTopology<N> {
 
@@ -85,13 +124,13 @@ template <size_t N> struct BlockTopologyNearest : public BlockTopology<N> {
 
         return 4;
 
-        /*
+        
         //TODO: find a way to perform the array casts
-        return flatten<N, StorageOrder::RowMajor>(
-            topo_dims,
-            Utils::array_cast<idx_t>(coords)
-        );
-        */
+        //return flatten<N, StorageOrder::RowMajor>(
+        //    topo_dims,
+        //    Utils::array_cast<idx_t>(coords)
+        //);
+        
 
     }
 
@@ -227,5 +266,6 @@ BlockTopology<N> build_blocks(Point<N>             p0,
         id++;
     }
 }
+*/
 
 } // namespace JADA
