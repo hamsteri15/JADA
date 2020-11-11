@@ -11,6 +11,7 @@
 #include "grid/create_partition.hpp"
 #include "grid/domain.hpp"
 #include "grid/block.hpp"
+#include "grid/block_neighbours.hpp"
 #include "grid/block_topology.hpp"
 #include "grid/boundary_condition.hpp"
 #include "grid/boundary_conditions.hpp"
@@ -55,6 +56,49 @@ TEST_CASE("Test Block"){
     REQUIRE_THROWS(Block<2>({0,10}, p0, p1, 1));
     REQUIRE_THROWS(Block<2>({3,10}, p1, p0, 1));
 
+
+
+}
+
+TEST_CASE("Block neighbours"){
+
+    using namespace JADA;
+    using Catch::Matchers::Contains;
+
+    auto oned_star = block_neighbours<1, ConnectivityType::Star>();
+    auto oned_box  = block_neighbours<1, ConnectivityType::Box>();
+
+    auto twod_star = block_neighbours<2, ConnectivityType::Star>();
+    auto twod_box  = block_neighbours<2, ConnectivityType::Box>();
+    
+    auto threed_star = block_neighbours<3, ConnectivityType::Star>();
+    auto threed_box  = block_neighbours<3, ConnectivityType::Box>();
+    
+    
+    CHECK(oned_box == oned_star);
+    CHECK(oned_box[0] == std::array<int,1>{1});
+
+
+    REQUIRE_THAT(twod_star, Catch::Matchers::UnorderedEquals(
+                    std::vector<std::array<int, 2>>{ {1,0}, {0, 1} }));
+    
+
+    REQUIRE_THAT(twod_box, Catch::Matchers::UnorderedEquals(
+                    std::vector<std::array<int, 2>>{ {1,0}, {0, 1}, {1, 1} }));
+
+
+    REQUIRE_THAT(threed_star, Catch::Matchers::UnorderedEquals(
+                    std::vector<std::array<int, 3>>{ {1,0,0}, {0, 1, 0}, {0,0,1} }));
+
+    REQUIRE_THAT(threed_box,
+                 Catch::Matchers::VectorContains(std::array<int, 3>{1, 1, 0}));
+
+    REQUIRE_THAT(threed_box,
+                 Catch::Matchers::VectorContains(std::array<int, 3>{1, 1, 1}));
+    
+    REQUIRE_THAT(threed_box,
+                 Catch::Matchers::VectorContains(std::array<int, 3>{0, 0, 1}));
+    //twod_box = 
 
 
 }
