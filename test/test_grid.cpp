@@ -60,46 +60,90 @@ TEST_CASE("Test Block"){
 
 }
 
+template<class T>
+bool is_unique(const std::vector<T>& arr){
+
+    auto copy = arr;
+    std::sort(std::begin(copy), std::end(copy));
+    auto it = std::unique( copy.begin(), copy.end() );
+    bool isUnique = (it == copy.end() );
+
+    return isUnique;
+}
+
+
 TEST_CASE("Block neighbours"){
 
     using namespace JADA;
     using Catch::Matchers::Contains;
 
-    auto oned_star = block_neighbours<1, ConnectivityType::Star>();
-    auto oned_box  = block_neighbours<1, ConnectivityType::Box>();
+    SECTION("Star connectivity"){
 
-    auto twod_star = block_neighbours<2, ConnectivityType::Star>();
-    auto twod_box  = block_neighbours<2, ConnectivityType::Box>();
-    
-    auto threed_star = block_neighbours<3, ConnectivityType::Star>();
-    auto threed_box  = block_neighbours<3, ConnectivityType::Box>();
-    
-    
-    CHECK(oned_box == oned_star);
-    CHECK(oned_box[0] == std::array<int,1>{1});
+        auto oned = block_neighbours<1, ConnectivityType::Star>();
+
+        REQUIRE_THAT(oned,
+                     Catch::Matchers::UnorderedEquals(
+                         std::vector<std::array<int, 1>>{{1}, {-1}}));
+
+        auto twod = block_neighbours<2, ConnectivityType::Star>();
+
+        REQUIRE_THAT(
+            twod,
+            Catch::Matchers::UnorderedEquals(std::vector<std::array<int, 2>>{
+                {1, 0}, {0, 1}, {-1, 0}, {0, -1}}));
+
+        auto threed = block_neighbours<3, ConnectivityType::Star>();
+        REQUIRE_THAT(threed,
+                     Catch::Matchers::UnorderedEquals(
+                         std::vector<std::array<int, 3>>{{1, 0, 0},
+                                                         {0, 1, 0},
+                                                         {0, 0, 1},
+                                                         {-1, 0, 0},
+                                                         {0, -1, 0},
+                                                         {0, 0, -1}}));
+    }
 
 
-    REQUIRE_THAT(twod_star, Catch::Matchers::UnorderedEquals(
-                    std::vector<std::array<int, 2>>{ {1,0}, {0, 1} }));
-    
 
-    REQUIRE_THAT(twod_box, Catch::Matchers::UnorderedEquals(
-                    std::vector<std::array<int, 2>>{ {1,0}, {0, 1}, {1, 1} }));
+    SECTION("Box connecitvity"){
+
+        auto oned = block_neighbours<1, ConnectivityType::Box>();
+
+        CHECK_THAT(oned,
+                     Catch::Matchers::UnorderedEquals(
+                         std::vector<std::array<int, 1>>{{1}, {-1}}));
 
 
-    REQUIRE_THAT(threed_star, Catch::Matchers::UnorderedEquals(
-                    std::vector<std::array<int, 3>>{ {1,0,0}, {0, 1, 0}, {0,0,1} }));
+        auto twod = block_neighbours<2, ConnectivityType::Box>();
 
-    REQUIRE_THAT(threed_box,
-                 Catch::Matchers::VectorContains(std::array<int, 3>{1, 1, 0}));
+        CHECK(
+            is_unique(twod)
+        );
 
-    REQUIRE_THAT(threed_box,
-                 Catch::Matchers::VectorContains(std::array<int, 3>{1, 1, 1}));
-    
-    REQUIRE_THAT(threed_box,
-                 Catch::Matchers::VectorContains(std::array<int, 3>{0, 0, 1}));
-    //twod_box = 
+    /*
+ { { 1, 1 }, { 0, 1 }, { 1, 0 }, { -1, 1 }, { 1, -1 }, { -1, 1 }, { 1, -1 }, {-1, 0 }, { 0, -1 }, { -1, -1 } }
+    */
 
+
+        CHECK_THAT(twod,
+                     Catch::Matchers::UnorderedEquals(
+                         std::vector<std::array<int, 2>>{
+                                                        {1, 0}, //ok
+                                                         {0, 1}, //ok
+                                                         {1, 1}, //ok
+                                                         {-1, 0}, //ok
+                                                         {0, -1}, //ok
+                                                         {-1, -1}, //ok
+                                                         {-1, 1}, //ok
+                                                         {1, -1} //ok
+                                                         }));
+
+
+        CHECK(is_unique(block_neighbours<3, ConnectivityType::Box>()));
+        CHECK(is_unique(block_neighbours<5, ConnectivityType::Box>()));
+
+
+    }
 
 }
 
