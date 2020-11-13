@@ -23,6 +23,18 @@ all_permutations_off(std::array<ET, N> arr) {
     return permutations;
 }
 
+
+
+///
+///@brief Given N dimensions returns the possible neighbour directions that a block may have based on the
+///       connectivity type. For N=2 the neighbours for connectivity type Star are: 
+///       [1, 0], [-1, 0], [0,1], [0,-1]. 
+///       For N = 2 and Box connectivity, also the combinations are returned i.e. [1,-1] [-1, 1]...
+///
+///@tparam N number of dimensions
+///@tparam CT Connectivity type
+///@return std::vector<std::array<int, N>> vector of neighbour directions
+///
 template <size_t N, ConnectivityType CT>
 std::vector<std::array<int, N>> block_neighbours() {
 
@@ -39,6 +51,9 @@ std::vector<std::array<int, N>> block_neighbours() {
             p_permutations.end(), n_permutations.begin(), n_permutations.end());
         return p_permutations;
     }
+
+
+    //Box type connectivity
 
     size_t n_combinations = 1;
     for (size_t i = 0; i < N; ++i) { n_combinations *= 3; }
