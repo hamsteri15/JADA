@@ -1,100 +1,76 @@
 #pragma once
+#include "loops/unflatten_index.hpp"
 #include <array>
 #include <vector>
 
-#include "utils/permutations.hpp"
+enum class ConnectivityType { Star, Box };
 
-enum class ConnectivityType{
-    Star, Box
-};
+namespace JADA {
 
-namespace JADA{
+template <size_t N, class ET>
+constexpr std::vector<std::array<ET, N>>
+all_permutations_off(std::array<ET, N> arr) {
 
-template <class T, size_t N, size_t R>
-void getPermutations(const std::array<T, N>&        arr,
-                     std::array<T, R>&              permutation,
-                     size_t                            curIndex,
-                     std::vector<std::array<T, R>>& permutations) {
-    // stop recursion condition
-    if (curIndex == R) {
-        permutations.emplace_back(permutation);
+    // TODO: preallocate
+    std::vector<std::array<ET, N>> permutations;
 
-    } else {
-        for (size_t i = 0; i < N; i++) {
-            permutation[curIndex] = arr[i];
-            getPermutations(arr, permutation, curIndex + 1, permutations);
-        }
-    }
-}
-
-
-
-// N = in array length
-// R = permutation array length
-template <class T, size_t N, size_t R> auto all_possible_permutations(const std::array<T, N>& arr) {
-
-    std::array<T, R>              permutation;
-    std::vector<std::array<T, R>> permutations;
-
-    size_t curIndex = 0;
-    getPermutations(arr, permutation, curIndex, permutations);
+    auto temp = arr;
+    std::sort(std::begin(temp), std::end(temp));
+    do {
+        permutations.push_back(temp);
+    } while (std::next_permutation(temp.begin(), temp.end()));
 
     return permutations;
 }
 
-
-template<size_t N, ConnectivityType CT>
+template <size_t N, ConnectivityType CT>
 std::vector<std::array<int, N>> block_neighbours() {
 
-
-
-    if constexpr (CT == ConnectivityType::Star){
-
-
+    if constexpr (CT == ConnectivityType::Star) {
 
         std::array<int, N> a_positive{};
         std::array<int, N> a_negative{};
-        a_positive[0] = 1;
-        a_negative[0] = -1;
-        auto p_permutations = Utils::all_permutations_off(a_positive);
-        auto n_permutations = Utils::all_permutations_off(a_negative);
+        a_positive[0]       = 1;
+        a_negative[0]       = -1;
+        auto p_permutations = all_permutations_off(a_positive);
+        auto n_permutations = all_permutations_off(a_negative);
 
-        p_permutations.insert(p_permutations.end(), n_permutations.begin(), n_permutations.end());
+        p_permutations.insert(
+            p_permutations.end(), n_permutations.begin(), n_permutations.end());
         return p_permutations;
-
     }
 
-    
+    size_t n_combinations = 1;
+    for (size_t i = 0; i < N; ++i) { n_combinations *= 3; }
 
-    
-    auto permutations = all_possible_permutations<int, 3, N>(std::array<int, 3>{1, 0, -1});
-    std::vector<std::array<int, N>> good_permutations;
-    
-    for (auto p : permutations){
+    std::vector<std::array<int, N>>
+        combinations; 
         
-        if (
-            std::any_of(p.begin(), p.end(), [](int i) {return i != 0;})
-        )
-        {
-            good_permutations.push_back(p);
+    // neglect the no-opt {0, 0, 0...}
+    combinations.reserve(n_combinations - 1);
+
+    std::array<int, N> combination;
+    for (auto& c : combination) c = 1;
+
+    for (size_t i = 0; i < n_combinations; ++i) {
+
+        for (auto& c : combination) {
+            if (c != -1) {
+                c -= 1;
+                break;
+            } else {
+                c = 1;
+            }
         }
 
-    }   
+        if (std::any_of(std::begin(combination),
+                        std::end(combination),
+                        [](int c) { return c != 0; })) {
+            combinations.emplace_back(combination);
+        }
+    }
 
-    return good_permutations;    
-
-
-//    return permutations;
-    /*std::array<int, 3> possibilities = {1, 0, -1};
-
-    return all_possible_permutations<int, 3, N>(possibilities);
-    */
+    return combinations;
 }
 
-
-
-
-
-
-
-}
+} // namespace JADA

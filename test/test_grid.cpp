@@ -115,32 +115,34 @@ TEST_CASE("Block neighbours"){
 
 
         auto twod = block_neighbours<2, ConnectivityType::Box>();
-
         CHECK(
             is_unique(twod)
         );
 
-    /*
- { { 1, 1 }, { 0, 1 }, { 1, 0 }, { -1, 1 }, { 1, -1 }, { -1, 1 }, { 1, -1 }, {-1, 0 }, { 0, -1 }, { -1, -1 } }
-    */
-
-
         CHECK_THAT(twod,
                      Catch::Matchers::UnorderedEquals(
                          std::vector<std::array<int, 2>>{
-                                                        {1, 0}, //ok
-                                                         {0, 1}, //ok
-                                                         {1, 1}, //ok
-                                                         {-1, 0}, //ok
-                                                         {0, -1}, //ok
-                                                         {-1, -1}, //ok
-                                                         {-1, 1}, //ok
-                                                         {1, -1} //ok
+                                                        {1, 0},
+                                                         {0, 1},
+                                                         {1, 1},
+                                                         {-1, 0},
+                                                         {0, -1},
+                                                         {-1, -1},
+                                                         {-1, 1},
+                                                         {1, -1}
                                                          }));
 
 
+
+        CHECK(block_neighbours<3, ConnectivityType::Box>().size() == 3*3*3 - 1);
+        CHECK(block_neighbours<5, ConnectivityType::Box>().size() == 3*3*3*3*3 - 1);
+
         CHECK(is_unique(block_neighbours<3, ConnectivityType::Box>()));
         CHECK(is_unique(block_neighbours<5, ConnectivityType::Box>()));
+
+
+    
+
 
 
     }
