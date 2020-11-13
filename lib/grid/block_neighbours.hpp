@@ -7,6 +7,15 @@ enum class ConnectivityType { Star, Box };
 
 namespace JADA {
 
+
+///
+///@brief For a given array returns a vector of permutations of the elements of the array
+///
+///@tparam N Dimensions of the array
+///@tparam ET Array element type
+///@param arr the input array
+///@return constexpr std::vector<std::array<ET, N>> vector of permutations
+///
 template <size_t N, class ET>
 constexpr std::vector<std::array<ET, N>>
 all_permutations_off(std::array<ET, N> arr) {
