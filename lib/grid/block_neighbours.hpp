@@ -70,7 +70,7 @@ std::vector<std::array<int, N>> block_neighbours() {
     std::vector<std::array<int, N>>
         combinations; 
         
-    // neglect the no-opt {0, 0, 0...}
+    // neglect the no-op {0, 0, 0...}
     combinations.reserve(n_combinations - 1);
 
     std::array<int, N> combination;

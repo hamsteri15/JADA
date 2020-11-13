@@ -49,13 +49,15 @@ TEST_CASE("Test Block"){
 
     using namespace JADA;
 
+    /*
     Point<2> p0{0,0};
     Point<2> p1{1,1};
+
 
     REQUIRE_NOTHROW(Block<2>({10,10}, p0, p1, 1));
     REQUIRE_THROWS(Block<2>({0,10}, p0, p1, 1));
     REQUIRE_THROWS(Block<2>({3,10}, p1, p0, 1));
-
+    */
 
 
 }

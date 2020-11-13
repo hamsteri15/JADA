@@ -15,6 +15,57 @@
 
 namespace JADA {
 
+
+template<size_t Dim>
+struct BlockConnection{
+    int from_id;
+    int to_id;
+    std::array<int, Dim> direction;
+
+
+    bool is_valid() const {
+        return (from_id != BLOCK_ID_NULL) && (to_id != BLOCK_ID_NULL)
+         && (from_id != to_id);
+    }
+
+
+};
+
+
+
+
+
+
+template<size_t Dim> class ConnectivityGraph{
+
+    using storage_t = std::map<int, std::vector<BlockConnection<Dim>>>;
+
+    storage_t m_storage;
+
+
+public:
+
+    ConnectivityGraph() = default;
+
+
+    void insert(int block_id, const std::vector<BlockConnection<Dim>>& connections){
+
+        m_storage.insert({block_id, connections});
+
+
+    }
+
+
+
+
+
+
+
+};
+
+
+
+
 template <size_t Dim> struct BlockTopology {
 
     using block_vector       = std::vector<Block<Dim>>;
@@ -23,6 +74,7 @@ template <size_t Dim> struct BlockTopology {
     BlockTopology(block_vector blocks, connectivity_graph con)
         : m_blocks(blocks)
         , m_connectivity(con) {}
+
 
     std::vector<int> get_neighbours(int id) const {
         return m_connectivity.at(id); //[id];
