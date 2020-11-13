@@ -87,6 +87,7 @@ std::vector<std::array<int, N>> block_neighbours() {
             }
         }
 
+        //Neglect the no-op [0,0,0...]
         if (std::any_of(std::begin(combination),
                         std::end(combination),
                         [](int c) { return c != 0; })) {
