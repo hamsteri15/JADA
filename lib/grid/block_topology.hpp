@@ -49,16 +49,13 @@ public:
 
 
     void insert(int block_id, const std::vector<BlockConnection<Dim>>& connections){
-
         m_storage.insert({block_id, connections});
-
-
     }
 
 
-
-
-
+    const std::vector<BlockConnection<Dim>>& get(int block_id) const{
+        return m_storage.at(block_id);        
+    }
 
 
 };
@@ -68,28 +65,29 @@ public:
 
 template <size_t Dim> struct BlockTopology {
 
-    using block_vector       = std::vector<Block<Dim>>;
-    using connectivity_graph = std::map<int, std::vector<int>>;
 
-    BlockTopology(block_vector blocks, connectivity_graph con)
+
+    explicit BlockTopology(std::vector<Block<Dim>> blocks, ConnectivityGraph<Dim> graph)
         : m_blocks(blocks)
-        , m_connectivity(con) {}
+        , m_graph(graph) {}
 
 
-    std::vector<int> get_neighbours(int id) const {
-        return m_connectivity.at(id); //[id];
+    const std::vector<BlockConnection<Dim>>& get_connections(int block_id) const {
+        return m_graph.get(block_id);
     }
 
-    Block<Dim> get_block(int id) const {
+    const Block<Dim>& get_block(int id) const {
         return *std::find_if(m_blocks.begin(),
                              m_blocks.end(),
                              [&](Block<Dim> b) { return b.id == id; });
     }
 
+
 private:
-    block_vector       m_blocks;
-    connectivity_graph m_connectivity;
+    std::vector<Block<Dim>> m_blocks;
+    ConnectivityGraph<Dim>  m_graph;
 };
+
 
 
 template <size_t N>

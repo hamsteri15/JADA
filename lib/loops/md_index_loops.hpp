@@ -7,6 +7,29 @@
 namespace JADA{
 
 
+/*
+
+#include <range/v3/view/indices.hpp>
+#include <range/v3/view/cartesian_product.hpp>
+
+using namespaces ranges;
+
+template<size_t N>
+auto indices(std::array<size_t, N> begin, std::array<size_t, N> end){
+
+    return [&]<auto... Is>(std::index_sequence<Is...>) {
+        return views::cartesian_product(
+            views::indices(begin[Is], end[Is])...
+        );
+        //return std::array<size_t, N>{get_shift<N, Is, storage>(dimension)...};
+    }(std::make_integer_sequence<size_t, N>{});
+
+    
+
+}
+
+*/
+
 
 [[maybe_unused]] inline static index_generator<1> 
 md_indices(position<1> begin, position<1> end) noexcept {
