@@ -28,6 +28,48 @@ template <size_t N> struct position {
     auto cend() { return storage.cend(); }
 
     auto operator<=>(const position<N>& rhs) const = default;
+
+    //Math ops
+    auto& operator+=(const position<N>& rhs) {
+        for (size_t i = 0; i < N; ++i) { storage[i] += rhs[i]; }
+        return *this; 
+    }
+
+    auto& operator-=(const position<N>& rhs) {
+        for (size_t i = 0; i < N; ++i) { storage[i] -= rhs[i]; }
+        return *this; 
+    }
+
+    auto& operator*=(const position<N>& rhs) {
+        for (size_t i = 0; i < N; ++i) { storage[i] *= rhs[i]; }
+        return *this; 
+    }
+
+    auto& operator/=(const position<N>& rhs) {
+        for (size_t i = 0; i < N; ++i) { storage[i] /= rhs[i]; }
+        return *this; 
+    }
+
+
+    friend position<N> operator+(position<N> lhs, const position<N>& rhs) {
+        lhs += rhs;
+        return lhs;
+    }
+
+    friend position<N> operator-(position<N> lhs, const position<N>& rhs) {
+        lhs -= rhs;
+        return lhs;
+    }
+
+    friend position<N> operator*(position<N> lhs, const position<N>& rhs) {
+        lhs *= rhs;
+        return lhs;
+    }
+
+    friend position<N> operator/(position<N> lhs, const position<N>& rhs) {
+        lhs /= rhs;
+        return lhs;
+    }
 };
 
 
@@ -43,8 +85,8 @@ auto operator==(const position<N>& lhs, const dimension<N>& rhs) {
     return true;
 }
 
-template<size_t N>
-auto operator!=(const position<N>& lhs, const dimension<N>& rhs){
+template <size_t N>
+auto operator!=(const position<N>& lhs, const dimension<N>& rhs) {
     return !(lhs == rhs);
 }
 
@@ -67,15 +109,12 @@ auto operator<=(const position<N>& lhs, const dimension<N>& rhs) {
 template <size_t N>
 auto operator>(const position<N>& lhs, const dimension<N>& rhs) {
     return !(lhs <= rhs);
-
 }
 
 template <size_t N>
 auto operator>=(const position<N>& lhs, const dimension<N>& rhs) {
     return !(lhs < rhs);
 }
-
-
 
 } // namespace JADA
 

@@ -6,58 +6,79 @@
 
 #include <iostream>
 
-TEST_CASE("AD"){
-
-    JADA::position<3> p{1,1,1};
-    JADA::dimension<3> d{2,2,2};
-
-    CHECK(p != d);
-
-}
 
 TEST_CASE("Test position"){
 
     using namespace JADA;
 
+    SECTION("Comparisons") {
+        position<3> a{4,3,1};
+        position<3> b = {4,3,1};
 
-    position<3> a{4,3,1};
-    position<3> b = {4,3,1};
+        auto [k,j,i] = a;
+        CHECK(k == 4);
+        CHECK(j == 3);
+        CHECK(i == 1);
 
-    auto [k,j,i] = a;
-    CHECK(k == 4);
-    CHECK(j == 3);
-    CHECK(i == 1);
+        CHECK(a == b);
 
-    CHECK(a == b);
+        a[1] = 15;
+        CHECK(a != b);
 
-    a[1] = 15;
-    CHECK(a != b);
-
-    CHECK( a > b);
-    CHECK( b < a);
+        CHECK( a > b);
+        CHECK( b < a);
 
 
 
-    position<3> pos{1,2,3};
-    dimension<3> dim{1,2,3};
+        position<3> pos{1,2,3};
+        dimension<3> dim{1,2,3};
 
-    CHECK(pos == dim);
-    CHECK(pos >= dim);
-    CHECK(pos <= dim);
-    pos[2] = 65;
-    CHECK(pos > dim);
-    CHECK(pos >= dim);
-    CHECK(!(pos < dim));
+        CHECK(pos == dim);
+        CHECK(pos >= dim);
+        CHECK(pos <= dim);
+        pos[2] = 65;
+        CHECK(pos > dim);
+        CHECK(pos >= dim);
+        CHECK(!(pos < dim));
 
-    pos = {3,3,3};
-    dim = {3,3, 1};
+        pos = {3,3,3};
+        dim = {3,3, 1};
 
-    CHECK(pos > dim);
-    CHECK(pos >= dim);
-    CHECK(pos != dim);
-    dim = {3,3,3};
-    CHECK(pos == dim);
+        CHECK(pos > dim);
+        CHECK(pos >= dim);
+        CHECK(pos != dim);
+        dim = {3,3,3};
+        CHECK(pos == dim);
 
+    }
+
+
+    SECTION("Math ops"){
+
+        position<3> lhs = {1,2,3};
+        position<3> rhs = {2,1,3};
+
+
+        lhs += rhs;
+        CHECK(lhs == position<3>{3, 3, 6});
+
+        lhs -= rhs;
+        CHECK(lhs == position<3>{1,2,3});
+
+
+        lhs /= rhs;
+        CHECK(lhs == position<3>{0, 2, 1}); 
+
+        lhs *= position<3>{1,1,2};
+        CHECK(lhs == position<3>{0, 2, 2});
+
+    
+        auto a = position<3>{1,2,3} + position<3>{2,2,2} * position<3>{2,5,6} / position<3>{1,1,1}; 
+    
+        CHECK(a == position<3>{1+2*2/1, 2+2*5/1, 3+2*6/1});
+
+
+    }
 
 
 }
