@@ -98,7 +98,8 @@ template <StorageOrder storage, class... Is>
 constexpr idx_t flatten(dimension<sizeof...(Is)> dim,
                         Is... idx) noexcept(Utils::can_throw) {
     return flatten<sizeof...(Is), storage>(
-        dim, std::to_array<idx_t>({idx_t(idx)...}));
+        dim, position<sizeof...(Is)>{idx_t(idx)...});
+        //dim, std::to_array<idx_t>({idx_t(idx)...}));
 }
 
 } // namespace JADA

@@ -12,12 +12,8 @@ struct dimension{
 
     std::array<size_t, N> storage;
 
-    //TODO: add a concept for the integer, currently this is ok ass storage is indexed
-    template<typename INT> 
-    size_t operator[](INT i) {return storage[i];}
-
-    template<typename INT> 
-    size_t operator[](INT i) const {return storage[i];}
+    size_t& operator[](size_t i) {return storage[i];}
+    size_t operator[](size_t i) const {return storage[i];}
 
 
     auto begin() {return storage.begin();}
