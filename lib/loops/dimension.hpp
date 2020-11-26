@@ -1,4 +1,6 @@
 #pragma once
+
+
 #include <array>
 #include <cstddef>
 
@@ -24,10 +26,13 @@ struct dimension{
     auto end() const {return storage.end();}
     auto cend() {return storage.cend();}
 
+    auto operator<=>(const dimension<N>& rhs) const = default;
+
+
+
 };
 
 
-//template <size_t N> using position = std::array<idx_t, N>;
 
 
 }
