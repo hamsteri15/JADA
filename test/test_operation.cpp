@@ -3,7 +3,6 @@
 
 #include "grid/direction.hpp"
 #include "operation/fdm_operations.hpp"
-#include "operation/fdm_derivative.hpp"
 
 namespace JADA{
 

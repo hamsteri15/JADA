@@ -6,7 +6,6 @@
 #include "grid/decomposition.hpp"
 #include "grid/local_global_mapping.hpp"
 #include "grid/split.hpp"
-#include "grid/uniform_grid.hpp"
 #include "grid/partition.hpp"
 #include "grid/create_partition.hpp"
 #include "grid/domain.hpp"
@@ -15,7 +14,6 @@
 #include "grid/block_topology.hpp"
 #include "grid/boundary_condition.hpp"
 #include "grid/boundary_conditions.hpp"
-#include "grid/grid_base.hpp"
 #include "operation/fdm_operations.hpp"
 
 
@@ -622,35 +620,6 @@ TEST_CASE("Test Partition") {
 
 }
 */
-TEST_CASE("Test BoundaryCondition"){
-
-    using namespace JADA;
-    
-    BoundaryCondition bc1(Direction::i, BcLoc::begin, BcType::periodic);
-    BoundaryCondition bc2(Direction::i, BcLoc::end, BcType::custom);
-    CHECK(bc1.is_periodic());
-    CHECK(bc2.is_periodic() == false);
-
-
-}
-
-TEST_CASE("Test BoundaryConditions"){
-
-    using namespace JADA;
-
-    BoundaryConditions<1> bc_1d{
-        {
-            BoundaryCondition(Direction::i, BcLoc::begin, BcType::periodic),
-            BoundaryCondition(Direction::i, BcLoc::end, BcType::periodic)
-
-        }
-    };
-
-    CHECK(bc_1d.is_periodic(Direction::i));
-
-
-
-}
 
 
 TEST_CASE("Test Domain"){

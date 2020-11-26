@@ -3,7 +3,6 @@
 #include <array>
 
 #include "grid/direction.hpp"
-#include "grid/grid_base.hpp"
 #include "loops/position.hpp"
 #include "loops/serial_index_loops.hpp"
 #include "utils/runtime_assert.hpp"

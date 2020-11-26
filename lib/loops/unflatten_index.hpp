@@ -20,7 +20,7 @@ namespace JADA {
 ///@return constexpr std::array<idx_t, N> array of multidimensional indices
 ///
 template <size_t N, StorageOrder storage>
-constexpr std::array<idx_t, N> unflatten(std::array<idx_t, N> dims,
+constexpr std::array<idx_t, N> unflatten(dimension<N> dims,
                                          idx_t idx) noexcept(Utils::can_throw) {
 
     Utils::runtime_assert(std::accumulate(std::begin(dims),

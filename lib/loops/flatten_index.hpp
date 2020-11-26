@@ -2,6 +2,7 @@
 
 #include "loops/index_type.hpp"
 #include "loops/position.hpp"
+#include "loops/dimension.hpp"
 #include "loops/storage_order.hpp"
 #include "utils/can_throw.hpp"
 #include "utils/runtime_assert.hpp"
@@ -21,20 +22,20 @@ namespace JADA {
 ///@return constexpr idx_t the shift in direction I
 ///
 template <size_t N, idx_t I, StorageOrder storage>
-constexpr idx_t get_shift(std::array<idx_t, N> dimension) {
+constexpr idx_t get_shift(dimension<N> dim) {
 
     static_assert(I < N, "Shift index out of bounds");
 
     if constexpr (storage == StorageOrder::RowMajor) {
 
-        return std::accumulate(std::begin(dimension) + int(I) + 1,
-                               std::end(dimension),
+        return std::accumulate(std::begin(dim) + int(I) + 1,
+                               std::end(dim),
                                idx_t(1),
                                std::multiplies<idx_t>{});
     }
 
-    return std::accumulate(std::begin(dimension),
-                           std::begin(dimension) + int(I),
+    return std::accumulate(std::begin(dim),
+                           std::begin(dim) + int(I),
                            idx_t(1),
                            std::multiplies<idx_t>{});
 }
@@ -49,9 +50,9 @@ constexpr idx_t get_shift(std::array<idx_t, N> dimension) {
 ///@return constexpr std::array<idx_t, N> the shifts in all N directions
 ///
 template <size_t N, StorageOrder storage>
-constexpr std::array<idx_t, N> get_shifts(std::array<idx_t, N> dimension) {
+constexpr dimension<N> get_shifts(dimension<N> dim) {
     return [&]<auto... Is>(std::index_sequence<Is...>) {
-        return std::array<idx_t, N>{get_shift<N, Is, storage>(dimension)...};
+        return dimension<N>{get_shift<N, Is, storage>(dim)...};
     }
     (std::make_integer_sequence<idx_t, N>{});
 }
@@ -67,17 +68,17 @@ constexpr std::array<idx_t, N> get_shifts(std::array<idx_t, N> dimension) {
 ///@return constexpr idx_t the flat index
 ///
 template <size_t N, StorageOrder storage>
-constexpr idx_t flatten(std::array<idx_t, N> dimension,
+constexpr idx_t flatten(dimension<N> dim,
                         std::array<idx_t, N> idx) noexcept(Utils::can_throw) {
 
     Utils::runtime_assert(std::equal(std::begin(idx),
                                      std::end(idx),
-                                     std::begin(dimension),
-                                     std::end(dimension),
+                                     std::begin(dim),
+                                     std::end(dim),
                                      std::less{}),
                           "Index out of bounds");
 
-    const auto mult = get_shifts<N, storage>(dimension);
+    const auto mult = get_shifts<N, storage>(dim);
 
     return std::inner_product(
         std::begin(idx), std::end(idx), std::begin(mult), idx_t(0));
@@ -94,10 +95,10 @@ constexpr idx_t flatten(std::array<idx_t, N> dimension,
 ///@return constexpr idx_t the flat index
 ///
 template <StorageOrder storage, class... Is>
-constexpr idx_t flatten(std::array<idx_t, sizeof...(Is)> dimension,
+constexpr idx_t flatten(dimension<sizeof...(Is)> dim,
                         Is... idx) noexcept(Utils::can_throw) {
     return flatten<sizeof...(Is), storage>(
-        dimension, std::to_array<idx_t>({idx_t(idx)...}));
+        dim, std::to_array<idx_t>({idx_t(idx)...}));
 }
 
 } // namespace JADA
