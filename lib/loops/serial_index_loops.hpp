@@ -54,7 +54,7 @@ serial_index(position<3> begin, position<3> end, dimension<3> dim) noexcept {
     for (auto i = i_begin; i != i_end; ++i) { 
         
         co_yield position<1>{flatten<StorageOrder::RowMajor>(dim, k, j, i )}; 
-        //co_yield position<1>{i + NI * j + NINJ*k}; 
+        //co_yield position<1>{i + idx_t(NI) * j + idx_t(NINJ)*k}; 
     }}}
 }
 

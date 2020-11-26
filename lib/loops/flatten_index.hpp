@@ -21,23 +21,23 @@ namespace JADA {
 ///@param dimension the maximum extent of the multidimensional array
 ///@return constexpr idx_t the shift in direction I
 ///
-template <size_t N, idx_t I, StorageOrder storage>
-constexpr idx_t get_shift(dimension<N> dim) {
+template <size_t N, size_t I, StorageOrder storage>
+constexpr size_t get_shift(dimension<N> dim) {
 
     static_assert(I < N, "Shift index out of bounds");
 
     if constexpr (storage == StorageOrder::RowMajor) {
 
-        return std::accumulate(std::begin(dim) + int(I) + 1,
+        return std::accumulate(std::begin(dim) + I + 1,
                                std::end(dim),
-                               idx_t(1),
-                               std::multiplies<idx_t>{});
+                               size_t(1),
+                               std::multiplies<size_t>{});
     }
 
     return std::accumulate(std::begin(dim),
-                           std::begin(dim) + int(I),
-                           idx_t(1),
-                           std::multiplies<idx_t>{});
+                           std::begin(dim) + I,
+                           size_t(1),
+                           std::multiplies<size_t>{});
 }
 
 ///
@@ -54,7 +54,7 @@ constexpr dimension<N> get_shifts(dimension<N> dim) {
     return [&]<auto... Is>(std::index_sequence<Is...>) {
         return dimension<N>{get_shift<N, Is, storage>(dim)...};
     }
-    (std::make_integer_sequence<idx_t, N>{});
+    (std::make_index_sequence<N>{});
 }
 
 ///
@@ -69,7 +69,7 @@ constexpr dimension<N> get_shifts(dimension<N> dim) {
 ///
 template <size_t N, StorageOrder storage>
 constexpr idx_t flatten(dimension<N> dim,
-                        std::array<idx_t, N> idx) noexcept(Utils::can_throw) {
+                        position<N> idx) noexcept(Utils::can_throw) {
 
     Utils::runtime_assert(std::equal(std::begin(idx),
                                      std::end(idx),

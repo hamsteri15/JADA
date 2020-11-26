@@ -20,7 +20,7 @@ namespace JADA {
 ///@return constexpr std::array<idx_t, N> array of multidimensional indices
 ///
 template <size_t N, StorageOrder storage>
-constexpr std::array<idx_t, N> unflatten(dimension<N> dims,
+constexpr position<N> unflatten(dimension<N> dims,
                                          idx_t idx) noexcept(Utils::can_throw) {
 
     Utils::runtime_assert(std::accumulate(std::begin(dims),
@@ -31,22 +31,24 @@ constexpr std::array<idx_t, N> unflatten(dimension<N> dims,
 
     );
 
-    std::array<idx_t, N> md_idx;
+    position<N> md_idx;
     auto                 mult = get_shifts<N, storage>(dims);
 
+
+    //TODO: this is not nice, try to make some sense at some point
     if constexpr (storage == StorageOrder::RowMajor) {
 
-        for (idx_t i = 0; i < N; ++i) {
-            md_idx[i] = idx / mult[i];
-            idx -= md_idx[i] * mult[i];
+        for (size_t i = 0; i < N; ++i) {
+            md_idx[i] = idx / idx_t(mult[i]);
+            idx -= md_idx[i] * idx_t(mult[i]);
         }
     }
 
     else {
 
-        for (idx_t i = N - 1; int(i) >= 0; --i) {
-            md_idx[i] = idx / mult[i];
-            idx -= md_idx[i] * mult[i];
+        for (size_t i = N - 1; int(i) >= 0; --i) {
+            md_idx[i] = idx / idx_t(mult[i]);
+            idx -= md_idx[i] * idx_t(mult[i]);
         }
     }
 

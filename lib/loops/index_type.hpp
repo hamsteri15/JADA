@@ -4,5 +4,6 @@
 
 namespace JADA{
 
-using idx_t                       = size_t;
+//unsigned for arithmetic operations
+using idx_t                       = std::ptrdiff_t;
 }

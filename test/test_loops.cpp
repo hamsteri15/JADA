@@ -21,6 +21,7 @@ TEST_CASE("Test get_shift"){
 
     }
 
+
     SECTION("2D"){
 
         size_t n0 = 10;
@@ -55,7 +56,10 @@ TEST_CASE("Test get_shift"){
     }
 
 
+
+
 }
+
 
 
 TEST_CASE("Test flatten"){
@@ -143,7 +147,6 @@ TEST_CASE("Test flatten"){
     }
 
 }
-
 TEST_CASE("Test unflatten"){
 
     using namespace JADA;
@@ -236,7 +239,6 @@ TEST_CASE("Test unflatten"){
 
 
 
-
 TEST_CASE("Test loops") {
 
     using namespace JADA;
@@ -261,19 +263,19 @@ TEST_CASE("Test loops") {
 
     SECTION("2D loops") {
 
-        idx_t ni = 10;
-        idx_t nj = 11;
+        size_t ni = 10;
+        size_t nj = 11;
 
         idx_t idx;
 
         idx = 0;
-        for (auto [j, i] : md_indices(position<2>{0, 0}, position<2>{nj, ni})) {
-            REQUIRE(i + ni * j == idx);
+        for (auto [j, i] : md_indices(position<2>{0, 0}, position<2>{idx_t(nj), idx_t(ni)})) {
+            REQUIRE(i + idx_t(ni) * j == idx);
             ++idx;
         }
 
         idx = 0;
-        for (auto [i] : serial_index(position<2>{0, 0}, position<2>{nj, ni}, dimension<2>{nj, ni})) {
+        for (auto [i] : serial_index(position<2>{0, 0}, position<2>{idx_t(nj), idx_t(ni)}, dimension<2>{nj, ni})) {
             REQUIRE(i == idx);
             ++idx;
         }
@@ -283,24 +285,25 @@ TEST_CASE("Test loops") {
     SECTION("3D loops") {
 
         
-        idx_t ni = 10;
-        idx_t nj = 11;
-        idx_t nk = 12;
+        size_t ni = 10;
+        size_t nj = 11;
+        size_t nk = 12;
 
         idx_t idx;
 
         idx = 0;
-        for (auto [k, j, i] : md_indices(position<3>{0, 0, 0}, position<3>{nk, nj, ni})) {
-            REQUIRE(i + ni * j + ni * nj * k == idx);
+        for (auto [k, j, i] : md_indices(position<3>{0,0,0}, position<3>{12, 11, 10})) {
+            REQUIRE(i + idx_t(ni) * j + idx_t(ni) * idx_t(nj) * k == idx);
             ++idx;
         }
 
         idx = 0;
         for (auto [i] :
-             serial_index(position<3>{0, 0, 0}, position<3>{nk, nj, ni}, dimension<3>{nk, nj, ni})) {
+             serial_index(position<3>{0, 0, 0}, position<3>{12, 11, 10}, dimension<3>{nk, nj, ni})) {
             REQUIRE(i == idx);
             ++idx;
         }
         
     }
 }
+
