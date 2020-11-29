@@ -1,77 +1,39 @@
 #pragma once
 
+#include "utils/math_vector.hpp"
 #include "loops/dimension.hpp"
 #include "loops/index_type.hpp"
 #include <array>
 
 namespace JADA {
 
-// template <size_t N> using position = std::array<idx_t, N>;
-
-template <size_t N> struct position {
+template <size_t L>
+struct position : public Utils::MathVectorBase<idx_t, L, position<L>> {
 
     using element_t = idx_t;
 
-    std::array<element_t, N> storage;
+    inline constexpr position() = default;
+    constexpr position(position const&) noexcept = default;
+    constexpr position(position&&) noexcept = default;
+    constexpr position& operator=(position const&) noexcept = default;
+    constexpr position& operator=(position&&) noexcept = default;
 
-    template <size_t I> element_t get() { return storage[I]; }
+    constexpr position(std::initializer_list<element_t> list) {
 
-    element_t& operator[](size_t i) { return storage[i]; }
-    element_t  operator[](size_t i) const { return storage[i]; }
+        if (list.size() > L) {
+            throw std::logic_error("Invalid paramenter count for vector");
+        }
+        std::move(list.begin(), list.end(), m_storage.begin());
 
-    auto begin() { return storage.begin(); }
-    auto begin() const { return storage.begin(); }
-    auto cbegin() const { return storage.cbegin(); }
-
-    auto end() { return storage.end(); }
-    auto end() const { return storage.end(); }
-    auto cend() { return storage.cend(); }
-
-    auto operator<=>(const position<N>& rhs) const = default;
-
-    //Math ops
-    auto& operator+=(const position<N>& rhs) {
-        for (size_t i = 0; i < N; ++i) { storage[i] += rhs[i]; }
-        return *this; 
+        Utils::runtime_assert(this->min() >= 0, "Negative position.");
     }
 
-    auto& operator-=(const position<N>& rhs) {
-        for (size_t i = 0; i < N; ++i) { storage[i] -= rhs[i]; }
-        return *this; 
-    }
+    const element_t* get_ptr() const { return m_storage.data(); }
+    element_t* get_ptr() { return m_storage.data(); }
 
-    auto& operator*=(const position<N>& rhs) {
-        for (size_t i = 0; i < N; ++i) { storage[i] *= rhs[i]; }
-        return *this; 
-    }
-
-    auto& operator/=(const position<N>& rhs) {
-        for (size_t i = 0; i < N; ++i) { storage[i] /= rhs[i]; }
-        return *this; 
-    }
-
-
-    friend position<N> operator+(position<N> lhs, const position<N>& rhs) {
-        lhs += rhs;
-        return lhs;
-    }
-
-    friend position<N> operator-(position<N> lhs, const position<N>& rhs) {
-        lhs -= rhs;
-        return lhs;
-    }
-
-    friend position<N> operator*(position<N> lhs, const position<N>& rhs) {
-        lhs *= rhs;
-        return lhs;
-    }
-
-    friend position<N> operator/(position<N> lhs, const position<N>& rhs) {
-        lhs /= rhs;
-        return lhs;
-    }
+private:
+    std::array<element_t, L> m_storage;
 };
-
 
 //================================
 // <=> Comparisons with dimension

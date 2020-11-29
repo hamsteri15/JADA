@@ -6,6 +6,7 @@ add_library(catch_main STATIC catch_main.cpp)
 
 
 SET(SerialTestSources
+    test_utils.cpp;
     test_loops.cpp;
     #test_stencil.cpp;
     #test_operation.cpp;

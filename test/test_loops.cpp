@@ -3,8 +3,8 @@
 #include "loops/unflatten_index.hpp"
 #include "loops/md_index_loops.hpp"
 #include "loops/serial_index_loops.hpp"
-
 #include <iostream>
+
 
 
 TEST_CASE("Test position"){
@@ -25,9 +25,8 @@ TEST_CASE("Test position"){
         a[1] = 15;
         CHECK(a != b);
 
-        CHECK( a > b);
-        CHECK( b < a);
 
+        //CHECK(a < 100);
 
 
         position<3> pos{1,2,3};
