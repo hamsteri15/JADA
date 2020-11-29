@@ -2,20 +2,10 @@
 
 #include <array>
 #include <iostream>
-
-#include "grid/decomposition.hpp"
-#include "grid/local_global_mapping.hpp"
 #include "grid/split.hpp"
-#include "grid/partition.hpp"
-#include "grid/create_partition.hpp"
-#include "grid/domain.hpp"
-#include "grid/block.hpp"
 #include "grid/block_neighbours.hpp"
-#include "grid/block_topology.hpp"
-#include "grid/boundary_condition.hpp"
-#include "grid/boundary_conditions.hpp"
-#include "operation/fdm_operations.hpp"
-
+#include "grid/local_global_mapping.hpp"
+#include "grid/decomposition.hpp"
 
 
 template <class Loop>
@@ -27,38 +17,7 @@ static std::vector<int> set_ones(const std::vector<int>& v, Loop loop) {
 }
 
 
-TEST_CASE("Test split") {
 
-    using namespace JADA;
-
-    std::array<idx_t, 3> global_dims = {101, 1, 444};
-
-    for (size_t i = 15; i < 81; ++i) { REQUIRE_NOTHROW(split(global_dims, i)); }
-
-    global_dims = {10, 10, 1};
-    REQUIRE_THROWS(split(global_dims, 101));
-
-
-
-
-}
-
-TEST_CASE("Test Block"){
-
-    using namespace JADA;
-
-    /*
-    Point<2> p0{0,0};
-    Point<2> p1{1,1};
-
-
-    REQUIRE_NOTHROW(Block<2>({10,10}, p0, p1, 1));
-    REQUIRE_THROWS(Block<2>({0,10}, p0, p1, 1));
-    REQUIRE_THROWS(Block<2>({3,10}, p1, p0, 1));
-    */
-
-
-}
 
 template<class T>
 bool is_unique(const std::vector<T>& arr){
@@ -69,6 +28,29 @@ bool is_unique(const std::vector<T>& arr){
     bool isUnique = (it == copy.end() );
 
     return isUnique;
+}
+
+TEST_CASE("Test split") {
+
+    using namespace JADA;
+
+    dimension<3> global_dims = {101, 1, 444};
+
+    for (size_t i = 15; i < 81; ++i) { REQUIRE_NOTHROW(split(global_dims, i)); }
+
+    global_dims = {10, 10, 1};
+    REQUIRE_THROWS(split(global_dims, 101));
+}
+
+TEST_CASE("Test Decomposition"){
+
+    using namespace JADA;
+
+    SECTION("Constructors"){
+        REQUIRE_NOTHROW(Decomposition<2>());
+    }
+
+
 }
 
 
@@ -140,82 +122,9 @@ TEST_CASE("Block neighbours"){
         CHECK(is_unique(block_neighbours<3, ConnectivityType::Box>()));
         CHECK(is_unique(block_neighbours<5, ConnectivityType::Box>()));
 
-
-    
-
-
-
     }
 
 }
-
-/*
-TEST_CASE("Test BlockTopologyNearest"){
-
-    using namespace JADA;
-
-    Block<1> b1({10}, {0}, {0.5}, 0);
-    Block<1> b2({10}, {0.5}, {1.0}, 1);
-
-    std::vector<Block<1>> blocks({b1, b2});
-
-
-    std::array<idx_t,1> topo_dims{2};
-
-
-    
-    REQUIRE_NOTHROW(
-        BlockTopologyNearest<1>(blocks, topo_dims, {0})
-    );
-
-
-
-
-
-
-//    CHECK(BlockTopologyNearest<1>::coord_to_id({2}, {3}) == 2);
-
-
-    //auto temp = BlockTopologyNearest<1>::id
-
-
-
-
-
-
-}
-*/
-/*
-TEST_CASE("Test BlockTopology"){
-
-    using namespace JADA;
-    Block<2> parent{{10, 10}, 0};
-
-    REQUIRE_NOTHROW(BlockTopology<2>(parent, 4));
-
-    BlockTopology<2> topo(parent, 4);
-
-    CHECK(topo.get_children().size() == 4);
-    for (auto child : topo.get_children()){
-        CHECK(child.density == BlockDensity<2>{5,5});
-    }
-
-    
-    std::cout << "Local: " << std::endl;
-    for (auto [j,i] : topo.local_md_indices(1)){
-        std::cout << j << " " << i << std::endl;
-    }
-
-
-    std::cout << "Global: " << std::endl;
-    for (auto [j,i] : topo.global_md_indices(1)){
-        std::cout << j << " " << i << std::endl;
-    }
-    
-
-}
-*/
-
 
 TEST_CASE("Test LocalGlobalMapping") {
 
@@ -320,7 +229,7 @@ TEST_CASE("Test LocalGlobalMapping") {
         CHECK(p2.second == std::array<size_t, 3>{2, 2, 0}); // indices
     }
 }
-
+/*
 TEST_CASE("Test Decomposition") {
 
     using namespace JADA;
@@ -338,8 +247,6 @@ TEST_CASE("Test Decomposition") {
 TEST_CASE("Test Grid"){
 
     using namespace JADA;
-
-
 
 
     REQUIRE_NOTHROW(Grid<3>());
@@ -369,7 +276,7 @@ TEST_CASE("Test Grid"){
 
 }
 
-/*
+
 TEST_CASE("Test UniformGrid") {
 
     using namespace JADA;
@@ -621,138 +528,3 @@ TEST_CASE("Test Partition") {
 }
 */
 
-
-TEST_CASE("Test Domain"){
-
-    using namespace JADA;
-
-
-    SECTION("Domain Constructors"){
-
-        SECTION("1D"){
-
-            BoundaryConditions<1> bcs(
-                {
-                    BoundaryCondition(Direction::i, BcLoc::begin, BcType::periodic),
-                    BoundaryCondition(Direction::i, BcLoc::end, BcType::periodic)
-                }
-            );        
-
-            REQUIRE_NOTHROW(Domain<1>({0}, {1}, bcs));
-        }
-
-        SECTION("2D"){
-
-            BoundaryConditions<2> bcs(
-                {
-                    BoundaryCondition(Direction::i, BcLoc::begin, BcType::periodic),
-                    BoundaryCondition(Direction::j, BcLoc::end, BcType::periodic),
-                    BoundaryCondition(Direction::i, BcLoc::end, BcType::periodic),
-                    BoundaryCondition(Direction::j, BcLoc::begin, BcType::periodic)
-                }
-            );        
-
-            REQUIRE_NOTHROW(Domain<2>({0,0}, {1,1}, bcs));
-        }
-
-
-
-    }
-
-    /*
-
-    SECTION("SubDomain<1> Constructors"){
-
-        GridDims<1> global_dims{10};
-        Domain<1> global(global_dims, all_physical_1d);        
-
-
-        idx_t n_subdomains = 4;
-
-        Decomposition<1> dec(n_subdomains, global.grid_dimensions(), global.periodic_directions(), GridDims<1>{});
-
-        
-        auto d0 = SubDomain<1>(global, n_subdomains, 0);
-
-        CHECK(d0.grid_dimensions() == GridDims<1>{2});
-
-        CHECK(d0.get_boundary(Direction::i, BoundaryLocation::begin).type == BoundaryType::physical);
-        CHECK(d0.get_boundary(Direction::i, BoundaryLocation::end).type == BoundaryType::processor);
-
-
-        auto d2 = SubDomain<1>(global, n_subdomains, 2);
-
-        CHECK(d2.grid_dimensions() == GridDims<1>{2});
-
-        CHECK(d2.get_boundary(Direction::i, BoundaryLocation::begin).type == BoundaryType::processor);
-        CHECK(d2.get_boundary(Direction::i, BoundaryLocation::end).type == BoundaryType::processor);
-
-
-        auto d3 = SubDomain<1>(global, n_subdomains, 3);
-
-        CHECK(d3.grid_dimensions() == GridDims<1>{3});
-
-        CHECK(d3.get_boundary(Direction::i, BoundaryLocation::begin).type == BoundaryType::processor);
-        CHECK(d3.get_boundary(Direction::i, BoundaryLocation::end).type == BoundaryType::physical);
-
-
-        REQUIRE_THROWS(d3.get_boundary(Direction::j, BoundaryLocation::begin));
-        REQUIRE_THROWS(d3.get_boundaries(Direction::j));
-
-
-        SECTION("Subdomain from subdomain"){
-
-
-            auto dd3 = SubDomain<1>(d3, 2, 0 );
-
-            CHECK(dd3.grid_dimensions() == GridDims<1>{1});
-
-
-        }
-
-
-
-    }
-    */
-
-
-    /*
-
-    SECTION("SubDomain< Constructors"){
-
-        GridDims<2> global_dims{10,10};
-        Domain<2> global(global_dims, all_physical_2d);        
-
-
-        idx_t n_subdomains = 4;
-
-        Decomposition<2> dec(n_subdomains, global.grid_dimensions(), global.periodic_directions(), GridDims<2>{});
-
-        //"upper left"
-        auto d0 = SubDomain<2>(global, n_subdomains, 0);
-
-        CHECK(d0.grid_dimensions() == GridDims<2>{5,5});
-
-        CHECK(d0.get_boundary(Direction::i, BoundaryLocation::begin).type == BoundaryType::physical);
-        CHECK(d0.get_boundary(Direction::i, BoundaryLocation::end).type == BoundaryType::processor);
-
-        CHECK(d0.get_boundary(Direction::j, BoundaryLocation::begin).type == BoundaryType::physical);
-        CHECK(d0.get_boundary(Direction::j, BoundaryLocation::end).type == BoundaryType::processor);
-
-        //upper right
-        auto d1 = SubDomain<2>(global, n_subdomains, 1);
-
-        CHECK(d1.grid_dimensions() == GridDims<2>{5,5});
-
-        CHECK(d1.get_boundary(Direction::i, BoundaryLocation::end).type == BoundaryType::physical);
-        CHECK(d1.get_boundary(Direction::i, BoundaryLocation::begin).type == BoundaryType::processor);
-
-        CHECK(d1.get_boundary(Direction::j, BoundaryLocation::begin).type == BoundaryType::physical);
-        CHECK(d1.get_boundary(Direction::j, BoundaryLocation::end).type == BoundaryType::processor);
-
-
-
-    }
-
-    */
-}

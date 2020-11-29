@@ -85,6 +85,12 @@ TEST_CASE("Test position"){
 
 TEST_CASE("Test dimension"){
 
+    using namespace JADA;
+
+    dimension<3> d= {1,2,3};
+    CHECK(d[0] == 1);
+    CHECK(d[2] == 3);
+
 
 
 

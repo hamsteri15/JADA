@@ -2,6 +2,8 @@
 
 #include <array>
 #include "utils/array_op_overloads.hpp"
+#include "loops/dimension.hpp"
+#include "grid/split.hpp"
 
 namespace JADA {
 

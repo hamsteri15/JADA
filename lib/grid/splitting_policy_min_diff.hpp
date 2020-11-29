@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include "loops/dimension.hpp"
 #include "grid/splitting_policy.hpp"
 
 
@@ -18,29 +19,19 @@ public:
     ///
     ///@brief Given an array of candidate splittings, finds the optimal one
     ///
-    ///@param candidates
-    ///@param dims
-    ///@return std::array<idx_t, N>
+    ///@param candidates vector of candidates to optimize, assumes all are valid
+    ///@param dims global dimensions
+    ///@return optimal dimensions
     ///
-    static std::array<idx_t, N>
+    static auto
     find_optimal(const candidate_array&       candidates,
-                 const std::array<idx_t, N>& dims) {
+                 dimension<N> dims) {
 
-        auto is_more_square = [&](const std::array<idx_t, N>& lhs,
-                                  const std::array<idx_t, N>& rhs) {
-            std::array<idx_t, N> lhs_dims{};
-            std::array<idx_t, N> rhs_dims{};
+        auto is_more_square = [&](const dimension<N>& lhs,
+                                  const dimension<N>& rhs) {
 
-            std::transform(std::cbegin(dims),
-                           std::cend(dims),
-                           std::cbegin(lhs),
-                           std::begin(lhs_dims),
-                           std::divides<>{});
-            std::transform(std::cbegin(dims),
-                           std::cend(dims),
-                           std::cbegin(rhs),
-                           std::begin(lhs_dims),
-                           std::divides<>{});
+            auto lhs_dims = dims / lhs;
+            auto rhs_dims = dims / rhs;
 
 
             return sum_abs_diff(lhs_dims) < sum_abs_diff(rhs_dims);
@@ -61,12 +52,12 @@ private:
     ///@return idx_t absolute difference between each element and its
     /// neighbours
     ///
-    static idx_t sum_abs_diff(const std::array<idx_t, N>& arr) {
+    static size_t sum_abs_diff(const dimension<N>& arr) {
 
-        idx_t diff = 0;
-        for (idx_t i = 0; i < N; ++i) {
-            for (idx_t j = 0; j < N; ++j) {
-                diff += idx_t (std::abs(long(arr[i]) - long(arr[j]))); 
+        size_t diff = 0;
+        for (size_t i = 0; i < N; ++i) {
+            for (size_t j = 0; j < N; ++j) {
+                diff += size_t (std::abs(long(arr[i]) - long(arr[j]))); 
             }
         }
 

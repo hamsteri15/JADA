@@ -10,6 +10,37 @@
 
 namespace JADA {
 
+
+template<size_t N>
+struct Decomposition{
+
+    Decomposition() = default;
+
+    Decomposition(size_t n_domains, dimension<N> grid_dims, std::array<bool,N> periodicity) :
+    m_grid_dims(grid_dims),
+    m_periodicity(periodicity),
+    m_dec_dims(split(grid_dims, n_domains))
+    {}    
+
+
+    position<N> get_offset(idx_t domain_id) const; 
+    dimension<N> local_dimensions(idx_t domain_id) const;
+    std::vector<idx_t> get_neighbours(idx_t domain_id) const; 
+    
+
+private:
+
+    dimension<N> m_grid_dims;
+    std::array<bool, N> m_periodicity;
+    dimension<N> m_dec_dims;
+};
+
+
+
+
+
+/*
+
 template <size_t N> class Decomposition : private LocalGlobalMapping<N> {
 
     static_assert(N <= 3, "Only up to 3 dimensions supported.");
@@ -128,5 +159,6 @@ public:
         return this->start(m_global_dims, m_subdomain_counts, coords);
     }
 };
+*/
 
 } // namespace JADA
