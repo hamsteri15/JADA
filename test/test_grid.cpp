@@ -48,7 +48,67 @@ TEST_CASE("Test Decomposition"){
 
     SECTION("Constructors"){
         REQUIRE_NOTHROW(Decomposition<2>());
+        REQUIRE_NOTHROW(Decomposition<2>({100, 100}, 4, {true, true}));
+        REQUIRE_THROWS(Decomposition<2>({1,1}, 4, {true, true}));
+
+        REQUIRE_NOTHROW(Decomposition<2>({100, 100}, {10, 10}, {true, true}));
+        REQUIRE_THROWS(Decomposition<2>({100, 100}, {111, 1}, {true, true}));
+
     }
+
+    /*
+    SECTION("local_extent()") {
+
+        Decomposition<3> map();
+
+        std::array<size_t, 3> n_nodes  = {10, 10, 10};
+        std::array<size_t, 3> n_splits = {3, 3, 3};
+
+        std::array<size_t, 3> coords = {0, 0, 0};
+        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
+              std::array<size_t, 3>{3, 3, 3});
+
+        coords = {1, 1, 1};
+        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
+              std::array<size_t, 3>{3, 3, 3});
+
+        coords = {2, 2, 2};
+        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
+              std::array<size_t, 3>{4, 4, 4});
+
+        n_nodes  = {10, 10, 10};
+        n_splits = {2, 2, 2};
+
+        coords = {0, 0, 0};
+        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
+              std::array<size_t, 3>{5, 5, 5});
+
+        coords = {1, 0, 1};
+        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
+              std::array<size_t, 3>{5, 5, 5});
+
+        n_nodes  = {7, 7, 7};
+        n_splits = {3, 3, 3};
+
+        coords = {0, 0, 0};
+        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
+              std::array<size_t, 3>{2, 2, 2});
+
+        coords = {1, 1, 1};
+        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
+              std::array<size_t, 3>{2, 2, 2});
+
+        coords = {2, 2, 2};
+        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
+              std::array<size_t, 3>{3, 3, 3});
+
+        n_nodes  = {8, 8, 8};
+        n_splits = {2, 2, 2};
+        coords   = {0, 0, 0};
+        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
+              std::array<size_t, 3>{4, 4, 4});
+    }*/
+
 
 
 }
