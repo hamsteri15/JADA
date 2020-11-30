@@ -56,60 +56,49 @@ TEST_CASE("Test Decomposition"){
 
     }
 
-    /*
     SECTION("local_extent()") {
 
-        Decomposition<3> map();
 
-        std::array<size_t, 3> n_nodes  = {10, 10, 10};
-        std::array<size_t, 3> n_splits = {3, 3, 3};
+        SECTION("Even splitting"){
+            dimension<3> n_nodes  = {4,4,4};
+            Decomposition<3> dec(n_nodes, 8, {true, true});
 
-        std::array<size_t, 3> coords = {0, 0, 0};
-        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
-              std::array<size_t, 3>{3, 3, 3});
-
-        coords = {1, 1, 1};
-        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
-              std::array<size_t, 3>{3, 3, 3});
-
-        coords = {2, 2, 2};
-        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
-              std::array<size_t, 3>{4, 4, 4});
-
-        n_nodes  = {10, 10, 10};
-        n_splits = {2, 2, 2};
-
-        coords = {0, 0, 0};
-        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
-              std::array<size_t, 3>{5, 5, 5});
-
-        coords = {1, 0, 1};
-        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
-              std::array<size_t, 3>{5, 5, 5});
-
-        n_nodes  = {7, 7, 7};
-        n_splits = {3, 3, 3};
-
-        coords = {0, 0, 0};
-        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
-              std::array<size_t, 3>{2, 2, 2});
-
-        coords = {1, 1, 1};
-        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
-              std::array<size_t, 3>{2, 2, 2});
-
-        coords = {2, 2, 2};
-        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
-              std::array<size_t, 3>{3, 3, 3});
-
-        n_nodes  = {8, 8, 8};
-        n_splits = {2, 2, 2};
-        coords   = {0, 0, 0};
-        CHECK(map.local_extent(n_nodes, n_splits, coords) ==
-              std::array<size_t, 3>{4, 4, 4});
-    }*/
+            CHECK(dec.dimensions() == dimension<3>{2,2,2});
 
 
+            for (size_t i = 0; i < 8; ++i){
+                REQUIRE(dec.local_grid_dimensions(idx_t(i)) == dimension<3>{2,2,2});
+            }
+
+        }
+
+        SECTION("Uneven splitting"){
+            dimension<3> n_nodes  = {5,4,4};
+            Decomposition<3> dec(n_nodes, 8, {true, true});
+            
+            CHECK(dec.dimensions() == dimension<3>{2,2,2});
+
+            CHECK(dec.local_grid_dimensions(0) == dimension<3>{3,2,2});
+            CHECK(dec.local_grid_dimensions(1) == dimension<3>{3,2,2});
+            CHECK(dec.local_grid_dimensions(2) == dimension<3>{3,2,2});
+            CHECK(dec.local_grid_dimensions(3) == dimension<3>{3,2,2});
+            CHECK(dec.local_grid_dimensions(4) == dimension<3>{2,2,2});
+            CHECK(dec.local_grid_dimensions(5) == dimension<3>{2,2,2});
+            CHECK(dec.local_grid_dimensions(6) == dimension<3>{2,2,2});
+            CHECK(dec.local_grid_dimensions(7) == dimension<3>{2,2,2});
+
+            REQUIRE_THROWS(dec.local_grid_dimensions(8));
+            REQUIRE_THROWS(dec.local_grid_dimensions(-1));
+
+
+        }
+
+
+    }
+
+    SECTION("local_offset()"){
+
+    }
 
 }
 
