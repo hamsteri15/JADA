@@ -5,6 +5,8 @@
 #include "grid/split.hpp"
 #include "grid/block_neighbours.hpp"
 #include "grid/decomposition.hpp"
+#include "grid/partition.hpp"
+
 
 
 template <class Loop>
@@ -161,6 +163,15 @@ TEST_CASE("Test Decomposition"){
                 REQUIRE_THROWS(dec.get_neighbour(3, {-5}));
 
 
+
+                dimension<1> n_nodes2 = {5};
+                Decomposition<1> dec2(n_nodes2, 1, {true});
+                CHECK(dec2.get_neighbour(0, {1}) == 0); 
+                CHECK(dec2.get_neighbour(0, {-1}) == 0); 
+                REQUIRE_THROWS(dec2.get_neighbour(0, {2}) == 0); 
+                REQUIRE_THROWS(dec2.get_neighbour(0, {-2}) == 0); 
+
+
             }
             SECTION("Non-periodic"){
                 dimension<1> n_nodes  = {5};
@@ -177,13 +188,6 @@ TEST_CASE("Test Decomposition"){
 
 
     }
-
-
-
-
-
-
-
 
 
 }
@@ -261,146 +265,42 @@ TEST_CASE("Block neighbours"){
 
 }
 
-/*
-TEST_CASE("Test Decomposition") {
+TEST_CASE("Test Partition"){
 
     using namespace JADA;
-
-    std::array<size_t, 3> global_dims = {8, 8, 8};
-    std::array<size_t, 3> barriers    = {0, 0, 0};
-    std::array<size_t, 3> periodicity = {0, 0, 0};
-
-    for (size_t i = 1; i < 8; ++i) {
-        REQUIRE_NOTHROW(
-            Decomposition<3>(i, global_dims, periodicity, barriers));
-    }
-}
-
-TEST_CASE("Test Grid"){
-
-    using namespace JADA;
-
-
-    REQUIRE_NOTHROW(Grid<3>());
-
-    Grid<3> g({1,2,3});
-    //auto t = dimensions(g);
-
-    CHECK(size(g) == 1 * 2 * 3);
-
-    std::vector<int> v(size(g));
-
-    for (auto [i] : indices(g)){
-        v[i] = int(i);
-    } 
-
-    CHECK(v == std::vector<int>{0,1,2,3,4,5});
-
-
-    for (auto [k,j,i] : md_indices(g)){
-        REQUIRE(k == 0);
-        REQUIRE(j <= 1);
-        REQUIRE(i <= 3);
-    }
-
-
-
-
-}
-
-
-TEST_CASE("Test UniformGrid") {
-
-    using namespace JADA;
-
 
     SECTION("Constructors"){
-        SECTION("1D"){
-            Point<1> begin{};
-            Point<1> end{1.0};
-            GridDims<1> dims{2};
+        REQUIRE_NOTHROW(Partition<3>{});
+        REQUIRE_NOTHROW(Partition<2>({10, 10}, {5,5}, {0,0}));
+        REQUIRE_NOTHROW(Partition<2>({10, 10}, {5,5}, {5,5}));
+        REQUIRE_THROWS(Partition<2>({9, 9}, {5,5}, {5,5}));
 
-            UniformGrid<1> grid1(begin, end, dims);
+        Partition<2> parent({10, 10}, {5,5}, {3,3});
 
-            CHECK(grid1.dimensions() == dims);
-
-            CHECK(grid1.stepsize() == std::array<double, 1>{0.5});
-            CHECK(grid1.size() == 2);
-            CHECK(grid1.points().size() == 2);
-            CHECK(grid1.points() == std::vector<Point<1>>{
-                Point<1>{0.25},
-                Point<1>{0.75}
-            });
-        }
-
-        SECTION("2D"){
-            Point<2> begin{};
-            Point<2> end{1.0, 1.0};
-            GridDims<2> dims1{2, 1};
-
-            UniformGrid<2> grid1(begin, end, dims1);
-
-            CHECK(grid1.dimensions() == dims1);
-
-            CHECK(grid1.stepsize() == std::array<double, 2>{0.5, 1.0});
-            CHECK(grid1.size() == 2);
-            CHECK(grid1.points().size() == 2);
-            CHECK(grid1.points() == std::vector<Point<2>>{
-                Point<2>{0.25, 0.5},
-                Point<2>{0.75, 0.5}
-            });
+        REQUIRE_NOTHROW(Partition<2>(parent, {2,2}, {1,1}));
+        REQUIRE_THROWS(Partition<2>(parent, {3,3}, {3,3}));
 
 
+    }
 
-            GridDims<2> dims2{1, 1};
-            UniformGrid<2> grid2(begin, end, dims2);
+    SECTION("Test get partition data"){
 
-            CHECK(grid2.dimensions() == dims2);
+        Partition<1> p({5}, {2}, {0});
+        std::vector<int> data = {1,2,3,4,5};
 
-            CHECK(grid2.stepsize() == std::array<double, 2>{1.0, 1.0});
-            CHECK(grid2.size() == 1);
-            CHECK(grid2.points().size() == 1);
-            CHECK(grid2.points() == std::vector<Point<2>>{
-                Point<2>{0.5, 0.5},
-            });
+        auto s = subset_data(p, data);
 
-
-        }
+        CHECK(s[0] == 1);
+        CHECK(s[1] == 2);
 
     }
 
 
-
-    SECTION("1D loop tests"){
-        std::vector<int> test = {0, 0, 0, 0};
-        UniformGrid<1>          grid({test.size()});
-        CHECK(grid.dimensions() == std::array<idx_t, 1>{test.size()});
-
-        CHECK(set_ones(test, grid.get_loop()) == std::vector<int>{1,1,1,1});
-
-    }
-
-    SECTION("2D loop tests"){
-        idx_t nj = 3; idx_t ni = 4;
-        std::vector<int> test(nj*ni, 0);
-        UniformGrid<2>          grid({nj, ni});
-        CHECK(grid.dimensions() == std::array<idx_t, 2>{nj,ni});
-
-        CHECK(set_ones(test, grid.get_loop()) == std::vector<int>(grid.size(), 1));
-
-    }
-
-    SECTION("3D loop tests"){
-        idx_t nk = 2; idx_t nj = 3; idx_t ni = 4;
-        std::vector<int> test(nk*nj*ni, 0);
-        UniformGrid<3>          grid({nk, nj, ni});
-        CHECK(grid.dimensions() == std::array<idx_t, 3>{nk,nj,ni});
-
-        CHECK(set_ones(test, grid.get_loop()) == std::vector<int>(grid.size(), 1));
-
-    }
 
 }
+
+
+/*
 
 TEST_CASE("Test Partition") {
 

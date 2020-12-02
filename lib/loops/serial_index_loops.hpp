@@ -18,6 +18,9 @@ serial_index(position<1> begin, position<1> end, [[maybe_unused]] dimension<1> d
 }
 
 
+
+
+
 [[maybe_unused]] inline static index_generator<1> 
 serial_index(position<2> begin, position<2> end, dimension<2> dim) noexcept {
 
