@@ -118,26 +118,6 @@ Container subset_data(Partition<N> p, const Container& data){
 
 
 
-template<size_t N, class T>
-void apply_operation(Partition<N> owner, Partition<N> neighbour, T& owner_data, T& neighbour_data){
-
-    Utils::runtime_assert(owner.parent_dimensions() == neighbour.parent_dimensions(), "Partitions dont share the same parent.");
-    Utils::runtime_assert(owner.size() == neighbour.size(), "Partition size mismatch.");
-
-
-    for (auto pos : owner.global_md_indices()){
-
-        auto n_pos = pos - owner.global_begin();
-
-        auto owner_i = flatten<N, StorageOrder::RowMajor>(owner.parent_dimensions(), pos);
-        auto neighbour_i = flatten<N, StorageOrder::RowMajor>(neighbour.parent_dimensions(), n_pos);
-
-        neighbour_data[size_t(neighbour_i)] = owner_data[size_t(owner_i)];
-
-    }
-   
-
-}
 
 
 
