@@ -25,7 +25,6 @@ struct position : public Utils::MathVectorBase<idx_t, L, position<L>> {
         }
         std::move(list.begin(), list.end(), m_storage.begin());
 
-        Utils::runtime_assert(this->min() >= 0, "Negative position.");
     }
 
     const element_t* get_ptr() const { return m_storage.data(); }

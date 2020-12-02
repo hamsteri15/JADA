@@ -144,6 +144,42 @@ TEST_CASE("Test Decomposition"){
 
     }
 
+    SECTION("get_neighbour()"){
+
+        SECTION("1D"){
+
+            SECTION("Periodic"){
+                dimension<1> n_nodes  = {5};
+                Decomposition<1> dec(n_nodes, 4, {true});
+                CHECK(dec.get_neighbour(0, {1}) == 1);
+                CHECK(dec.get_neighbour(0, {-1}) == 3);
+                CHECK(dec.get_neighbour(1, {1}) == 2);
+
+                CHECK(dec.get_neighbour(3, {1}) == 0);
+                CHECK(dec.get_neighbour(3, {4}) == 3);
+
+                REQUIRE_THROWS(dec.get_neighbour(3, {5}));
+                REQUIRE_THROWS(dec.get_neighbour(3, {-5}));
+
+
+            }
+            SECTION("Non-periodic"){
+                dimension<1> n_nodes  = {5};
+                Decomposition<1> dec(n_nodes, 4, {false});
+                CHECK(dec.get_neighbour(0, {1}) == 1);
+                CHECK(dec.get_neighbour(0, {-1}) == NEIGHBOUR_ID_NULL);
+                CHECK(dec.get_neighbour(1, {1}) == 2);
+
+                CHECK(dec.get_neighbour(3, {1}) == NEIGHBOUR_ID_NULL);
+
+            }
+
+        }
+
+
+    }
+
+
 }
 
 

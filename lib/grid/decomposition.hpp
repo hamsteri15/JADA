@@ -7,9 +7,18 @@
 #include "grid/split.hpp"
 #include "grid/splitting_policy_min_diff.hpp"
 #include "loops/unflatten_index.hpp"
+#include "loops/flatten_index.hpp"
 #include "utils/runtime_assert.hpp"
 
+
+
+
 namespace JADA {
+
+static constexpr idx_t NEIGHBOUR_ID_NULL = -42;
+
+
+
 
 template <size_t N> struct Decomposition {
 
@@ -64,34 +73,47 @@ template <size_t N> struct Decomposition {
         return local_dims;
     }
 
-    idx_t get_neighbour(idx_t domain_id, position<N> offset) const;
-    /*{
+    idx_t get_neighbour(idx_t domain_id, position<N> offset) const{
 
         Utils::runtime_assert(valid_id(domain_id), "Invalid domain id");
 
-        //CHECK that offset < dec_dims
+        Utils::runtime_assert(
+            std::equal(std::begin(offset), std::end(offset), std::begin(m_dec_dims),
+            [](idx_t o, size_t d){return std::abs(o) <= idx_t(d);}),
+            "Offset out of bounds."
+        );
 
-        auto d_coords   = get_domain_coords(domain_id);
-        auto n_coords   = d_coords + offset;
-        
-        static constexpr idx_t = NEIGHBOUR_ID_NULL = -43;
+
+        auto n_coords   = get_domain_coords(domain_id) + offset;
 
         for (size_t i = 0; i < N; ++i){
 
-            if ( n_coords[i] < 0 ){
+            if (n_coords[i] < 0){
+
                 if (m_periodicity[i]){
-                    
+                    n_coords[i] += idx_t(m_dec_dims[i]);
                 }
-                else {
+                else{
                     return NEIGHBOUR_ID_NULL;
                 }
             }
 
+            if (n_coords[i] >= idx_t(m_dec_dims[i])){
+                
+                if (m_periodicity[i]){
+                    n_coords[i] -= idx_t(m_dec_dims[i]);
+                }
+                else {
+                    return NEIGHBOUR_ID_NULL;
+                }
+
+            }
         }
+        return get_domain_id(n_coords);        
 
 
 
-    }*/
+    }
 
     dimension<N> dimensions() const { return m_dec_dims; }
     dimension<N> global_grid_dimensions() const { return m_grid_dims; }
@@ -105,6 +127,10 @@ private:
         return unflatten<N, StorageOrder::RowMajor>(m_dec_dims, domain_id);
     }
 
+    idx_t get_domain_id(position<N> coord) const{
+        return flatten<N, StorageOrder::RowMajor>(m_dec_dims, coord);
+    }
+
     bool valid_id(idx_t domain_id) const {
         return (domain_id >= 0) &&
                (domain_id < idx_t(m_dec_dims.elementwise_product()));
@@ -113,6 +139,18 @@ private:
     bool valid_local_dims(dimension<N> dims) const{
         return std::ranges::equal(dims, m_grid_dims, std::less_equal{});
     }
+
+    /*
+    bool d_coord_in_bounds(position<N> coord) const {
+
+        for (size_t i = 0; i < N; ++i){
+            if (coord[i] < 0 || coord[i] >= idx_t(m_dec_dims[i])){
+                return false;
+            }
+        }
+        return true;
+    }*/
+
 };
 
 /*
