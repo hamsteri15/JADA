@@ -73,30 +73,74 @@ TEST_CASE("Test Decomposition"){
         }
 
         SECTION("Uneven splitting"){
-            dimension<3> n_nodes  = {5,4,4};
-            Decomposition<3> dec(n_nodes, 8, {true, true});
-            
-            CHECK(dec.dimensions() == dimension<3>{2,2,2});
 
-            CHECK(dec.local_grid_dimensions(0) == dimension<3>{3,2,2});
-            CHECK(dec.local_grid_dimensions(1) == dimension<3>{3,2,2});
-            CHECK(dec.local_grid_dimensions(2) == dimension<3>{3,2,2});
-            CHECK(dec.local_grid_dimensions(3) == dimension<3>{3,2,2});
-            CHECK(dec.local_grid_dimensions(4) == dimension<3>{2,2,2});
-            CHECK(dec.local_grid_dimensions(5) == dimension<3>{2,2,2});
-            CHECK(dec.local_grid_dimensions(6) == dimension<3>{2,2,2});
-            CHECK(dec.local_grid_dimensions(7) == dimension<3>{2,2,2});
+            SECTION("1d"){
+                dimension<1> n_nodes  = {4};
+                Decomposition<1> dec(n_nodes, 3, {true});
+                
+                CHECK(dec.dimensions() == dimension<1>{3});
 
-            REQUIRE_THROWS(dec.local_grid_dimensions(8));
-            REQUIRE_THROWS(dec.local_grid_dimensions(-1));
+                CHECK(dec.local_grid_dimensions(0) == dimension<1>{1});
+                CHECK(dec.local_grid_dimensions(1) == dimension<1>{1});
+                CHECK(dec.local_grid_dimensions(2) == dimension<1>{2});
 
+                REQUIRE_THROWS(dec.local_grid_dimensions(3));
+                REQUIRE_THROWS(dec.local_grid_dimensions(-1));
+
+            }
+            SECTION("3d"){
+                dimension<3> n_nodes  = {5,4,4};
+                Decomposition<3> dec(n_nodes, 8, {true, true});
+                
+                CHECK(dec.dimensions() == dimension<3>{2,2,2});
+
+                CHECK(dec.local_grid_dimensions(0) == dimension<3>{2,2,2});
+                CHECK(dec.local_grid_dimensions(1) == dimension<3>{2,2,2});
+                CHECK(dec.local_grid_dimensions(2) == dimension<3>{2,2,2});
+                CHECK(dec.local_grid_dimensions(3) == dimension<3>{2,2,2});
+                CHECK(dec.local_grid_dimensions(4) == dimension<3>{3,2,2});
+                CHECK(dec.local_grid_dimensions(5) == dimension<3>{3,2,2});
+                CHECK(dec.local_grid_dimensions(6) == dimension<3>{3,2,2});
+                CHECK(dec.local_grid_dimensions(7) == dimension<3>{3,2,2});
+
+                REQUIRE_THROWS(dec.local_grid_dimensions(8));
+                REQUIRE_THROWS(dec.local_grid_dimensions(-1));
+
+            }
 
         }
 
 
     }
 
-    SECTION("local_offset()"){
+    SECTION("get_offset()"){
+
+        SECTION("Even splitting"){
+            SECTION("1d"){
+                dimension<1> n_nodes  = {4};
+                Decomposition<1> dec(n_nodes, 4, {true});
+                CHECK(dec.dimensions() == dimension<1>{4});
+
+                CHECK(dec.get_offset(0) == dimension<1>{0});
+                CHECK(dec.get_offset(1) == dimension<1>{1});
+                CHECK(dec.get_offset(2) == dimension<1>{2});
+                CHECK(dec.get_offset(3) == dimension<1>{3});
+
+            }
+        }
+        SECTION("Uneven splitting"){
+            SECTION("1d"){
+                dimension<1> n_nodes  = {5};
+                Decomposition<1> dec(n_nodes, 4, {true});
+                CHECK(dec.dimensions() == dimension<1>{4});
+
+                CHECK(dec.get_offset(0) == dimension<1>{0});
+                CHECK(dec.get_offset(1) == dimension<1>{1});
+                CHECK(dec.get_offset(2) == dimension<1>{2});
+                CHECK(dec.get_offset(3) == dimension<1>{3});
+
+            }
+        }
 
     }
 

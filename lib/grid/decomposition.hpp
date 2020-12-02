@@ -34,7 +34,7 @@ template <size_t N> struct Decomposition {
 
     position<N> get_offset(idx_t domain_id) const {
 
-        Utils::runtime_assert(domain_id >= 0, "Negative domain id");
+        Utils::runtime_assert(valid_id(domain_id), "Invalid domain id");
 
         auto        d_coords = get_domain_coords(domain_id);
         position<N> offset;
@@ -47,24 +47,51 @@ template <size_t N> struct Decomposition {
 
     dimension<N> local_grid_dimensions(idx_t domain_id) const {
 
-        Utils::runtime_assert(domain_id >= 0, "Negative domain id");
-        Utils::runtime_assert(domain_id <
-                                  idx_t(m_dec_dims.elementwise_product()),
-                              "Domain id out of bounds");
+        Utils::runtime_assert(valid_id(domain_id), "Invalid domain id");
+
 
         auto local_dims = m_grid_dims / m_dec_dims;
         auto remainder  = m_grid_dims % m_dec_dims;
         auto d_coords   = get_domain_coords(domain_id);
 
-        // this handles uneven node counts
+        // this handles uneven node counts by adding the reminder to the last domain in the 
+        // grid
         for (size_t i = 0; i < N; ++i) {
-            if (d_coords[i] == 0) { local_dims[i] += remainder[i]; }
+            if (d_coords[i] == idx_t(m_dec_dims[i] - 1)) { local_dims[i] += remainder[i]; }
         }
 
-        // Utils::runtime_assert(local_dims > 0, "Invalid local dimensions");
+        Utils::runtime_assert(valid_local_dims(local_dims), "Invalid local dimensions");
         return local_dims;
     }
-    std::vector<idx_t> get_neighbours(idx_t domain_id) const;
+
+    idx_t get_neighbour(idx_t domain_id, position<N> offset) const;
+    /*{
+
+        Utils::runtime_assert(valid_id(domain_id), "Invalid domain id");
+
+        //CHECK that offset < dec_dims
+
+        auto d_coords   = get_domain_coords(domain_id);
+        auto n_coords   = d_coords + offset;
+        
+        static constexpr idx_t = NEIGHBOUR_ID_NULL = -43;
+
+        for (size_t i = 0; i < N; ++i){
+
+            if ( n_coords[i] < 0 ){
+                if (m_periodicity[i]){
+                    
+                }
+                else {
+                    return NEIGHBOUR_ID_NULL;
+                }
+            }
+
+        }
+
+
+
+    }*/
 
     dimension<N> dimensions() const { return m_dec_dims; }
     dimension<N> global_grid_dimensions() const { return m_grid_dims; }
@@ -76,6 +103,15 @@ private:
 
     position<N> get_domain_coords(idx_t domain_id) const {
         return unflatten<N, StorageOrder::RowMajor>(m_dec_dims, domain_id);
+    }
+
+    bool valid_id(idx_t domain_id) const {
+        return (domain_id >= 0) &&
+               (domain_id < idx_t(m_dec_dims.elementwise_product()));
+    }
+
+    bool valid_local_dims(dimension<N> dims) const{
+        return std::ranges::equal(dims, m_grid_dims, std::less_equal{});
     }
 };
 
