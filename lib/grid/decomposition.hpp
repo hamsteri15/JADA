@@ -3,27 +3,27 @@
 #include <array>
 #include <vector>
 
-#include "grid/local_global_mapping.hpp"
 #include "grid/split.hpp"
 #include "grid/splitting_policy_min_diff.hpp"
-#include "loops/unflatten_index.hpp"
 #include "loops/flatten_index.hpp"
+#include "loops/unflatten_index.hpp"
 #include "utils/runtime_assert.hpp"
-
-
-
 
 namespace JADA {
 
 static constexpr idx_t NEIGHBOUR_ID_NULL = -42;
 
-
-
-
 template <size_t N> struct Decomposition {
 
     Decomposition() = default;
 
+    ///
+    ///@brief Construct a decomposition from specified subdomain grid.
+    ///
+    ///@param grid_dims Global grid dimensions.
+    ///@param dec_dims  Subdomain grid dimensions.
+    ///@param periodicity Dimensions specific periodicity.
+    ///
     Decomposition(dimension<N>        grid_dims,
                   dimension<N>        dec_dims,
                   std::array<bool, N> periodicity)
@@ -31,16 +31,34 @@ template <size_t N> struct Decomposition {
         , m_dec_dims(dec_dims)
         , m_periodicity(periodicity) {
 
-        Utils::runtime_assert(
-            std::ranges::equal(dec_dims, grid_dims, std::less_equal{}),
-            "Invalid decomposition");
+        Utils::runtime_assert(std::equal(std::begin(dec_dims),
+                                         std::end(dec_dims),
+                                         std::begin(grid_dims),
+                                         std::less_equal{}),
+                              "Invalid decomposition");
     }
 
+    ///
+    ///@brief Construct a decomposition from number of subdomains.
+    ///
+    ///@param grid_dims Global grid dimensions.
+    ///@param n_domains Number of subdomains.
+    ///@param periodicity Dimension specific periodicity.
+    ///
     Decomposition(dimension<N>        grid_dims,
                   size_t              n_domains,
                   std::array<bool, N> periodicity)
         : Decomposition(grid_dims, split(grid_dims, n_domains), periodicity) {}
 
+    ///
+    ///@brief Given a domain id returns the grid offset wrt. position zero of
+    ///       the global grid.
+    ///       The offset can be used to convert local grid indices to global
+    ///       indices by simple addition: global = local + offset
+    ///
+    ///@param domain_id Id to query the offset for.
+    ///@return position<N> The offset.
+    ///
     position<N> get_offset(idx_t domain_id) const {
 
         Utils::runtime_assert(valid_id(domain_id), "Invalid domain id");
@@ -54,68 +72,93 @@ template <size_t N> struct Decomposition {
         return offset;
     }
 
+    ///
+    ///@brief Given a domain id returns the local grid dimensions.
+    ///
+    ///@param domain_id Id to query the dimensions for.
+    ///@return dimension<N> Local grid dimensions.
+    ///
     dimension<N> local_grid_dimensions(idx_t domain_id) const {
 
         Utils::runtime_assert(valid_id(domain_id), "Invalid domain id");
-
 
         auto local_dims = m_grid_dims / m_dec_dims;
         auto remainder  = m_grid_dims % m_dec_dims;
         auto d_coords   = get_domain_coords(domain_id);
 
-        // this handles uneven node counts by adding the reminder to the last domain in the 
-        // grid
+        // this handles uneven node counts by adding the reminder to the last
+        // domain in the grid
         for (size_t i = 0; i < N; ++i) {
-            if (d_coords[i] == idx_t(m_dec_dims[i] - 1)) { local_dims[i] += remainder[i]; }
+            if (d_coords[i] == idx_t(m_dec_dims[i] - 1)) {
+                local_dims[i] += remainder[i];
+            }
         }
 
-        Utils::runtime_assert(valid_local_dims(local_dims), "Invalid local dimensions");
+        Utils::runtime_assert(valid_local_dims(local_dims),
+                              "Invalid local dimensions");
         return local_dims;
     }
 
-    idx_t get_neighbour(idx_t domain_id, position<N> offset) const{
+    ///
+    ///@brief Given a domain id and an offset (direction) in the domain grid
+    ///       returns the neighbour id.
+    ///       For instance in a two dimensional grid an offset of {1,0} would
+    ///       return the "north" neighbour id of 'domain_id'. For border domains
+    ///       without periodicity returns a NEIGHBOUR_ID_NULL.
+    ///
+    ///@param domain_id Id to query the neighbour for.
+    ///@param offset The offset wrt. to domain id to get the neighbour id.
+    ///@return idx_t The neigbhouring domain id.
+    ///
+    idx_t get_neighbour(idx_t domain_id, position<N> offset) const {
 
         Utils::runtime_assert(valid_id(domain_id), "Invalid domain id");
 
-        Utils::runtime_assert(
-            std::equal(std::begin(offset), std::end(offset), std::begin(m_dec_dims),
-            [](idx_t o, size_t d){return std::abs(o) <= idx_t(d);}),
-            "Offset out of bounds."
-        );
+        Utils::runtime_assert(std::equal(std::begin(offset),
+                                         std::end(offset),
+                                         std::begin(m_dec_dims),
+                                         [](idx_t o, size_t d) {
+                                             return std::abs(o) <= idx_t(d);
+                                         }),
+                              "Offset out of bounds.");
 
+        auto n_coords = get_domain_coords(domain_id) + offset;
 
-        auto n_coords   = get_domain_coords(domain_id) + offset;
+        for (size_t i = 0; i < N; ++i) {
 
-        for (size_t i = 0; i < N; ++i){
+            if (n_coords[i] < 0) {
 
-            if (n_coords[i] < 0){
-
-                if (m_periodicity[i]){
+                if (m_periodicity[i]) {
                     n_coords[i] += idx_t(m_dec_dims[i]);
-                }
-                else{
+                } else {
                     return NEIGHBOUR_ID_NULL;
                 }
             }
 
-            if (n_coords[i] >= idx_t(m_dec_dims[i])){
-                
-                if (m_periodicity[i]){
+            if (n_coords[i] >= idx_t(m_dec_dims[i])) {
+
+                if (m_periodicity[i]) {
                     n_coords[i] -= idx_t(m_dec_dims[i]);
-                }
-                else {
+                } else {
                     return NEIGHBOUR_ID_NULL;
                 }
-
             }
         }
-        return get_domain_id(n_coords);        
-
-
-
+        return get_domain_id(n_coords);
     }
 
+    ///
+    ///@brief Get the decomposition dimensions.
+    ///
+    ///@return dimension<N> Dimensions of the subdomain grid.
+    ///
     dimension<N> dimensions() const { return m_dec_dims; }
+
+    ///
+    ///@brief Get the global grid point count
+    ///
+    ///@return dimension<N> The global grid point count
+    ///
     dimension<N> global_grid_dimensions() const { return m_grid_dims; }
 
 private:
@@ -123,166 +166,52 @@ private:
     dimension<N>        m_dec_dims;
     std::array<bool, N> m_periodicity;
 
+    ///
+    ///@brief Converts a domain id to a position in the subdomain grid.
+    ///
+    ///@param domain_id Id to convert.
+    ///@return position<N> Subdomain position.
+    ///
     position<N> get_domain_coords(idx_t domain_id) const {
         return unflatten<N, StorageOrder::RowMajor>(m_dec_dims, domain_id);
     }
 
-    idx_t get_domain_id(position<N> coord) const{
+    ///
+    ///@brief Converts a domain coordinate to domain id.
+    ///
+    ///@param coord Coordinate to convert.
+    ///@return idx_t The domain id.
+    ///
+    idx_t get_domain_id(position<N> coord) const {
         return flatten<N, StorageOrder::RowMajor>(m_dec_dims, coord);
     }
 
+    ///
+    ///@brief Checks that the input id is valid.
+    ///
+    ///@param domain_id The id to validate.
+    ///@return true If valid.
+    ///@return false If invalid.
+    ///
     bool valid_id(idx_t domain_id) const {
         return (domain_id >= 0) &&
                (domain_id < idx_t(m_dec_dims.elementwise_product()));
     }
 
-    bool valid_local_dims(dimension<N> dims) const{
-        return std::ranges::equal(dims, m_grid_dims, std::less_equal{});
-    }
-
-    /*
-    bool d_coord_in_bounds(position<N> coord) const {
-
-        for (size_t i = 0; i < N; ++i){
-            if (coord[i] < 0 || coord[i] >= idx_t(m_dec_dims[i])){
-                return false;
-            }
-        }
-        return true;
-    }*/
-
-};
-
-/*
-
-template <size_t N> class Decomposition : private LocalGlobalMapping<N> {
-
-    static_assert(N <= 3, "Only up to 3 dimensions supported.");
-
-    using splitting_policy_t = SplittingPolicyMinDiff<N>;
-
-    size_t                m_subdomain_count;     // total number of subdomains
-    std::array<size_t, N> m_global_dims;         // global domain dimensions
-    std::array<size_t, N> m_periodic_directions; // periodic (1) or not in each
-direction (0) std::array<size_t, N> m_barriers;            // direction specific
-number of barriers std::array<size_t, N> m_subdomain_counts;    // direction
-specific total number of subdomains
-
-public:
-    Decomposition() = default;
-
-
     ///
-    ///@brief Construct from specified number of splitst
+    ///@brief Checks that the input local grid dimensions are valid.
     ///
-    ///@param subdomain_count total number of subdomains
-    ///@param global_dims total number of subdomains
-    ///@param periodic_directions periodic (1) or not (0) in each direction
-    ///@param barriers number of barrier nodes in each direction
-    ///@param subdomain_counts speciefied splitting in each direction
+    ///@param local_grid_dims The local grid dimensions to validate.
+    ///@return true If the grid dimensions are valid.
+    ///@return false If the grid dimensions are invalid.
     ///
-    Decomposition(size_t                       subdomain_count,
-                  const std::array<size_t, N>& global_dims,
-                  const std::array<size_t, N>& periodic_directions,
-                  const std::array<size_t, N>& barriers,
-                  const std::array<size_t, N>& subdomain_counts)
-        : m_subdomain_count(subdomain_count)
-        , m_global_dims(global_dims)
-        , m_periodic_directions(periodic_directions)
-        , m_barriers(barriers)
-        , m_subdomain_counts(subdomain_counts) {
-        Utils::runtime_assert(
-            splitting_policy_t::is_valid(subdomain_counts, global_dims,
-subdomain_count), "Invalid domain decomposition.");
-    }
-
-
-
-    ///
-    ///@brief Construct from subdomain count and global dimensions. The
-splitting policy finds an
-    /// optimal splitting.
-    ///
-    ///@param subdomain_count total number of subdomains
-    ///@param global_dims total number of subdomains
-    ///@param periodic_directions periodicity periodic (1) or not (0) in each
-direction
-    ///@param barriers number of barrier nodes in each direction
-    ///
-    Decomposition(size_t                       subdomain_count,
-                  const std::array<size_t, N>& global_dims,
-                  const std::array<size_t, N>& periodic_directions,
-                  const std::array<size_t, N>& barriers)
-        : Decomposition(subdomain_count,
-                        global_dims,
-                        periodic_directions,
-                        barriers,
-                        split(global_dims, subdomain_count)) {}
-
-
-    ///
-    ///@brief Get the total number of subdomains
-    ///
-    ///@return size_t total number of subdomains
-    ///
-    size_t get_subdomain_count() const { return m_subdomain_count; }
-
-    ///
-    ///@brief Get the number of subdomains in each direction
-    ///
-    ///@return const std::array<size_t, N>& number of subdomains in each
-direction
-    ///
-    const std::array<size_t, N>& get_subdomain_counts() const { return
-m_subdomain_counts; }
-
-    ///
-    ///@brief Get directionwise peridicity information
-    ///
-    ///@return const std::array<size_t, N>& periodic (1) or not (0) in each
-direction
-    ///
-    const std::array<size_t, N>& get_periodic_directions() const { return
-m_periodic_directions; }
-
-    ///
-    ///@brief Get the directionwise global dimensions
-    ///
-    ///@return const std::array<size_t, N>& direction wise global (array)
-dimensions
-    ///
-    const std::array<size_t, N>& get_global_dimensions() const { return
-m_global_dims; }
-
-    ///
-    ///@brief Get the directionwise barriers count information
-    ///
-    ///@return const std::array<size_t, N>& direction wise barrier dimensions
-    ///
-    const std::array<size_t, N>& get_barriers() const { return m_barriers; }
-
-    ///
-    ///@brief Get the directionwise local dimensions of the subdomain at coords
-    ///
-    ///@param coords Location of the subdomain w.r.t the decomposition topology
-    ///@return std::array<size_t, N> direction wise local (array) dimensions
-    ///
-    std::array<size_t, N> get_local_dimensions(const std::array<size_t, N>&
-coords) const { return this->local_extent(m_global_dims, m_subdomain_counts,
-coords);
-    }
-
-    ///
-    ///@brief Get the starting index of this process w.r.t to global dimensions
-    ///
-    ///@param coords Location of the subdomain w.r.t the decomposition topology
-    ///@return std::array<size_t, N> the start index
-    ///
-    std::array<size_t, N> get_start(const std::array<size_t, N>& coords) const {
-
-        return this->start(m_global_dims, m_subdomain_counts, coords);
+    bool valid_local_dims(dimension<N> local_grid_dims) const {
+        return std::equal(std::begin(local_grid_dims),
+                          std::end(local_grid_dims),
+                          std::begin(m_grid_dims),
+                          std::less_equal{});
     }
 };
-*/
+
 
 } // namespace JADA
