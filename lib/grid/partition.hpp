@@ -4,11 +4,12 @@
 #include "loops/position.hpp"
 #include "loops/md_index_loops.hpp"
 #include "loops/flatten_index.hpp"
+#include "loops/loopable.hpp"
 #include "utils/runtime_assert.hpp"
 
 namespace JADA {
 
-template <size_t N> struct Partition {
+template <size_t N> struct Partition : public Loopable<Partition<N>, N> {
 
     Partition() = default;
 
@@ -40,9 +41,6 @@ template <size_t N> struct Partition {
     {}
 
 
-
-
-
     static bool in_bounds(dimension<N> parent_dims, dimension<N> dims, position<N> begin){
 
         for (size_t i = 0; i < N; ++i){
@@ -56,24 +54,17 @@ template <size_t N> struct Partition {
         return true;
     }
 
+    position<N> loop_begin() const {return m_begin;}
 
-    position<N> global_begin() const {
-        return m_begin;
-    }
-    position<N> global_end() const {
+    position<N> loop_end() const {
         position<N> end;
         for (size_t i = 0; i < N; ++i){
             end[i] = m_begin[i] + idx_t(m_dims[i]);
         }
         return end;
-    }
-
-
-    index_generator<N> global_md_indices() const{
-        return md_indices(global_begin(), global_end());
-    }
-
     
+    }
+
     dimension<N> parent_dimensions() const {return m_parent_dims;}
     dimension<N> dimensions() const {return m_dims;}
 
@@ -87,38 +78,6 @@ private:
     position<N>  m_begin;
 
 };
-template<size_t N>
-index_generator<2> partition_loop(Partition<N> p) {
-
-    for (auto pos : p.global_md_indices()){
-
-        auto partition_pos = pos - p.global_begin();
-        auto partition_i = flatten<N, StorageOrder::RowMajor>(p.dimensions(), partition_pos);
-        auto data_i = flatten<N, StorageOrder::RowMajor>(p.parent_dimensions(), pos);
-
-        co_yield {partition_i, data_i}; 
-    }
-}
-
-template<size_t N, class Container>
-Container subset_data(Partition<N> p, const Container& data){
-
-    Utils::runtime_assert(data.size() == p.parent_size(), "Partition parent size differs from container size");
-    Container ret(p.size());
-    
-    for (auto [p_i, d_i] : partition_loop(p)){
-        ret[size_t(p_i)] = data[size_t(d_i)];
-    }
-
-    return ret;
-
-}
-
-
-
-
-
-
 
 
 } // namespace JADA

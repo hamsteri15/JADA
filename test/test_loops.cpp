@@ -3,6 +3,7 @@
 #include "loops/unflatten_index.hpp"
 #include "loops/md_index_loops.hpp"
 #include "loops/serial_index_loops.hpp"
+#include "loops/loopable.hpp"
 #include <iostream>
 
 
@@ -399,5 +400,42 @@ TEST_CASE("Test loops") {
         }
         
     }
+}
+
+
+
+TEST_CASE("Test Loopable"){
+
+    using namespace JADA;
+
+    SECTION("1D"){
+
+        struct TEST : public Loopable<TEST,1>{
+
+            position<1> loop_begin() const{
+                return {1};
+            }
+
+            position<1> loop_end() const{
+                return {3};
+            }
+
+        };
+
+        std::vector<int> v = {1,2,3,4,5};
+        TEST t;
+
+        for (auto [i] : loop(t)){
+            v[size_t(i)] = -1;
+        }
+
+        CHECK(v == std::vector<int>{1, -1, -1, 4, 5});
+
+
+
+    }
+
+
+
 }
 

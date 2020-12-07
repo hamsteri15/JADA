@@ -283,15 +283,16 @@ TEST_CASE("Test Partition"){
 
     }
 
-    SECTION("Test get partition data"){
+    SECTION("loop"){
 
-        Partition<1> p({5}, {2}, {0});
-        std::vector<int> data = {1,2,3,4,5};
+        Partition<1> p{{5}, {2}, {3}};
 
-        auto s = subset_data(p, data);
+        std::vector<int> v = {1,2,3,4,5};
 
-        CHECK(s[0] == 1);
-        CHECK(s[1] == 2);
+        for (auto [i] : loop(p)){
+            v[size_t(i)] = -1;
+        }
+        CHECK(v == std::vector<int>{1,2,3,-1,-1});
 
     }
 
