@@ -17,14 +17,14 @@ template <size_t N> struct Partition : public Loopable<Partition<N>, N> {
     ///@brief Construct a partition from given dims and a begin position.
     ///
     ///@param parent_dims Dimensions of the parent.
-    ///@param dims Dimensions of the partition.
     ///@param begin Begin position of the partition wrt to the parent dimensions.
+    ///@param extent Extent of the partition from begin.
     ///
-    Partition(dimension<N> parent_dims, dimension<N> dims, position<N> begin)
+    Partition(dimension<N> parent_dims, position<N> begin, position<N> extent)
         : m_parent_dims(parent_dims)
-        , m_dims(dims)
-        , m_begin(begin) {
-            Utils::runtime_assert(in_bounds(parent_dims, dims, begin), "Partition out of bounds.");
+        , m_begin(begin) 
+        , m_extent(extent){
+            Utils::runtime_assert(in_bounds(parent_dims, begin, extent), "Partition out of bounds.");
         }
 
 
@@ -33,49 +33,44 @@ template <size_t N> struct Partition : public Loopable<Partition<N>, N> {
     ///       This is useful for constructing recusive subpartitions.
     ///
     ///@param parent The partition to subset.
-    ///@param dims Dimensions of the new partition
     ///@param begin Begin position of the partition wrt to parent dimensions.
+    ///@param extent Extent of the new partition from begin.
     ///
-    Partition(Partition<N> parent, dimension<N> dims, position<N> begin) :
-    Partition(parent.dimensions(), dims, begin)
+    Partition(Partition<N> parent, position<N> begin, position<N> extent) :
+    Partition(parent.dimensions(), begin, extent)
     {}
 
 
-    static bool in_bounds(dimension<N> parent_dims, dimension<N> dims, position<N> begin){
+    static bool in_bounds(dimension<N> parent_dims, position<N> begin, position<N> extent){
 
-        for (size_t i = 0; i < N; ++i){
-            if (begin[i] < 0){
-                return false;
-            }
-            if (begin[i] + idx_t(dims[i]) > idx_t(parent_dims[i])){
-                return false;
-            }
-        }
-        return true;
+        return (begin.all_positive() && ((begin + extent) <= parent_dims));
+
     }
 
     position<N> loop_begin() const {return m_begin;}
 
     position<N> loop_end() const {
-        position<N> end;
-        for (size_t i = 0; i < N; ++i){
-            end[i] = m_begin[i] + idx_t(m_dims[i]);
-        }
-        return end;
-    
+        return loop_begin() + m_extent;
     }
 
     dimension<N> parent_dimensions() const {return m_parent_dims;}
-    dimension<N> dimensions() const {return m_dims;}
 
-    size_t size() const {return m_dims.elementwise_product();}
+    dimension<N> dimensions() const {
+        dimension<N> dims;
+        for (size_t i = 0; i < N; ++i){
+            dims[i] = size_t(m_extent[i]);
+        }
+        return dims;
+    }
+
+    size_t size() const {return size_t(m_extent.elementwise_product());}
     size_t parent_size() const {return m_parent_dims.elementwise_product();}
 
 
 private:
     dimension<N> m_parent_dims;
-    dimension<N> m_dims;
     position<N>  m_begin;
+    position<N> m_extent;
 
 };
 

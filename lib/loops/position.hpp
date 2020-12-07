@@ -27,6 +27,15 @@ struct position : public Utils::MathVectorBase<idx_t, L, position<L>> {
 
     }
 
+    bool all_positive() const {
+        for (auto e : m_storage){
+            if (e < 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     const element_t* get_ptr() const { return m_storage.data(); }
     element_t* get_ptr() { return m_storage.data(); }
 

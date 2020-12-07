@@ -271,13 +271,13 @@ TEST_CASE("Test Partition"){
 
     SECTION("Constructors"){
         REQUIRE_NOTHROW(Partition<3>{});
-        REQUIRE_NOTHROW(Partition<2>({10, 10}, {5,5}, {0,0}));
+        REQUIRE_NOTHROW(Partition<2>({10, 10}, {0,0}, {5,5}));
         REQUIRE_NOTHROW(Partition<2>({10, 10}, {5,5}, {5,5}));
         REQUIRE_THROWS(Partition<2>({9, 9}, {5,5}, {5,5}));
 
-        Partition<2> parent({10, 10}, {5,5}, {3,3});
+        Partition<2> parent({10, 10}, {3,3}, {5,5});
 
-        REQUIRE_NOTHROW(Partition<2>(parent, {2,2}, {1,1}));
+        REQUIRE_NOTHROW(Partition<2>(parent, {1,1}, {2,2}));
         REQUIRE_THROWS(Partition<2>(parent, {3,3}, {3,3}));
 
 
@@ -285,7 +285,7 @@ TEST_CASE("Test Partition"){
 
     SECTION("loop"){
 
-        Partition<1> p{{5}, {2}, {3}};
+        Partition<1> p{{5}, {3}, {2}};
 
         std::vector<int> v = {1,2,3,4,5};
 
