@@ -19,11 +19,9 @@ struct Loopable{
 
 
 template<class Derived, size_t N>
-auto inline static loop(const Loopable<Derived, N>& l){
+inline static auto loop(const Loopable<Derived, N>& l){
     return md_indices(l.begin(), l.end());
 }
-
-
 
 
 }

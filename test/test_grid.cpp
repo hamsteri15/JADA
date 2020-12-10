@@ -6,8 +6,8 @@
 #include "grid/block_neighbours.hpp"
 #include "grid/decomposition.hpp"
 #include "grid/partition.hpp"
-
-
+#include "grid/tiled_data.hpp"
+#include "grid/tile_apply.hpp"
 
 template <class Loop>
 static std::vector<int> set_ones(const std::vector<int>& v, Loop loop) {
@@ -292,9 +292,253 @@ TEST_CASE("Test Partition"){
         for (auto [i] : loop(p)){
             v[size_t(i)] = -1;
         }
+
         CHECK(v == std::vector<int>{1,2,3,-1,-1});
 
+
     }
+
+    SECTION("get_data"){
+
+        std::vector<int> v = 
+        {
+            0,0,0,1,2,
+            0,0,0,1,2,
+            0,0,0,1,2
+        };
+
+        dimension<2> data_dims = {3,5};
+        position<2>  p_begin = {0, 3};
+        position<2>  p_extent = {3, 2};
+        Partition<2> p(data_dims, p_begin, p_extent);
+
+
+        CHECK(get_data(v, p) == std::vector<int>{1,2,1,2,1,2});
+
+
+        std::vector<int> v2 = 
+        {
+            1,2,0,0,0,
+            1,2,0,0,0,
+            1,2,0,0,0
+        };
+
+        p_begin = {0,0};
+        Partition<2> p2(data_dims, p_begin, p_extent);
+
+
+
+        CHECK(get_data(v2, p2) == std::vector<int>{1,2,1,2,1,2});
+
+
+
+    }
+
+    SECTION("put_data"){
+
+        std::vector<int> v = 
+        {
+            0,0,0,1,2,
+            0,0,0,1,2,
+            0,0,0,1,2
+        };
+
+        dimension<2> data_dims = {3,5};
+        position<2>  p_begin = {0, 3};
+        position<2>  p_extent = {3, 2};
+        Partition<2> p(data_dims, p_begin, p_extent);
+
+        std::vector<int> p_data = {3,3,3,3,3,3};
+
+        put_data(v, p_data, p);
+
+        CHECK(v == 
+            std::vector<int>
+            {
+                0,0,0,3,3,
+                0,0,0,3,3,
+                0,0,0,3,3
+            });
+            
+
+
+
+        p_begin = {0,0};
+        Partition<2> p2(data_dims, p_begin, p_extent);
+
+
+        put_data(v, p_data, p2);
+
+        CHECK(v == 
+            std::vector<int>
+            {
+                3,3,0,3,3,
+                3,3,0,3,3,
+                3,3,0,3,3
+            });
+
+
+
+    }
+
+
+
+
+    SECTION("test swap"){
+
+        //k,j,i
+        dimension<2> dim1 = {3,3};
+        position<2>  p1_begin = {0, 2};
+        position<2>  p1_extent = {3, 1};
+
+        Partition<2> p1(dim1, p1_begin, p1_extent);
+
+        std::vector<int> v1 = 
+        {
+            1,2,3,
+            1,2,3,
+            1,2,3
+        };
+
+        auto p1_data = get_data(v1, p1);
+
+        /////
+
+        dimension<2> dim2 = {3, 4};
+        position<2> p2_begin = {0,0};
+        position<2> p2_extent = {3, 1};
+
+        Partition<2> p2(dim2, p2_begin, p2_extent);        
+
+        std::vector<int> v2 = 
+        {
+            2,3,4,5,
+            2,3,4,5,
+            2,3,4,5
+        };
+
+        put_data(v2, p1_data, p2);
+
+        CHECK( v2 ==
+            std::vector<int>
+            {
+                3,3,4,5,
+                3,3,4,5,
+                3,3,4,5
+            }
+        );
+
+        p2_begin = {0, 3};
+        Partition<2> p3(dim2, p2_begin, p2_extent);
+
+        put_data(v2, p1_data, p3);
+
+        CHECK( v2 ==
+            std::vector<int>
+            {
+                3,3,4,3,
+                3,3,4,3,
+                3,3,4,3
+            }
+        );
+
+
+    }
+
+
+
+
+
+
+
+}
+
+TEST_CASE("Test TiledData"){
+
+    using namespace JADA;
+
+    SECTION("Constructors"){
+
+        std::vector<int> v = {1,2,3,4,5,6};
+
+
+
+        REQUIRE_NOTHROW(TiledData<Tile<-2,2>, int>());
+
+
+        TiledData<Tile<-2, 2>, int> d(&v[2]);
+
+        CHECK(d(-2) == 1);
+        CHECK(d(-1) == 2);
+        CHECK(d(0) == 3);
+        CHECK(d(1) == 4);
+        CHECK(d(2) == 5);
+        REQUIRE_THROWS(d(3));
+        REQUIRE_THROWS(d(-3));
+
+
+        TiledData<Tile<0, 3>, int> d2(&v[1]);
+
+        CHECK(d2(0) == 2);
+        CHECK(d2(1) == 3);
+        CHECK(d2(2) == 4);
+        CHECK(d2(3) == 5);
+        REQUIRE_THROWS(d2(-1));
+        REQUIRE_THROWS(d2(4));
+
+        TiledData<Tile<-3, 0>, int> d3(&v[3]);
+
+        CHECK(d3(-3) == 1);
+        CHECK(d3(-2) == 2);
+        CHECK(d3(-1) == 3);
+        CHECK(d3(0) == 4);
+        REQUIRE_THROWS(d3(-4));
+        REQUIRE_THROWS(d3(1));
+
+
+
+
+
+    }
+
+
+
+}
+
+struct CD4 {
+    using Shape = JADA::Tile<-2, 2>;
+
+    static auto apply(const auto& f){
+        return f(-2) + f(-1) + f(0) + f(1) + f(2);
+    } 
+};
+
+
+TEST_CASE("Tile apply"){
+
+    using namespace JADA;
+
+
+    SECTION("1D"){
+
+
+        std::vector<int> in = {1,2,3,4,5};
+        std::vector<int> out = {0,0,0,0,0};
+
+        Partition<1> p({5}, {2}, {1});
+
+        apply(in, out, p, CD4());
+
+        CHECK(out[2] == 1 + 2 + 3 + 4 + 5);
+
+        for (auto o : out){
+            std::cout << o << std::endl;
+        }
+
+
+    }
+
+
 
 
 

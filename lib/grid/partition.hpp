@@ -47,6 +47,9 @@ template <size_t N> struct Partition : public Loopable<Partition<N>, N> {
 
     }
 
+
+    position<N> offset() const {return m_begin;}
+
     position<N> loop_begin() const {return m_begin;}
 
     position<N> loop_end() const {
@@ -73,6 +76,63 @@ private:
     position<N> m_extent;
 
 };
+
+///
+///@brief Get a partition from the input container.
+///
+///@tparam Container 
+///@tparam N 
+///@param in The container to get the partition from.
+///@param p  Partition whose parent size matches the container size.
+///@return Container A partition of size p.size()
+///
+template<class Container, size_t N>
+Container get_data(const Container& in, const Partition<N>& p){
+
+    Utils::runtime_assert(p.parent_size() == in.size(), "Partition and container size mismatch");
+
+    Container ret(p.size());
+
+    for (auto pos : loop(p)){
+
+        auto p_idx = flatten<N, StorageOrder::RowMajor>(p.parent_dimensions(), pos);
+        auto i_idx = flatten<N, StorageOrder::RowMajor>(p.dimensions(), pos - p.offset());
+        ret[size_t(i_idx)] = in[size_t(p_idx)];
+    }
+    return ret;
+
+}
+
+
+///
+///@brief Put p_data to position defined by the partition p.
+///
+///@tparam Container 
+///@tparam N 
+///@param in The container where to put the p_data
+///@param p_data Partition data whose size is at least p.size()
+///@param p The belonging to the container "in" (in.size() == p.parent_size())
+///
+template<class Container, size_t N>
+void put_data(Container& in, const Container& p_data, const Partition<N>& p){
+
+
+    Utils::runtime_assert(in.size() == p.parent_size(), "Partition data size mismatch");
+    Utils::runtime_assert(p_data.size() >= p.size(), "Partition data size mismatch");
+
+    for (auto pos : loop(p)){
+
+        auto i_idx = flatten<N, StorageOrder::RowMajor>(p.parent_dimensions(), pos);
+        auto p_idx = flatten<N, StorageOrder::RowMajor>(p.dimensions(), pos - p.offset());
+
+        in[size_t(i_idx)] = p_data[size_t(p_idx)];
+        
+    }
+
+}
+
+
+
 
 
 } // namespace JADA
