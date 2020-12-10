@@ -6,6 +6,7 @@
 #include "grid/block_neighbours.hpp"
 #include "grid/decomposition.hpp"
 #include "grid/partition.hpp"
+#include "grid/boundary.hpp"
 #include "grid/tiled_data.hpp"
 #include "grid/tile_apply.hpp"
 
@@ -445,11 +446,169 @@ TEST_CASE("Test Partition"){
 
     }
 
+}
 
 
+TEST_CASE("Test Boundary"){
+
+    using namespace JADA;
+
+    SECTION("Constructors"){
+
+        REQUIRE_NOTHROW(Boundary<2>({3,5}, {0,1}));
+        REQUIRE_THROWS(Boundary<2>({3,5}, {0,0}));
+        REQUIRE_THROWS(Boundary<2>({3,5}, {2,1}));
+        REQUIRE_THROWS(Boundary<2>({3,5}, {-2,-1}));
+
+    }
+
+    SECTION("Loops"){
+
+        dimension<2> dims = {2, 4};
 
 
+        SECTION("Left"){
 
+            Boundary<2> b(dims, {0,-1});
+            
+            std::vector<int> v1 = 
+            {
+                0,0,0,0,
+                0,0,0,0
+            };
+
+
+            for (auto pos : loop(b)){
+                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
+                v1[size_t(idx)] = 1;
+            }
+            CHECK(v1 == 
+            std::vector<int>
+            {
+                1,0,0,0,
+                1,0,0,0
+            });
+
+        }
+
+        SECTION("Right"){
+
+            Boundary<2> b(dims, {0, 1});
+            
+            std::vector<int> v1 = 
+            {
+                0,0,0,0,
+                0,0,0,0
+            };
+
+
+            for (auto pos : loop(b)){
+                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
+                v1[size_t(idx)] = 1;
+            }
+            CHECK(v1 == 
+            std::vector<int>
+            {
+                0,0,0,1,
+                0,0,0,1
+            });
+
+        }
+
+        SECTION("Up"){
+
+            Boundary<2> b(dims, {-1, 0});
+            
+            std::vector<int> v1 = 
+            {
+                0,0,0,0,
+                0,0,0,0
+            };
+
+
+            for (auto pos : loop(b)){
+                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
+                v1[size_t(idx)] = 1;
+            }
+            CHECK(v1 == 
+            std::vector<int>
+            {
+                1,1,1,1,
+                0,0,0,0
+            });
+
+        }
+        SECTION("Down"){
+
+            Boundary<2> b(dims, {1, 0});
+            
+            std::vector<int> v1 = 
+            {
+                0,0,0,0,
+                0,0,0,0
+            };
+
+
+            for (auto pos : loop(b)){
+                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
+                v1[size_t(idx)] = 1;
+            }
+            CHECK(v1 == 
+            std::vector<int>
+            {
+                0,0,0,0,
+                1,1,1,1
+            });
+
+        }
+
+        SECTION("Upper left"){
+
+            Boundary<2> b(dims, {-1, -1});
+            
+            std::vector<int> v1 = 
+            {
+                0,0,0,0,
+                0,0,0,0
+            };
+
+
+            for (auto pos : loop(b)){
+                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
+                v1[size_t(idx)] = 1;
+            }
+            CHECK(v1 == 
+            std::vector<int>
+            {
+                1,0,0,0,
+                0,0,0,0
+            });
+
+        }
+        SECTION("Lower right"){
+
+            Boundary<2> b(dims, {1,1});
+            
+            std::vector<int> v1 = 
+            {
+                0,0,0,0,
+                0,0,0,0
+            };
+
+
+            for (auto pos : loop(b)){
+                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
+                v1[size_t(idx)] = 1;
+            }
+            CHECK(v1 == 
+            std::vector<int>
+            {
+                0,0,0,0,
+                0,0,0,1
+            });
+
+        }
+    }
 
 }
 
