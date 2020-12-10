@@ -8,16 +8,17 @@ namespace JADA {
 
 template <size_t N> struct Boundary : public Loopable<Boundary<N>, N> {
 
-    Boundary(dimension<N> dims, position<N> direction)
-        : m_parent_dims(dims)
-        , m_begin({})
-        , m_end({}) {
+    Boundary() = default;
 
-        //TODO: consider if this should just return begin = 0, end = 1;
-        Utils::runtime_assert(direction.non_zero(), "Zero direction boundary not supported");
+    Boundary(dimension<N> dims, position<N> direction) {
+        // TODO: consider if this should just return begin = 0, end = 1;
+        Utils::runtime_assert(direction.non_zero(),
+                              "Zero direction boundary not supported");
 
         for (size_t i = 0; i < N; ++i) {
-            Utils::runtime_assert( (std::abs(direction[i]) == 1)||(direction[i] == 0), "Elements of direction have to be +-1 or 0" );
+            Utils::runtime_assert((std::abs(direction[i]) == 1) ||
+                                      (direction[i] == 0),
+                                  "Elements of direction have to be +-1 or 0");
 
             if (direction[i] == -1) {
                 m_begin[i] = 0;
@@ -35,6 +36,9 @@ template <size_t N> struct Boundary : public Loopable<Boundary<N>, N> {
                 m_end[i]   = m_begin[i] + 1;
             }
         }
+
+        m_direction = direction;
+
     }
 
     position<N> loop_begin() const { return m_begin; }
@@ -42,9 +46,9 @@ template <size_t N> struct Boundary : public Loopable<Boundary<N>, N> {
     position<N> loop_end() const { return m_end; }
 
 private:
-    dimension<N> m_parent_dims;
-    position<N>  m_begin;
-    position<N>  m_end;
+    position<N> m_begin;
+    position<N> m_end;
+    position<N> m_direction;
 };
 
 } // namespace JADA

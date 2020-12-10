@@ -455,6 +455,7 @@ TEST_CASE("Test Boundary"){
 
     SECTION("Constructors"){
 
+        REQUIRE_NOTHROW(Boundary<1>());
         REQUIRE_NOTHROW(Boundary<2>({3,5}, {0,1}));
         REQUIRE_THROWS(Boundary<2>({3,5}, {0,0}));
         REQUIRE_THROWS(Boundary<2>({3,5}, {2,1}));
