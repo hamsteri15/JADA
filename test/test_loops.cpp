@@ -1,10 +1,13 @@
 #include "catch.hpp"
+#include <iostream>
+
 #include "loops/flatten_index.hpp"
 #include "loops/unflatten_index.hpp"
 #include "loops/md_index_loops.hpp"
 //#include "loops/serial_index_loops.hpp"
 #include "loops/loopable.hpp"
-#include <iostream>
+#include "loops/index_generator.hpp"
+#include "loops/index_pair_generator.hpp"
 
 
 
@@ -334,7 +337,7 @@ TEST_CASE("Test unflatten"){
 
 
 
-TEST_CASE("Test loops") {
+TEST_CASE("Test md_loops") {
 
     using namespace JADA;
 
@@ -365,8 +368,6 @@ TEST_CASE("Test loops") {
         }
 
     }
-
-
     SECTION("3D loops") {
 
         
@@ -386,7 +387,47 @@ TEST_CASE("Test loops") {
     }
 }
 
+TEST_CASE("Test paired md loops"){
 
+    using namespace JADA;
+
+    std::vector<int> v = 
+    {
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0
+    }; 
+
+    dimension<2> d = {3, 4};
+
+    position<2> begin = {0,0};
+    position<2> end = {3, 1};
+
+    position<2> offset = {0, 3};
+
+    for (auto [p1, p2] : paired_md_indices(begin, end, offset)){
+
+        auto i1 = flatten<2, StorageOrder::RowMajor>(d, p1);
+        auto i2 = flatten<2, StorageOrder::RowMajor>(d, p2);
+
+        v[size_t(i1)] = 1;
+        v[size_t(i2)] = 1;
+
+    }
+
+    CHECK(v ==
+    std::vector<int>
+    {
+        1,0,0,1,
+        1,0,0,1,
+        1,0,0,1
+    }
+    );
+
+
+
+
+}
 
 TEST_CASE("Test Loopable"){
 
