@@ -683,7 +683,42 @@ TEST_CASE("Test Partition"){
     }
 
 
+    SECTION("Paired loop"){
 
+        std::vector<int> v1 = 
+        {
+            0,0,1,
+            0,0,1
+        };
+
+        std::vector<int> v2 = 
+        {
+            2,0,0,
+            2,0,0
+        };
+
+        dimension<2> d1 = {2,3};
+        dimension<2> d2 = {2,3};
+        Partition<2> p1(d1, {0,0}, {2,3});
+        Partition<2> p2(d2, {0,0}, {2,3});
+
+        for (auto [pos1, pos2] : loop(p1,p2, {0,1})){
+            auto i1 = flatten<2, StorageOrder::RowMajor>(d1, pos1);
+            auto i2 = flatten<2, StorageOrder::RowMajor>(d2, pos2);
+
+            v1[size_t(i1)] = v2[size_t(i2)];
+
+        }
+
+
+        CHECK(v1 == std::vector<int>
+        {
+            0,0,2,
+            0,0,2
+        });
+
+
+    }
 
 
 }

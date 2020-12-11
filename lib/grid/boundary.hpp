@@ -58,4 +58,11 @@ private:
     position<N> m_direction;
 };
 
+
+
+
+
+
+
+
 } // namespace JADA

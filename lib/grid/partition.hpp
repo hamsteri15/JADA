@@ -4,6 +4,7 @@
 #include "loops/dimension.hpp"
 #include "loops/position.hpp"
 #include "loops/md_index_loops.hpp"
+#include "loops/paired_md_index_loops.hpp"
 #include "loops/flatten_index.hpp"
 #include "loops/loopable.hpp"
 #include "utils/runtime_assert.hpp"
@@ -80,6 +81,20 @@ private:
     position<N> m_extent;
 
 };
+
+template<size_t N>
+auto loop(const Partition<N>& owner, const Partition<N>& neighbour, position<N> direction){
+
+    auto bo = owner.get_boundary(direction);
+    auto bn = neighbour.get_boundary(-direction);
+    auto extent = bo.loop_end() - bo.loop_begin();
+
+    return paired_md_indices(bo.loop_begin(), bn.loop_begin(), extent);
+
+}
+
+
+
 
 ///
 ///@brief Get a partition from the input container.

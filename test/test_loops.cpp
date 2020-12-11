@@ -399,12 +399,12 @@ TEST_CASE("Test paired md loops"){
 
     dimension<2> d = {3, 4};
 
-    position<2> begin = {0,0};
-    position<2> end = {3, 1};
+    position<2> begin1 = {0, 0};
+    position<2> begin2 = {0, 3};
 
-    position<2> offset = {0, 3};
+    position<2> extent = {3, 1};
 
-    for (auto [p1, p2] : paired_md_indices(begin, end, offset)){
+    for (auto [p1, p2] : paired_md_indices(begin1, begin2, extent)){
 
         auto i1 = flatten<2, StorageOrder::RowMajor>(d, p1);
         auto i2 = flatten<2, StorageOrder::RowMajor>(d, p2);
@@ -422,7 +422,6 @@ TEST_CASE("Test paired md loops"){
         1,0,0,1
     }
     );
-
 
 
 

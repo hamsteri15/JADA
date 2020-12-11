@@ -4,13 +4,17 @@
 
 namespace JADA{
 
+
+
 template<size_t N>
 [[maybe_unused]] inline static index_pair_generator<N>
-paired_md_indices(position<N> begin, position<N> end, position<N> offset) noexcept{
+paired_md_indices(position<N> begin1, position<N> begin2, position<N> extent) noexcept{
 
-    for (auto pos : md_indices(begin, end)){
-        co_yield {pos, pos + offset};
+    for (auto pos : md_indices(position<N>{}, extent)){
+        co_yield {begin1 + pos, begin2 + pos};
     }
 }
+
+
 
 }
