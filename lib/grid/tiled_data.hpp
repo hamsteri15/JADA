@@ -28,7 +28,9 @@ struct TiledData{
 
     }
 
-    TiledData(const ET* ptr_owner, const ET* ptr_neigh, size_t NN){
+    TiledData(const ET* ptr_owner, const ET* ptr_neigh, idx_t NN){
+
+
 
         for (idx_t i = min; i != min + idx_t(NN); ++i){
             idx_t offset1 = 1;

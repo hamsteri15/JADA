@@ -777,7 +777,7 @@ TEST_CASE("Test TiledData"){
 
 }
 
-struct CD4 {
+struct TEMP_OP {
     using Shape = JADA::Tile<-2, 2>;
 
     static auto apply(const auto& f){
@@ -823,11 +823,20 @@ TEST_CASE("Tile apply"){
 
 
        
-        apply(in1, in2, out, p1, p2, {1}, CD4{});
+        apply(in1, in2, out, p1, p2, {1}, TEMP_OP{});
 
-        for (auto o : out){
-            std::cout << o << std::endl;
-        }
+        CHECK(out ==
+        std::vector<int>
+        {
+            0,
+            0,
+            0,
+            in1[1] + in1[2] + in1[3] + in1[4] + in2[0],
+            in1[2] + in1[3] + in1[4] + in2[0] + in2[1]
+        });
+
+
+
 
 
         //CHECK(out == std::vector<int>{0,0,0, 4,5});
