@@ -1,5 +1,6 @@
 #pragma once
 
+#include "grid/boundary.hpp"
 #include "loops/dimension.hpp"
 #include "loops/position.hpp"
 #include "loops/md_index_loops.hpp"
@@ -42,9 +43,7 @@ template <size_t N> struct Partition : public Loopable<Partition<N>, N> {
 
 
     static bool in_bounds(dimension<N> parent_dims, position<N> begin, position<N> extent){
-
         return (begin.all_positive() && ((begin + extent) <= parent_dims));
-
     }
 
 
@@ -68,6 +67,11 @@ template <size_t N> struct Partition : public Loopable<Partition<N>, N> {
 
     size_t size() const {return size_t(m_extent.elementwise_product());}
     size_t parent_size() const {return m_parent_dims.elementwise_product();}
+
+
+    Boundary<N> get_boundary(position<N> direction) const {
+        return Boundary<N>(dimensions(), direction, m_begin);
+    }
 
 
 private:

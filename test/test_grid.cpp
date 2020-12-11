@@ -266,6 +266,170 @@ TEST_CASE("Block neighbours"){
 
 }
 
+TEST_CASE("Test Boundary"){
+
+    using namespace JADA;
+
+    SECTION("Constructors"){
+
+        REQUIRE_NOTHROW(Boundary<1>());
+        REQUIRE_NOTHROW(Boundary<2>({3,5}, {0,1}));
+        REQUIRE_THROWS(Boundary<2>({3,5}, {0,0}));
+        REQUIRE_THROWS(Boundary<2>({3,5}, {2,1}));
+        REQUIRE_THROWS(Boundary<2>({3,5}, {-2,-1}));
+
+    }
+
+    SECTION("Loops"){
+
+        dimension<2> dims = {2, 4};
+
+
+        SECTION("Left"){
+
+            Boundary<2> b(dims, {0,-1});
+            
+            std::vector<int> v1 = 
+            {
+                0,0,0,0,
+                0,0,0,0
+            };
+
+
+            for (auto pos : loop(b)){
+                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
+                v1[size_t(idx)] = 1;
+            }
+            CHECK(v1 == 
+            std::vector<int>
+            {
+                1,0,0,0,
+                1,0,0,0
+            });
+
+        }
+
+        SECTION("Right"){
+
+            Boundary<2> b(dims, {0, 1});
+            
+            std::vector<int> v1 = 
+            {
+                0,0,0,0,
+                0,0,0,0
+            };
+
+
+            for (auto pos : loop(b)){
+                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
+                v1[size_t(idx)] = 1;
+            }
+            CHECK(v1 == 
+            std::vector<int>
+            {
+                0,0,0,1,
+                0,0,0,1
+            });
+
+        }
+
+        SECTION("Up"){
+
+            Boundary<2> b(dims, {-1, 0});
+            
+            std::vector<int> v1 = 
+            {
+                0,0,0,0,
+                0,0,0,0
+            };
+
+
+            for (auto pos : loop(b)){
+                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
+                v1[size_t(idx)] = 1;
+            }
+            CHECK(v1 == 
+            std::vector<int>
+            {
+                1,1,1,1,
+                0,0,0,0
+            });
+
+        }
+        SECTION("Down"){
+
+            Boundary<2> b(dims, {1, 0});
+            
+            std::vector<int> v1 = 
+            {
+                0,0,0,0,
+                0,0,0,0
+            };
+
+
+            for (auto pos : loop(b)){
+                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
+                v1[size_t(idx)] = 1;
+            }
+            CHECK(v1 == 
+            std::vector<int>
+            {
+                0,0,0,0,
+                1,1,1,1
+            });
+
+        }
+
+        SECTION("Upper left"){
+
+            Boundary<2> b(dims, {-1, -1});
+            
+            std::vector<int> v1 = 
+            {
+                0,0,0,0,
+                0,0,0,0
+            };
+
+
+            for (auto pos : loop(b)){
+                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
+                v1[size_t(idx)] = 1;
+            }
+            CHECK(v1 == 
+            std::vector<int>
+            {
+                1,0,0,0,
+                0,0,0,0
+            });
+
+        }
+        SECTION("Lower right"){
+
+            Boundary<2> b(dims, {1,1});
+            
+            std::vector<int> v1 = 
+            {
+                0,0,0,0,
+                0,0,0,0
+            };
+
+
+            for (auto pos : loop(b)){
+                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
+                v1[size_t(idx)] = 1;
+            }
+            CHECK(v1 == 
+            std::vector<int>
+            {
+                0,0,0,0,
+                0,0,0,1
+            });
+
+        }
+    }
+
+}
+
 TEST_CASE("Test Partition"){
 
     using namespace JADA;
@@ -446,172 +610,85 @@ TEST_CASE("Test Partition"){
 
     }
 
-}
 
 
-TEST_CASE("Test Boundary"){
+    SECTION("get_boundary"){
 
-    using namespace JADA;
+        dimension<2> global_d = {3, 4};
+        
+        std::vector<int> data = 
+        {
+            0,0,0,0,
+            0,0,0,0,
+            0,0,0,0
+        };
+        
 
-    SECTION("Constructors"){
+        position<2>  p_begin = {1,0};
+        position<2>  p_extent= {2,2};
 
-        REQUIRE_NOTHROW(Boundary<1>());
-        REQUIRE_NOTHROW(Boundary<2>({3,5}, {0,1}));
-        REQUIRE_THROWS(Boundary<2>({3,5}, {0,0}));
-        REQUIRE_THROWS(Boundary<2>({3,5}, {2,1}));
-        REQUIRE_THROWS(Boundary<2>({3,5}, {-2,-1}));
+        Partition<2> p(global_d, p_begin, p_extent);
+
+
+        for (auto pos : loop(p)){
+
+            auto idx = flatten<2, StorageOrder::RowMajor>(global_d, pos);
+            data[size_t(idx)] = 1;
+        }
+
+        CHECK(data == 
+        std::vector<int>
+        {
+            0,0,0,0,
+            1,1,0,0,
+            1,1,0,0
+        }
+        );
+
+
+
+        for (auto pos : loop(p.get_boundary({-1, 0}))){
+
+            auto idx = flatten<2, StorageOrder::RowMajor>(global_d, pos);
+            data[size_t(idx)] = 2;
+        }
+
+        CHECK(data == 
+        std::vector<int>
+        {
+            0,0,0,0,
+            2,2,0,0,
+            1,1,0,0
+        }
+        );
+
+
+        for (auto pos : loop(p.get_boundary({0, 1}))){
+
+            auto idx = flatten<2, StorageOrder::RowMajor>(global_d, pos);
+            data[size_t(idx)] = 3;
+        }
+
+        CHECK(data == 
+        std::vector<int>
+        {
+            0,0,0,0,
+            2,3,0,0,
+            1,3,0,0
+        }
+        );
+
+
 
     }
 
-    SECTION("Loops"){
-
-        dimension<2> dims = {2, 4};
 
 
-        SECTION("Left"){
 
-            Boundary<2> b(dims, {0,-1});
-            
-            std::vector<int> v1 = 
-            {
-                0,0,0,0,
-                0,0,0,0
-            };
-
-
-            for (auto pos : loop(b)){
-                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
-                v1[size_t(idx)] = 1;
-            }
-            CHECK(v1 == 
-            std::vector<int>
-            {
-                1,0,0,0,
-                1,0,0,0
-            });
-
-        }
-
-        SECTION("Right"){
-
-            Boundary<2> b(dims, {0, 1});
-            
-            std::vector<int> v1 = 
-            {
-                0,0,0,0,
-                0,0,0,0
-            };
-
-
-            for (auto pos : loop(b)){
-                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
-                v1[size_t(idx)] = 1;
-            }
-            CHECK(v1 == 
-            std::vector<int>
-            {
-                0,0,0,1,
-                0,0,0,1
-            });
-
-        }
-
-        SECTION("Up"){
-
-            Boundary<2> b(dims, {-1, 0});
-            
-            std::vector<int> v1 = 
-            {
-                0,0,0,0,
-                0,0,0,0
-            };
-
-
-            for (auto pos : loop(b)){
-                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
-                v1[size_t(idx)] = 1;
-            }
-            CHECK(v1 == 
-            std::vector<int>
-            {
-                1,1,1,1,
-                0,0,0,0
-            });
-
-        }
-        SECTION("Down"){
-
-            Boundary<2> b(dims, {1, 0});
-            
-            std::vector<int> v1 = 
-            {
-                0,0,0,0,
-                0,0,0,0
-            };
-
-
-            for (auto pos : loop(b)){
-                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
-                v1[size_t(idx)] = 1;
-            }
-            CHECK(v1 == 
-            std::vector<int>
-            {
-                0,0,0,0,
-                1,1,1,1
-            });
-
-        }
-
-        SECTION("Upper left"){
-
-            Boundary<2> b(dims, {-1, -1});
-            
-            std::vector<int> v1 = 
-            {
-                0,0,0,0,
-                0,0,0,0
-            };
-
-
-            for (auto pos : loop(b)){
-                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
-                v1[size_t(idx)] = 1;
-            }
-            CHECK(v1 == 
-            std::vector<int>
-            {
-                1,0,0,0,
-                0,0,0,0
-            });
-
-        }
-        SECTION("Lower right"){
-
-            Boundary<2> b(dims, {1,1});
-            
-            std::vector<int> v1 = 
-            {
-                0,0,0,0,
-                0,0,0,0
-            };
-
-
-            for (auto pos : loop(b)){
-                auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
-                v1[size_t(idx)] = 1;
-            }
-            CHECK(v1 == 
-            std::vector<int>
-            {
-                0,0,0,0,
-                0,0,0,1
-            });
-
-        }
-    }
 
 }
+
+
 
 TEST_CASE("Test TiledData"){
 
