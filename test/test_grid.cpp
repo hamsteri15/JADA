@@ -756,6 +756,7 @@ TEST_CASE("Tile apply"){
     using namespace JADA;
 
 
+    /*
     SECTION("1D"){
 
 
@@ -774,9 +775,29 @@ TEST_CASE("Tile apply"){
 
 
     }
+    */
+
+   /*
+    SECTION("Boundary apply"){
+
+        std::vector<int> in1 = {1,2,3,4,5};
+        std::vector<int> in2 = {6,7};
+        std::vector<int> out = {0,0,0,0,0};
+
+        Partition<1> p1({5}, {0}, {5});
+        Partition<1> p2({2}, {0}, {2});
+
+        auto boundary = p1.get_boundary({1});
+
+        apply(in1, in2, out, p1, p2, boundary, CD4{});
 
 
+        CHECK(out == std::vector<int>{0,0,0, 4,5});
 
+
+    }
+
+    */
 
 
 }

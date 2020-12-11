@@ -38,23 +38,19 @@ template <size_t N> struct Boundary : public Loopable<Boundary<N>, N> {
         }
 
         m_direction = direction;
-
     }
 
-    Boundary(dimension<N> dims, position<N> direction, position<N> offset) :
-    Boundary(dims, direction)
-    {
+    Boundary(dimension<N> dims, position<N> direction, position<N> offset)
+        : Boundary(dims, direction) {
         m_begin += offset;
-        m_end   += offset;
+        m_end += offset;
     }
-
-
-
 
     position<N> loop_begin() const { return m_begin; }
 
     position<N> loop_end() const { return m_end; }
 
+    position<N> get_direction() const {return m_direction;}
 
 private:
     position<N> m_begin;

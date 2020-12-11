@@ -32,10 +32,6 @@ struct TiledData{
         return m_data[idx_convert(i)];
     }
 
-
-    
-
-
 private:
     std::array<ET, N> m_data;
 
@@ -48,6 +44,9 @@ private:
 
 
 };
+
+
+
 
 
 
