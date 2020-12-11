@@ -82,6 +82,17 @@ private:
 
 };
 
+
+///
+///@brief Loops over the positions shared by partition owner and neighbour. Usage:
+///         for (auto [p1, p2] : loop(owner_partition, neighbour_partition, {0,1})){}
+///
+///@tparam N 
+///@param owner The "lhs" partition, the index in the lhs partition is returned as the first element 
+///@param neighbour The "rhs" partition, the index in the rhs partition is returned as the second element
+///@param direction The direction of the interface between the two partitions
+///@return auto Sequence of position pairs [i_owner, i_neighbour] 
+///
 template<size_t N>
 auto loop(const Partition<N>& owner, const Partition<N>& neighbour, position<N> direction){
 
