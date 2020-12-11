@@ -4,10 +4,9 @@
 #include "loops/flatten_index.hpp"
 #include "loops/unflatten_index.hpp"
 #include "loops/md_index_loops.hpp"
+#include "loops/paired_md_index_loops.hpp"
 //#include "loops/serial_index_loops.hpp"
 #include "loops/loopable.hpp"
-#include "loops/index_generator.hpp"
-#include "loops/index_pair_generator.hpp"
 
 
 
