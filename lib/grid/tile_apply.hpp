@@ -37,10 +37,9 @@ static void apply(
                   [[maybe_unused]] Container&          out,
                   [[maybe_unused]] const Partition<N>& p1,
                   [[maybe_unused]] const Partition<N>& p2,
-                  [[maybe_unused]] const Boundary<N>&  b,
+                  [[maybe_unused]] const position<N>&  direction,
                   [[maybe_unused]] Op op) {
 
-    /*
     Utils::runtime_assert(in1.size() == out.size(), "Array size mismatch.");
     
     using ET        = Container::value_type;
@@ -50,33 +49,24 @@ static void apply(
     static constexpr size_t N_tiles = Utils::constexpr_abs(tile_t::get_min()) + 1;
 
 
-
-
-
-    for (auto pos : loop(b)) {
+    for (auto [p_owner, p_neigh] : loop(p1, p2, direction)){
 
         for (idx_t i = idx_t(N_tiles); i != 0; --i){
 
-            ///std::cout << i << std::endl;
-            auto pos_owner = pos - (b.get_direction() * i);
-            //auto pos_neigh = 
-            auto idx_owner = size_t(
-            flatten<N, StorageOrder::RowMajor>(p1.parent_dimensions(), pos_owner));
+            auto p_data  = p_owner - direction * i; 
+            auto i_data  = size_t(flatten<N, StorageOrder::RowMajor>(p1.parent_dimensions(), p_data));
+
+            auto i_owner = size_t(flatten<N, StorageOrder::RowMajor>(p1.parent_dimensions(), p_owner));
+            auto i_neigh = size_t(flatten<N, StorageOrder::RowMajor>(p2.parent_dimensions(), p_neigh));
 
 
+            storage_t s(&in1[i_owner], &in2[i_neigh], size_t(i));
 
+            out[i_data] = Op::apply(s);
 
-
-            out[idx_owner] = in1[idx_owner];
         }
 
-
-        [[maybe_unused]] storage_t temp;
-
-
-         //Op::apply(storage_t(&in[idx]));
     }
-    */
 }
 
 

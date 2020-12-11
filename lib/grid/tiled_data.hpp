@@ -28,6 +28,24 @@ struct TiledData{
 
     }
 
+    TiledData(const ET* ptr_owner, const ET* ptr_neigh, size_t NN){
+
+        for (idx_t i = min; i != min + idx_t(NN); ++i){
+            idx_t offset1 = 1;
+            m_data[idx_convert(i)] = ptr_owner[i * offset1];
+        }
+
+        for (idx_t i = min + idx_t(NN); i != max + 1; ++i){
+            idx_t offset2 = 1;
+            m_data[idx_convert(i)] = ptr_neigh[i * offset2];
+
+        }
+
+
+    }
+
+
+
     ET operator()(idx_t i) const{
         return m_data[idx_convert(i)];
     }

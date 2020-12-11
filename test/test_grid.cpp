@@ -812,7 +812,6 @@ TEST_CASE("Tile apply"){
     }
     */
 
-   /*
     SECTION("Boundary apply"){
 
         std::vector<int> in1 = {1,2,3,4,5};
@@ -822,17 +821,20 @@ TEST_CASE("Tile apply"){
         Partition<1> p1({5}, {0}, {5});
         Partition<1> p2({2}, {0}, {2});
 
-        auto boundary = p1.get_boundary({1});
 
-        apply(in1, in2, out, p1, p2, boundary, CD4{});
+       
+        apply(in1, in2, out, p1, p2, {1}, CD4{});
+
+        for (auto o : out){
+            std::cout << o << std::endl;
+        }
 
 
-        CHECK(out == std::vector<int>{0,0,0, 4,5});
+        //CHECK(out == std::vector<int>{0,0,0, 4,5});
 
 
     }
 
-    */
 
 
 }
