@@ -28,23 +28,28 @@ struct TiledData{
 
     }
 
-    TiledData(const ET* ptr_owner, const ET* ptr_neigh, idx_t NN){
+    TiledData(std::array<ET, N> data) : m_data(data) {}
 
+    TiledData(const ET* ptr_owner, const ET* ptr_neigh, idx_t owner_read_count){
 
+        size_t i = 0;
 
-        for (idx_t i = min; i != min + idx_t(NN); ++i){
-            idx_t offset1 = 1;
-            m_data[idx_convert(i)] = ptr_owner[i * offset1];
+        while (i != size_t(owner_read_count)){
+            m_data[i] = *ptr_owner;
+            ptr_owner++;
+            ++i;
         }
 
-        for (idx_t i = min + idx_t(NN); i != max + 1; ++i){
-            idx_t offset2 = 1;
-            m_data[idx_convert(i)] = ptr_neigh[i * offset2];
-
+        while(i != N){
+            m_data[i] = *ptr_neigh;
+            i++;
+            ptr_neigh++;
         }
-
 
     }
+
+   //TiledData(std::array<ET, N> data) : m_data(data) {}
+
 
 
 

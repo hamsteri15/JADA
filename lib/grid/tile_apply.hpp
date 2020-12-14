@@ -40,35 +40,68 @@ static void apply(
                   [[maybe_unused]] const position<N>&  direction,
                   [[maybe_unused]] Op op) {
 
-    /*
     Utils::runtime_assert(in1.size() == out.size(), "Array size mismatch.");
     
     using ET        = Container::value_type;
     using tile_t    = Op::Shape;
     using storage_t = TiledData<tile_t, ET>;
 
-    [[maybe_unused]] storage_t t;
+
+    [[maybe_unused]] storage_t used;
 
     for (auto [p_owner, p_neigh] : loop(p1, p2, direction)){
 
-        //[-2, -1, 0]
-        for (idx_t i = tile_t::get_min(); i != 0; ++i){
+        auto p = p_owner - direction * tile_t::get_max() + 1;
+        auto o_end   = p_owner + direction;
+        auto n_start = p_neigh;
 
 
-            auto p_data  = p_owner + direction * (i+1); 
-            auto i_data  = size_t(flatten<N, StorageOrder::RowMajor>(p1.parent_dimensions(), p_data));
-            auto i_owner = size_t(flatten<N, StorageOrder::RowMajor>(p1.parent_dimensions(), p_owner));
-            auto i_neigh = size_t(flatten<N, StorageOrder::RowMajor>(p2.parent_dimensions(), p_neigh));
+        //auto pp = tilet_t::get_max() + 1;
+        //auto ll = p + tile_t::get_min();
 
 
-            storage_t s(&in1[i_owner], &in2[i_neigh], size_t(i));
-            out[i_data] = Op::apply(s);
+        //idx_t n_read_owner = 
 
-            //out[i_data] = 1;
+
+        while (p != o_end){
+
+            auto l = p       + direction * tile_t::get_min();
+            auto o_start = l;
+
+            size_t idx_temp = 0;
+            std::array<ET, tile_t::get_width()> stencil;
+            for (auto b_pos : md_indices(o_start, o_end)){
+                
+                auto b_idx = size_t(flatten<N, StorageOrder::RowMajor>(p1.parent_dimensions(), b_pos));
+                stencil[idx_temp] = in1[b_idx];
+                idx_temp+=1;
+            }
+
+            auto n_end   = n_start + direction * (idx_t(tile_t::get_width() - idx_temp));
+
+            for (auto b_pos : md_indices(n_start, n_end)){
+                auto b_idx = size_t(flatten<N, StorageOrder::RowMajor>(p2.parent_dimensions(), b_pos));
+                stencil[idx_temp] = in2[b_idx];
+                idx_temp += 1;
+            }        
+
+
+            storage_t s(stencil);
+
+            auto out_idx = size_t(flatten<N, StorageOrder::RowMajor>(p1.parent_dimensions(), p));
+
+            out[out_idx] = Op::apply(s);
+
+            p += direction;
+
         }
 
+
+        
+
+        
+
     }
-    */
 }
 
 
