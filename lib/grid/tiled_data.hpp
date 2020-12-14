@@ -30,21 +30,18 @@ struct TiledData{
 
     TiledData(std::array<ET, N> data) : m_data(data) {}
 
-    TiledData(const ET* ptr_owner, const ET* ptr_neigh, idx_t owner_read_count){
+    TiledData(const ET* o_begin, const ET* o_end, const ET* n_begin){
 
         size_t i = 0;
 
-        while (i != size_t(owner_read_count)){
-            m_data[i] = *ptr_owner;
-            ptr_owner++;
-            ++i;
+        for (auto it = o_begin; it != o_end; ++it, ++i){
+            m_data[i] = *it;
         }
 
-        while(i != N){
-            m_data[i] = *ptr_neigh;
-            i++;
-            ptr_neigh++;
+        for (auto it = n_begin; i != N; ++i, ++it){
+            m_data[i] = *it;
         }
+
 
     }
 

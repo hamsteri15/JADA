@@ -19,7 +19,7 @@ static void apply(const Container&    in,
     using ET        = Container::value_type;
     using tile_t    = Op::Shape;
     using storage_t = TiledData<tile_t, ET>;
-
+ 
     for (auto pos : loop(p)) {
 
         auto idx = size_t(
@@ -28,6 +28,16 @@ static void apply(const Container&    in,
         out[idx] = Op::apply(storage_t(&in[idx]));
     }
 }
+
+/*
+template<size_t N, class Tile>
+position<N> get_boundary_offset_end(position<N> direction, Tile t){
+
+    return direction * t::
+
+}
+*/
+
 
 
 template <size_t N, class Container, class Op>
@@ -49,53 +59,46 @@ static void apply(
 
     [[maybe_unused]] storage_t used;
 
+
+    [[maybe_unused]] idx_t offset_p1 = 1;
+    [[maybe_unused]] idx_t offset_p2 = 1;
+
+
+
     for (auto [p_owner, p_neigh] : loop(p1, p2, direction)){
 
-        auto p = p_owner - direction * tile_t::get_max() + 1;
-        auto o_end   = p_owner + direction;
-        auto n_start = p_neigh;
+        //compute maximum owner iterator
+        const auto end_i =  size_t(flatten<N, StorageOrder::RowMajor>(p1.parent_dimensions(), p_owner));
+        const auto* owner_max = &in1[end_i] + 1;
+
+        //compute the minimum neighbour iterator
+        const auto begin_i = size_t(flatten<N, StorageOrder::RowMajor>(p2.parent_dimensions(), p_neigh));
+        const auto* neigh_min = &in2[begin_i];
 
 
-        //auto pp = tilet_t::get_max() + 1;
-        //auto ll = p + tile_t::get_min();
+        //compute the current output iterator
+        const auto current_pos = p_owner - direction * tile_t::get_max() + 1;
+        const auto current_i = size_t(flatten<N, StorageOrder::RowMajor>(p1.parent_dimensions(), current_pos));
+       
+        auto* out_begin = &out[current_i];
+        const auto* out_end = &out[end_i] + 1;
 
 
-        //idx_t n_read_owner = 
+        const auto stencil_begin_pos = current_pos + direction * tile_t::get_min();
+        const auto stencil_begin_i   = size_t(flatten<N, StorageOrder::RowMajor>(p1.parent_dimensions(), stencil_begin_pos));
+        auto* stencil_min            = &in1[stencil_begin_i];
 
 
-        while (p != o_end){
+        for (auto* current = out_begin; current != out_end; current+=offset_p1){
+        
 
-            auto l = p       + direction * tile_t::get_min();
-            auto o_start = l;
+            storage_t s(stencil_min, owner_max, neigh_min );
+            *current = Op::apply(s);
 
-            size_t idx_temp = 0;
-            std::array<ET, tile_t::get_width()> stencil;
-            for (auto b_pos : md_indices(o_start, o_end)){
-                
-                auto b_idx = size_t(flatten<N, StorageOrder::RowMajor>(p1.parent_dimensions(), b_pos));
-                stencil[idx_temp] = in1[b_idx];
-                idx_temp+=1;
-            }
+            stencil_min += offset_p1;
 
-            auto n_end   = n_start + direction * (idx_t(tile_t::get_width() - idx_temp));
-
-            for (auto b_pos : md_indices(n_start, n_end)){
-                auto b_idx = size_t(flatten<N, StorageOrder::RowMajor>(p2.parent_dimensions(), b_pos));
-                stencil[idx_temp] = in2[b_idx];
-                idx_temp += 1;
-            }        
-
-
-            storage_t s(stencil);
-
-            auto out_idx = size_t(flatten<N, StorageOrder::RowMajor>(p1.parent_dimensions(), p));
-
-            out[out_idx] = Op::apply(s);
-
-            p += direction;
 
         }
-
 
         
 

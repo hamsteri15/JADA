@@ -723,7 +723,14 @@ TEST_CASE("Test Partition"){
 
 }
 
+TEST_CASE("Test tile") {
 
+    using namespace JADA;
+
+    
+
+
+}
 
 TEST_CASE("Test TiledData"){
 
@@ -777,11 +784,19 @@ TEST_CASE("Test TiledData"){
 
 }
 
-struct TEMP_OP {
+struct TEMP_OP1 {
     using Shape = JADA::Tile<-2, 2>;
 
     static auto apply(const auto& f){
         return f(-2) + f(-1) + f(0) + f(1) + f(2);
+    } 
+};
+
+struct TEMP_OP2 {
+    using Shape = JADA::Tile<1, 2>;
+
+    static auto apply(const auto& f){
+        return f(1) + f(2);
     } 
 };
 
@@ -812,7 +827,7 @@ TEST_CASE("Tile apply"){
     }
     */
 
-    SECTION("Boundary apply"){
+    SECTION("Boundary apply centered stencil"){
 
         std::vector<int> in1 = {1,2,3,4,5};
         std::vector<int> in2 = {6,7};
@@ -823,7 +838,7 @@ TEST_CASE("Tile apply"){
 
 
        
-        apply(in1, in2, out, p1, p2, {1}, TEMP_OP{});
+        apply(in1, in2, out, p1, p2, {1}, TEMP_OP1{});
 
         CHECK(out ==
         std::vector<int>
@@ -835,16 +850,43 @@ TEST_CASE("Tile apply"){
             in1[2] + in1[3] + in1[4] + in2[0] + in2[1]
         });
 
-
-
-
-
         //CHECK(out == std::vector<int>{0,0,0, 4,5});
 
 
     }
 
+    /*
+    SECTION("Boundary apply right biased stencil"){
 
+        //f[i] = f[i+1] + f[i+2]
+
+        std::vector<int> in1 = {1,2,3,4,5};
+        std::vector<int> in2 = {6,7,8,9};
+        std::vector<int> out = {0,0,0,0,0};
+
+        Partition<1> p1({5}, {0}, {5});
+        Partition<1> p2({4}, {0}, {4});
+
+
+        //
+       
+        apply(in1, in2, out, p1, p2, {1}, TEMP_OP2{});
+
+        CHECK(out ==
+        std::vector<int>
+        {
+            0,
+            0,
+            0,
+            in1[4] + in2[0],
+            in2[1] + in2[2]
+        });
+
+        //CHECK(out == std::vector<int>{0,0,0, 4,5});
+
+
+    }
+    */
 
 }
 
