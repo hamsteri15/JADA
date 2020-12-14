@@ -10,6 +10,8 @@ namespace JADA{
 template<idx_t min, idx_t max>
 struct Tile{
 
+    static_assert(min < max, "Tile min must be smaller than tile max");
+
     static constexpr idx_t get_min(){
         return min;
     }
@@ -19,6 +21,11 @@ struct Tile{
     }
 
     static constexpr size_t get_width(){
+        //includes f[i = 0]
+        /*if constexpr ( (min * max) < 0){
+            return max - min + 1;
+        }*/
+        //does not include f[0]
         return max - min + 1;
     }
 
@@ -27,7 +34,7 @@ struct Tile{
     //f[i] = f[i-3] + f[i-2] + f[i-1] -> last index that can be computed = 7 -> barrier end = 0
 
     static constexpr idx_t barrier_end(){
-        return std::min(idx_t(0), get_max());
+        return std::max(idx_t(0), get_max());
     }
 
     // {0,1,2,3,4,5,6,7}

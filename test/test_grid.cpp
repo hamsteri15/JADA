@@ -727,7 +727,7 @@ TEST_CASE("Test tile") {
 
     using namespace JADA;
 
-    
+
 
 
 }
@@ -827,6 +827,7 @@ TEST_CASE("Tile apply"){
     }
     */
 
+   /*
     SECTION("Boundary apply centered stencil"){
 
         std::vector<int> in1 = {1,2,3,4,5};
@@ -854,8 +855,7 @@ TEST_CASE("Tile apply"){
 
 
     }
-
-    /*
+    */
     SECTION("Boundary apply right biased stencil"){
 
         //f[i] = f[i+1] + f[i+2]
@@ -886,7 +886,6 @@ TEST_CASE("Tile apply"){
 
 
     }
-    */
 
 }
 
