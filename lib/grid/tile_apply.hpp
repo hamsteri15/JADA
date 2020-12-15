@@ -64,7 +64,6 @@ static void apply(
     using storage_t = TiledData<tile_t, ET>;
 
 
-    [[maybe_unused]] storage_t used;
 
 
     //first index that this routine will compute relative to the boundary, always on owner side and max -0
@@ -90,12 +89,14 @@ static void apply(
     const idx_t offset_left = 1;
     const idx_t offset_right = 1;
     const idx_t offset_out   = offset_left;
+
     /*
     std::cout << first_computable_idx << std::endl;
     std::cout << first_idx_to_read << std::endl;
     std::cout << n_boundary_stencils << std::endl;
     std::cout << total_boundary_width << std::endl;
     std::cout << last_idx_to_read << std::endl;
+    std::cout << tile_t::get_width() << std::endl;
     std::exit(1);
     */
     for (auto [p_owner, p_neigh] : loop(p1, p2, direction)){
@@ -119,23 +120,27 @@ static void apply(
                       offset_left,
                       offset_right);
 
-        for (auto t : temp){
+        /*for (auto t : temp){
             std::cout << t << std::endl;
+        }*/
+
+        auto out_it = &out[i_out] - ((n_boundary_stencils - 1) * offset_out);
+
+        for (size_t i = 0; i < n_boundary_stencils; ++i, out_it += offset_out) {
+
+            storage_t s(std::cbegin(temp) + i,
+                        std::cbegin(temp) + i + tile_t::get_width());
+
+            //auto sol = Op::apply(s);
+
+            s.print();
+            std::cout << s(1) << std::endl; //+ s(2) << std::endl;
+            std::cout << s(2) << std::endl; //+ s(2) << std::endl;
+            //s.print();
+            //std::cout << sol << std::endl;
+
+            *out_it = Op::apply(s);
         }
-        
-
-        auto out_it = &out[i_out] - (n_boundary_stencils * offset_out) + 1;
-
-        for (size_t i = 0; i < n_boundary_stencils; ++i, out_it+=offset_out){
-
-            *out_it = Op::apply(storage_t(std::begin(temp) + i, std::begin(temp) + i + tile_t::get_width()));
-        }
-
-
-
-
-
-
     }
     
 }

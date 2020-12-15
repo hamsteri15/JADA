@@ -1,6 +1,8 @@
 #pragma once
 
 #include <array>
+#include <iostream>
+
 #include "loops/index_type.hpp"
 #include "grid/tile.hpp"
 #include "utils/runtime_assert.hpp"
@@ -18,7 +20,7 @@ struct TiledData{
 
     TiledData() = default;
 
-    TiledData(const ET* ptr) {
+    explicit TiledData(const ET* ptr) {
 
         for (idx_t i = min; i != max + 1; ++i){
 
@@ -28,8 +30,6 @@ struct TiledData{
 
     }
 
-    TiledData(std::array<ET, N> data) : m_data(data) {}
-
 
     template<class It>
     TiledData(It begin, It end) {
@@ -37,13 +37,17 @@ struct TiledData{
     }
 
 
-   //TiledData(std::array<ET, N> data) : m_data(data) {}
-
-
-
-
     ET operator()(idx_t i) const{
-        return m_data[idx_convert(i)];
+        //return m_data[idx_convert(i)];
+        return m_data.at(idx_convert(i));
+    }
+
+
+    void print() const {
+        for (auto e : m_data){
+            std::cout << e << " ";
+        }
+        std::cout << std::endl;
     }
 
 private:
@@ -58,8 +62,6 @@ private:
 
 
 };
-
-
 
 
 
