@@ -30,20 +30,12 @@ struct TiledData{
 
     TiledData(std::array<ET, N> data) : m_data(data) {}
 
-    TiledData(const ET* o_begin, const ET* o_end, const ET* n_begin){
 
-        size_t i = 0;
-
-        for (auto it = o_begin; it != o_end; ++it, ++i){
-            m_data[i] = *it;
-        }
-
-        for (auto it = n_begin; i != N; ++i, ++it){
-            m_data[i] = *it;
-        }
-
-
+    template<class It>
+    TiledData(It begin, It end) {
+        std::copy(begin, end, m_data.begin());
     }
+
 
    //TiledData(std::array<ET, N> data) : m_data(data) {}
 

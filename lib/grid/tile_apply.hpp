@@ -29,7 +29,22 @@ static void apply(const Container&    in,
     }
 }
 
+template<class It, class OutIt>
+void pick_boundary(It left, It right, OutIt out, idx_t first, idx_t last, idx_t offset_left, idx_t offset_right){
 
+
+    for (idx_t i = first; i < last; ++i, ++out) {
+
+        if (i <= 0) {
+            auto it = left + i * offset_left;
+            *out       = *it;
+
+        } else {
+            auto it = right + (offset_right * (i-1));
+            *out       = *it;
+        }
+    }
+}
 
 
 template <size_t N, class Container, class Op>
@@ -53,11 +68,11 @@ static void apply(
 
 
     //first index that this routine will compute relative to the boundary, always on owner side and max -0
-    [[maybe_unused]] idx_t first_computable_idx = -tile_t::barrier_end() + 1;
+    static constexpr idx_t first_computable_idx = -tile_t::barrier_end() + 1;
 
     //first index that this routine will read relative to the boundary, 
     //can be on either owner (negative) or neighbour side (positive) 
-    [[maybe_unused]] idx_t first_idx_to_read = first_computable_idx + tile_t::get_min();
+    static constexpr idx_t first_idx_to_read = first_computable_idx + tile_t::get_min();
 
 
     //total number of boundary stencils
@@ -70,8 +85,11 @@ static void apply(
 
     //last index that this routine will read relative to the boundary, 
     //can be on either owner (negative) or neighbour side (positive)
-    [[maybe_unused]] idx_t  last_idx_to_read = first_idx_to_read + idx_t(total_boundary_width);
+    static constexpr idx_t  last_idx_to_read = first_idx_to_read + idx_t(total_boundary_width);
 
+    const idx_t offset_left = 1;
+    const idx_t offset_right = 1;
+    const idx_t offset_out   = offset_left;
     /*
     std::cout << first_computable_idx << std::endl;
     std::cout << first_idx_to_read << std::endl;
@@ -82,45 +100,35 @@ static void apply(
     */
     for (auto [p_owner, p_neigh] : loop(p1, p2, direction)){
 
-        [[maybe_unused]] std::array<ET, total_boundary_width> temp;        
+        auto i_left  = size_t(flatten<N, StorageOrder::RowMajor>(
+            p1.parent_dimensions(), p_owner));
+        auto i_right = size_t(flatten<N, StorageOrder::RowMajor>(
+            p2.parent_dimensions(), p_neigh));
+        auto i_out  = size_t(flatten<N, StorageOrder::RowMajor>(
+            p1.parent_dimensions(), p_owner));
 
 
-        size_t ii = 0;
 
-        for (idx_t i = first_idx_to_read; i < last_idx_to_read; ++i, ++ii){
+        std::array<ET, total_boundary_width> temp;
 
-            if (i <= 0){
-                auto owner_pos = p_owner + (direction * i);
-                auto owner_i   = size_t(flatten<N, StorageOrder::RowMajor>(p1.parent_dimensions(), owner_pos));
-                temp[ii] = in1[owner_i];
-            }
-            else {
-                auto neigh_pos = p_neigh + (direction * (i-1));
-                auto neigh_i =  size_t(flatten<N, StorageOrder::RowMajor>(p2.parent_dimensions(), neigh_pos));
-                temp[ii] = in2[neigh_i];
-                //temp[ii] = 100;
-
-            }
-
-        }
-
+        pick_boundary(&in1[i_left],
+                      &in2[i_right],
+                      temp.begin(),
+                      first_idx_to_read,
+                      last_idx_to_read,
+                      offset_left,
+                      offset_right);
 
         for (auto t : temp){
             std::cout << t << std::endl;
         }
         
 
+        auto out_it = &out[i_out] - (n_boundary_stencils * offset_out) + 1;
 
-        for (size_t i = 0; i < n_boundary_stencils; ++i){
-            std::array<ET, tile_t::get_width()> storage;
-            std::copy(std::begin(temp) + i, std::begin(temp) + i + tile_t::get_width(), std::begin(storage));
+        for (size_t i = 0; i < n_boundary_stencils; ++i, out_it+=offset_out){
 
-            storage_t s(storage);
-            
-            auto out_pos = p_owner - (direction * idx_t(n_boundary_stencils - i) - 1);
-            auto out_i   = size_t(flatten<N, StorageOrder::RowMajor>(p1.parent_dimensions(), out_pos));
-            out[out_i] = Op::apply(s);
-
+            *out_it = Op::apply(storage_t(std::begin(temp) + i, std::begin(temp) + i + tile_t::get_width()));
         }
 
 
@@ -131,10 +139,6 @@ static void apply(
     }
     
 }
-
-
-
-
 
 
 } // namespace JADA
