@@ -75,11 +75,11 @@ static void apply(
 
 
     //total number of boundary stencils
-    [[maybe_unused]] static constexpr size_t n_boundary_stencils = size_t(tile_t::barrier_end());
+    static constexpr size_t n_boundary_stencils = size_t(tile_t::barrier_end());
 
 
     //total width of the points effected by the stencil (boundary tile witdth)
-    [[maybe_unused]] static constexpr size_t total_boundary_width = n_boundary_stencils + tile_t::get_width() - 1;
+    static constexpr size_t total_boundary_width = n_boundary_stencils + tile_t::get_width() - 1;
 
 
     //last index that this routine will read relative to the boundary, 
@@ -120,26 +120,13 @@ static void apply(
                       offset_left,
                       offset_right);
 
-        /*for (auto t : temp){
-            std::cout << t << std::endl;
-        }*/
 
         auto out_it = &out[i_out] - ((n_boundary_stencils - 1) * offset_out);
 
         for (size_t i = 0; i < n_boundary_stencils; ++i, out_it += offset_out) {
 
-            storage_t s(std::cbegin(temp) + i,
-                        std::cbegin(temp) + i + tile_t::get_width());
-
-            //auto sol = Op::apply(s);
-
-            s.print();
-            std::cout << s(1) << std::endl; //+ s(2) << std::endl;
-            std::cout << s(2) << std::endl; //+ s(2) << std::endl;
-            //s.print();
-            //std::cout << sol << std::endl;
-
-            *out_it = Op::apply(s);
+            *out_it = Op::apply(storage_t(std::cbegin(temp) + i,
+                        std::cbegin(temp) + i + tile_t::get_width()));
         }
     }
     

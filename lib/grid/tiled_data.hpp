@@ -53,11 +53,10 @@ struct TiledData{
 private:
     std::array<ET, N> m_data;
 
-
     static constexpr size_t idx_convert(idx_t i) {
         Utils::runtime_assert(i >= min, "Tile index out of bounds");
         Utils::runtime_assert(i <= max, "Tile index out of bounds");
-        return size_t(i + std::abs(min));
+        return size_t(i - min);
     }
 
 
