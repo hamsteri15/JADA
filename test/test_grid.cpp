@@ -837,7 +837,7 @@ TEST_CASE("Tile apply"){
     */
 
 
-    SECTION("Boundary apply centered stencil"){
+    SECTION("Boundary apply centered stencil right"){
 
         std::vector<int> in1 = {1,2,3,4,5};
         std::vector<int> in2 = {6,7};
@@ -848,7 +848,7 @@ TEST_CASE("Tile apply"){
 
 
        
-        apply(in1, in2, out, p1, p2, {1}, TEMP_OP1{});
+        apply(in1, in2, p1, p2, out, {1}, TEMP_OP1{});
 
         CHECK(out ==
         std::vector<int>
@@ -865,6 +865,9 @@ TEST_CASE("Tile apply"){
 
     }
 
+
+
+
     SECTION("Boundary apply right biased stencil"){
 
         //f[i] = f[i+1] + f[i+2]
@@ -879,7 +882,7 @@ TEST_CASE("Tile apply"){
 
         //
        
-        apply(in1, in2, out, p1, p2, {1}, TEMP_OP2{});
+        apply(in1, in2, p1, p2, out, {1}, TEMP_OP2{});
 
         CHECK(out ==
         std::vector<int>

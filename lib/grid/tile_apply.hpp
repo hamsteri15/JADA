@@ -30,8 +30,10 @@ static void apply(const Container&    in,
 }
 
 template<class It, class OutIt>
-void pick_boundary(It left, It right, OutIt out, idx_t first, idx_t last, idx_t offset_left, idx_t offset_right){
+void pick_boundary(It left, It right, OutIt out, idx_t first, idx_t width, idx_t offset_left, idx_t offset_right){
 
+
+    idx_t last = first + width;
 
     for (idx_t i = first; i < last; ++i, ++out) {
 
@@ -49,15 +51,15 @@ void pick_boundary(It left, It right, OutIt out, idx_t first, idx_t last, idx_t 
 
 template <size_t N, class Container, class Op>
 static void apply(
-                  [[maybe_unused]] const Container&    in1,
-                  [[maybe_unused]] const Container&    in2,
+                  [[maybe_unused]] const Container&    lhs,
+                  [[maybe_unused]] const Container&    rhs,
+                  [[maybe_unused]] const Partition<N>& p_lhs,
+                  [[maybe_unused]] const Partition<N>& p_rhs,
                   [[maybe_unused]] Container&          out,
-                  [[maybe_unused]] const Partition<N>& p1,
-                  [[maybe_unused]] const Partition<N>& p2,
                   [[maybe_unused]] const position<N>&  direction,
                   [[maybe_unused]] Op op) {
 
-    Utils::runtime_assert(in1.size() == out.size(), "Array size mismatch.");
+    Utils::runtime_assert(lhs.size() == out.size(), "Array size mismatch.");
     
     using ET        = Container::value_type;
     using tile_t    = Op::Shape;
@@ -73,50 +75,38 @@ static void apply(
     //can be on either owner (negative) or neighbour side (positive) 
     static constexpr idx_t first_idx_to_read = first_computable_idx + tile_t::get_min();
 
-
     //total number of boundary stencils
     static constexpr size_t n_boundary_stencils = size_t(tile_t::barrier_end());
-
 
     //total width of the points effected by the stencil (boundary tile witdth)
     static constexpr size_t total_boundary_width = n_boundary_stencils + tile_t::get_width() - 1;
 
-
     //last index that this routine will read relative to the boundary, 
     //can be on either owner (negative) or neighbour side (positive)
-    static constexpr idx_t  last_idx_to_read = first_idx_to_read + idx_t(total_boundary_width);
+    [[maybe_unused]] static constexpr idx_t  last_idx_to_read = first_idx_to_read + idx_t(total_boundary_width);
 
     const idx_t offset_left = 1;
     const idx_t offset_right = 1;
     const idx_t offset_out   = offset_left;
 
-    /*
-    std::cout << first_computable_idx << std::endl;
-    std::cout << first_idx_to_read << std::endl;
-    std::cout << n_boundary_stencils << std::endl;
-    std::cout << total_boundary_width << std::endl;
-    std::cout << last_idx_to_read << std::endl;
-    std::cout << tile_t::get_width() << std::endl;
-    std::exit(1);
-    */
-    for (auto [p_owner, p_neigh] : loop(p1, p2, direction)){
+    for (auto [pos_lhs, pos_rhs] : loop(p_lhs, p_rhs, direction)){
 
         auto i_left  = size_t(flatten<N, StorageOrder::RowMajor>(
-            p1.parent_dimensions(), p_owner));
+            p_lhs.parent_dimensions(), pos_lhs));
         auto i_right = size_t(flatten<N, StorageOrder::RowMajor>(
-            p2.parent_dimensions(), p_neigh));
+            p_rhs.parent_dimensions(), pos_rhs));
         auto i_out  = size_t(flatten<N, StorageOrder::RowMajor>(
-            p1.parent_dimensions(), p_owner));
+            p_lhs.parent_dimensions(), pos_lhs));
 
 
 
         std::array<ET, total_boundary_width> temp;
 
-        pick_boundary(&in1[i_left],
-                      &in2[i_right],
+        pick_boundary(&lhs[i_left],
+                      &rhs[i_right],
                       temp.begin(),
                       first_idx_to_read,
-                      last_idx_to_read,
+                      idx_t(total_boundary_width),
                       offset_left,
                       offset_right);
 

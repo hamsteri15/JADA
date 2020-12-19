@@ -9,6 +9,7 @@ SET(SerialTestSources
     test_utils.cpp;
     test_loops.cpp;
     test_grid.cpp;
+    test_containers.cpp;
     #test_stencil.cpp;
     #test_operation.cpp;
 )
