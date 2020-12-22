@@ -19,7 +19,7 @@ static void apply(const Container&    in,
     using ET        = Container::value_type;
     using tile_t    = Op::Shape;
     using storage_t = TiledData<tile_t, ET>;
- 
+
     for (auto pos : loop(p)) {
 
         auto idx = size_t(
@@ -35,18 +35,21 @@ void pick_boundary(It left, It right, OutIt out, idx_t first, idx_t width, idx_t
 
     idx_t last = first + width;
 
-    for (idx_t i = first; i < last; ++i, ++out) {
-
-        if (i <= 0) {
-            auto it = left + i * offset_left;
-            *out       = *it;
-
-        } else {
-            auto it = right + (offset_right * (i-1));
-            *out       = *it;
-        }
+    //read from first to zero from the lhs
+    for (idx_t i = first; i <= 0; ++i, ++out){
+        auto it = left + i * offset_left;
+        *out       = *it;
     }
+
+    //read from 1/first to last from the rhs
+    for (idx_t i = std::max(first, idx_t(1)); i < last; ++i, ++out){
+        auto it = right + (offset_right * (i-1));
+        *out       = *it;
+    }
+
+
 }
+
 
 
 template <size_t N, class Container, class Op>
@@ -66,14 +69,9 @@ static void apply(
     using storage_t = TiledData<tile_t, ET>;
 
 
-
-
-    //first index that this routine will compute relative to the boundary, always on owner side and max -0
-    static constexpr idx_t first_computable_idx = -tile_t::barrier_end() + 1;
-
     //first index that this routine will read relative to the boundary, 
     //can be on either owner (negative) or neighbour side (positive) 
-    static constexpr idx_t first_idx_to_read = first_computable_idx + tile_t::get_min();
+    static constexpr idx_t first_idx_to_read = -tile_t::barrier_end() + 1 + tile_t::get_min();
 
     //total number of boundary stencils
     static constexpr size_t n_boundary_stencils = size_t(tile_t::barrier_end());
@@ -81,9 +79,6 @@ static void apply(
     //total width of the points effected by the stencil (boundary tile witdth)
     static constexpr size_t total_boundary_width = n_boundary_stencils + tile_t::get_width() - 1;
 
-    //last index that this routine will read relative to the boundary, 
-    //can be on either owner (negative) or neighbour side (positive)
-    [[maybe_unused]] static constexpr idx_t  last_idx_to_read = first_idx_to_read + idx_t(total_boundary_width);
 
     const idx_t offset_left = 1;
     const idx_t offset_right = 1;

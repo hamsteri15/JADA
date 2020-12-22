@@ -20,6 +20,8 @@ struct TiledData{
 
     TiledData() = default;
 
+
+
     explicit TiledData(const ET* ptr) {
 
         for (idx_t i = min; i != max + 1; ++i){

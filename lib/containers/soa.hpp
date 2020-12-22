@@ -28,7 +28,7 @@ template<class... Elements>
 struct Soa
 {
 
-    static constexpr size_t n_elements = sizeof(Elements...);
+    //static constexpr size_t n_elements = sizeof(Elements...);
 
 };
 
