@@ -41,7 +41,7 @@ struct Tile{
     //f[i] = f[i+1] + f[i+2] -> first index that can be computed = 0 -> barrier begin = 0
     //f[i] = f[i-3] + f[i-2] + f[i-1] -> first index that can be computed = 3 -> barrier begin = 3
     static constexpr idx_t barrier_begin(){
-        return std::min(idx_t(0), -get_min());
+        return std::max(idx_t(0), -get_min());
     }
 
 

@@ -728,6 +728,33 @@ TEST_CASE("Test tile") {
     using namespace JADA;
 
 
+    SECTION("Constructors"){
+
+        Tile<-2, 2> t1;
+        CHECK(t1.get_min() == -2);
+        CHECK(t1.get_max() ==  2);
+        CHECK(t1.get_width() == 5);
+
+
+        CHECK(t1.barrier_end() == 2);
+        CHECK(t1.barrier_begin() == 2);
+
+
+        Tile<0, 3> t2;
+        CHECK(t2.get_min() == 0);
+        CHECK(t2.get_max() == 3);
+        CHECK(t2.get_width() == 4);
+
+        CHECK(t2.barrier_begin() == 0);
+        CHECK(t2.barrier_end() == 3);
+
+
+
+
+
+    }
+
+
 
 
 }
@@ -837,66 +864,93 @@ TEST_CASE("Tile apply"){
     */
 
 
-    SECTION("Boundary apply centered stencil right"){
-
-        std::vector<int> in1 = {1,2,3,4,5};
-        std::vector<int> in2 = {6,7};
-        std::vector<int> out = {0,0,0,0,0};
-
-        Partition<1> p1({5}, {0}, {5});
-        Partition<1> p2({2}, {0}, {2});
 
 
-       
-        apply(in1, in2, p1, p2, out, {1}, TEMP_OP1{});
+   SECTION("apply_begin()"){
 
-        CHECK(out ==
-        std::vector<int>
-        {
-            0,
-            0,
-            0,
-            in1[1] + in1[2] + in1[3] + in1[4] + in2[0],
-            in1[2] + in1[3] + in1[4] + in2[0] + in2[1]
-        });
+        SECTION("Symmetric stencil"){
 
-        //CHECK(out == std::vector<int>{0,0,0, 4,5});
+            std::vector<int> in1 = {1,2,3,4,5};
+            std::vector<int> in2 = {6,7};
+            std::vector<int> out = {0,0,0,0,0};
+
+            Partition<1> p1({5}, {0}, {5});
+            Partition<1> p2({2}, {0}, {2});
+            
+            apply_end(in1, in2, p1, p2, out, {1}, TEMP_OP1{});
+
+            CHECK(out ==
+            std::vector<int>
+            {
+                0,
+                0,
+                0,
+                in1[1] + in1[2] + in1[3] + in1[4] + in2[0],
+                in1[2] + in1[3] + in1[4] + in2[0] + in2[1]
+            });
+        }
+
+        SECTION("Right biased stencil"){
+
+            std::vector<int> in1 = {1,2,3,4,5};
+            std::vector<int> in2 = {6,7,8};
+            std::vector<int> out = {0,0,0,0,0};
+
+            Partition<1> p1({5}, {0}, {5});
+            Partition<1> p2({3}, {0}, {3});
+        
+            apply_end(in1, in2, p1, p2, out, {1}, TEMP_OP2{});
+
+            CHECK(out ==
+            std::vector<int>
+            {
+                0,
+                0,
+                0,
+                in1[4] + in2[0],
+                in2[0] + in2[1]
+            });
+
+        }
+   }
+
+
+    /*    
+
+    SECTION("apply_end()"){
+
+        SECTION("Boundary apply centered stencil left"){
+
+            std::vector<int> in1 = {1,2,3,4,5};
+            std::vector<int> in2 = {6,7,8,9};
+            std::vector<int> out = {0,0,0,0,0};
+
+            Partition<1> p1({5}, {0}, {5});
+            Partition<1> p2({4}, {0}, {4});
+            
+            apply_begin(in1, in2, p1, p2, out, {1}, TEMP_OP1{});
+
+            CHECK(out ==
+            std::vector<int>
+            {
+                in1[1] + in1[2] + in1[3] + in1[4] + in2[0],
+                in1[2] + in1[3] + in1[4] + in2[0] + in2[1],
+                0,
+                0,
+                0
+            });
+
+            //CHECK(out == std::vector<int>{0,0,0, 4,5});
+
+
+        }
 
 
     }
 
+    */
+    
 
-
-
-    SECTION("Boundary apply right biased stencil"){
-
-        //f[i] = f[i+1] + f[i+2]
-
-        std::vector<int> in1 = {1,2,3,4,5};
-        std::vector<int> in2 = {6,7,8};
-        std::vector<int> out = {0,0,0,0,0};
-
-        Partition<1> p1({5}, {0}, {5});
-        Partition<1> p2({3}, {0}, {3});
-
-
-        //
-       
-        apply(in1, in2, p1, p2, out, {1}, TEMP_OP2{});
-
-        CHECK(out ==
-        std::vector<int>
-        {
-            0,
-            0,
-            0,
-            in1[4] + in2[0],
-            in2[0] + in2[1]
-        });
-
-        //CHECK(out == std::vector<int>{0,0,0, 4,5});
-
-    }
 
 
 }
