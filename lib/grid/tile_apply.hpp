@@ -35,13 +35,13 @@ void pick_boundary(It left, It right, OutIt out, idx_t first, idx_t width, idx_t
     
     idx_t last = first + width;
 
-    //read from first to zero from the lhs
+    //read negative indices from left
     for (idx_t i = first; i < 0; ++i, ++out){
         auto it = left + i * offset_left;
         *out       = *it;
     }
 
-    //read from 1/first to last from the rhs
+    //read positive or 0 indices from right
     for (idx_t i = std::max(first, idx_t(0)); i < last; ++i, ++out){
         auto it = right + (offset_right * i);
         *out       = *it;
@@ -165,7 +165,7 @@ static void apply_end(
 
     //first index that this routine will read relative to the boundary, 
     //can be on either owner (negative) or neighbour side (positive) 
-    static constexpr idx_t first_idx_to_read = -tile_t::barrier_end() + 1 + tile_t::get_min();
+    static constexpr idx_t first_idx_to_read = -tile_t::barrier_end() + tile_t::get_min();
 
     //total number of boundary stencils
     static constexpr size_t n_boundary_stencils = size_t(tile_t::barrier_end());
@@ -191,7 +191,7 @@ static void apply_end(
 
         std::array<ET, total_boundary_width> temp;
 
-        pick_boundary(&lhs[i_left],
+        pick_boundary(&lhs[i_left] + 1, //NOTE! THIS MAKES NO SENSE!
                       &rhs[i_right],
                       temp.begin(),
                       first_idx_to_read,

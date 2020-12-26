@@ -895,6 +895,9 @@ TEST_CASE("Tile apply"){
             std::vector<int> out = {0,0,0,0,0};
             pick_boundary(lhs.cend(), rhs.cbegin(), out.begin(), -3, 5, 1, 1);
             CHECK(out == std::vector<int>{3,4,5,6,7});
+            
+            pick_boundary(lhs.cend(), rhs.cbegin(), out.begin(), -2, 5, 1, 1);
+            CHECK(out == std::vector<int>{4,5,6,7,8});
 
        }
 
@@ -930,7 +933,6 @@ TEST_CASE("Tile apply"){
    }
     */
 
-   /*
    SECTION("apply_end()"){
 
         SECTION("Symmetric stencil"){
@@ -979,7 +981,6 @@ TEST_CASE("Tile apply"){
         }
    }
 
-    */
     
 
 
