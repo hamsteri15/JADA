@@ -864,9 +864,74 @@ TEST_CASE("Tile apply"){
     */
 
 
+    SECTION("pick_boundary()"){
 
+        std::vector<int> lhs = {1,2,3,4,5};
+        std::vector<int> rhs = {6,7,8,9};
+       
+        SECTION("full lhs"){
+
+            std::vector<int> out = {0,0,0};
+            pick_boundary(lhs.cend(), rhs.cbegin(), out.begin(), -3, 3, 1,1);
+            CHECK(out == std::vector<int>{3,4,5});
+            
+            pick_boundary(lhs.cend(), rhs.cbegin(), out.begin(), -4, 3, 1,1);
+            CHECK(out == std::vector<int>{2,3,4});
+        }
+
+        SECTION("full rhs"){
+
+            std::vector<int> out = {0,0,0};
+            pick_boundary(lhs.cend(), rhs.cbegin(), out.begin(), 0, 3, 1,1);
+            CHECK(out == std::vector<int>{6,7,8});
+
+            pick_boundary(lhs.cend(), rhs.cbegin(), out.begin(), 1, 3, 1,1);
+            CHECK(out == std::vector<int>{7,8,9});
+        }
+        
+
+       SECTION("both"){
+
+            std::vector<int> out = {0,0,0,0,0};
+            pick_boundary(lhs.cend(), rhs.cbegin(), out.begin(), -3, 5, 1, 1);
+            CHECK(out == std::vector<int>{3,4,5,6,7});
+
+       }
+
+   }
+
+
+   /*
 
    SECTION("apply_begin()"){
+
+        SECTION("Symmetric stencil"){
+
+            std::vector<int> in1 = {1,2,3,4,5};
+            std::vector<int> in2 = {6,7,8,9};
+            std::vector<int> out = {0,0,0,0,0};
+
+            Partition<1> p1({5}, {0}, {5});
+            Partition<1> p2({4}, {0}, {4});
+            
+            apply_begin(in1, in2, p1, p2, out, {1}, TEMP_OP1{});
+
+            CHECK(out ==
+            std::vector<int>
+            {
+                in1[2] + in1[3] + in1[4] + in2[0] + in2[1],
+                in1[3] + in1[4] + in2[0] + in2[1] + in2[2],
+                0,
+                0,
+                0
+            });
+        }
+
+   }
+    */
+
+   /*
+   SECTION("apply_end()"){
 
         SECTION("Symmetric stencil"){
 
@@ -913,40 +978,6 @@ TEST_CASE("Tile apply"){
 
         }
    }
-
-
-    /*    
-
-    SECTION("apply_end()"){
-
-        SECTION("Boundary apply centered stencil left"){
-
-            std::vector<int> in1 = {1,2,3,4,5};
-            std::vector<int> in2 = {6,7,8,9};
-            std::vector<int> out = {0,0,0,0,0};
-
-            Partition<1> p1({5}, {0}, {5});
-            Partition<1> p2({4}, {0}, {4});
-            
-            apply_begin(in1, in2, p1, p2, out, {1}, TEMP_OP1{});
-
-            CHECK(out ==
-            std::vector<int>
-            {
-                in1[1] + in1[2] + in1[3] + in1[4] + in2[0],
-                in1[2] + in1[3] + in1[4] + in2[0] + in2[1],
-                0,
-                0,
-                0
-            });
-
-            //CHECK(out == std::vector<int>{0,0,0, 4,5});
-
-
-        }
-
-
-    }
 
     */
     

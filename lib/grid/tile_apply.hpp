@@ -32,23 +32,18 @@ static void apply(const Container&    in,
 template<class It, class OutIt>
 void pick_boundary(It left, It right, OutIt out, idx_t first, idx_t width, idx_t offset_left, idx_t offset_right){
 
-    std::cout << "first: " << first << std::endl;
-    std::cout << "width: " << width << std::endl;
-    std::cout << "last: " << first + width << std::endl;
-
-
-
+    
     idx_t last = first + width;
 
     //read from first to zero from the lhs
-    for (idx_t i = first; i <= 0; ++i, ++out){
+    for (idx_t i = first; i < 0; ++i, ++out){
         auto it = left + i * offset_left;
         *out       = *it;
     }
 
     //read from 1/first to last from the rhs
-    for (idx_t i = std::max(first, idx_t(1)); i < last; ++i, ++out){
-        auto it = right + (offset_right * (i-1));
+    for (idx_t i = std::max(first, idx_t(0)); i < last; ++i, ++out){
+        auto it = right + (offset_right * i);
         *out       = *it;
     }
 
@@ -63,19 +58,12 @@ void rename_me(InIt stencil, OutIt out, idx_t offset, size_t n_boundary_stencils
     using tile_t    = Op::Shape;
     using storage_t = TiledData<tile_t, ET>;
 
-    std::cout << "Olen taalla" << std::endl;
 
     for (size_t i = 0; i < n_boundary_stencils; ++i, out+=offset){
 
-        auto s = storage_t(stencil + i, stencil + i + Op::Shape::get_width());
-
-        std::cout << "s: " << std::endl;
-        
-
-        s.print();
-        *out = Op::apply(s);
-
-        //*out = Op::apply(storage_t(stencil + i, stencil + i + Op::Shape::get_width()));
+        //auto s = storage_t(stencil + i, stencil + i + Op::Shape::get_width());
+        //*out = Op::apply(s);
+        *out = Op::apply(storage_t(stencil + i, stencil + i + Op::Shape::get_width()));
     }
 
 
@@ -141,12 +129,14 @@ static void apply_begin(
                       offset_left,
                       offset_right);
 
+
+        /*
         for (auto &e : temp){
             //e = 32;
             std::cout << e << std::endl;
         }
         std::exit(1);
-
+        */
         auto out_it = &out[0];
         //auto out_it = &out[i_out] - ((n_boundary_stencils - 1) * offset_out);
 
