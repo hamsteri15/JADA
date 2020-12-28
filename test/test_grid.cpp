@@ -5,7 +5,7 @@
 #include "grid/split.hpp"
 #include "grid/block_neighbours.hpp"
 #include "grid/decomposition.hpp"
-#include "grid/partition.hpp"
+#include "grid/block.hpp"
 #include "grid/boundary.hpp"
 #include "grid/tiled_data.hpp"
 #include "grid/tile_apply.hpp"
@@ -430,260 +430,52 @@ TEST_CASE("Test Boundary"){
 
 }
 
-TEST_CASE("Test Partition"){
+TEST_CASE("Test Block"){
 
     using namespace JADA;
 
     SECTION("Constructors"){
-        REQUIRE_NOTHROW(Partition<3>{});
-        REQUIRE_NOTHROW(Partition<2>({10, 10}, {0,0}, {5,5}));
-        REQUIRE_NOTHROW(Partition<2>({10, 10}, {5,5}, {5,5}));
-        REQUIRE_THROWS(Partition<2>({9, 9}, {5,5}, {5,5}));
 
-        Partition<2> parent({10, 10}, {3,3}, {5,5});
-
-        REQUIRE_NOTHROW(Partition<2>(parent, {1,1}, {2,2}));
-        REQUIRE_THROWS(Partition<2>(parent, {3,3}, {3,3}));
-
+        REQUIRE_NOTHROW(Block<1>());
+        REQUIRE_NOTHROW(Block<2>({0,0}, {2,2}));
+        REQUIRE_THROWS(Block<2>({0,0}, {5,0}));
 
     }
 
     SECTION("loop"){
 
-        Partition<1> p{{5}, {3}, {2}};
+        Block<1> b({0}, {3});
+        std::vector<int> v(b.size(), 0);
+        CHECK(v == std::vector<int>{0,0,0});
 
-        std::vector<int> v = {1,2,3,4,5};
-
-        for (auto [i] : loop(p)){
-            v[size_t(i)] = -1;
+        for (auto [i] : loop(b)){
+            v[size_t(i)] = 1;
         }
 
-        CHECK(v == std::vector<int>{1,2,3,-1,-1});
+        CHECK(v == std::vector<int>{1,1,1});
+    }
+
+    SECTION("loop subblock"){
+
+        Block<1> b({0}, {3});
+        std::vector<int> v(b.size(), 0);
+        CHECK(v == std::vector<int>{0,0,0});
+
+        auto sb = b.get_subblock({1}, {1});
+
+        for (auto [i] : loop(sb)){
+            v[size_t(i)] = 1;
+        }
+
+        CHECK(v == std::vector<int>{0,1,0});
+
+        REQUIRE_THROWS(b.get_subblock({0}, {4}));
+        REQUIRE_THROWS(b.get_subblock({1}, {3}));
 
 
     }
 
-    SECTION("get_data"){
-
-        std::vector<int> v = 
-        {
-            0,0,0,1,2,
-            0,0,0,1,2,
-            0,0,0,1,2
-        };
-
-        dimension<2> data_dims = {3,5};
-        position<2>  p_begin = {0, 3};
-        position<2>  p_extent = {3, 2};
-        Partition<2> p(data_dims, p_begin, p_extent);
-
-
-        CHECK(get_data(v, p) == std::vector<int>{1,2,1,2,1,2});
-
-
-        std::vector<int> v2 = 
-        {
-            1,2,0,0,0,
-            1,2,0,0,0,
-            1,2,0,0,0
-        };
-
-        p_begin = {0,0};
-        Partition<2> p2(data_dims, p_begin, p_extent);
-
-
-
-        CHECK(get_data(v2, p2) == std::vector<int>{1,2,1,2,1,2});
-
-
-
-    }
-
-    SECTION("put_data"){
-
-        std::vector<int> v = 
-        {
-            0,0,0,1,2,
-            0,0,0,1,2,
-            0,0,0,1,2
-        };
-
-        dimension<2> data_dims = {3,5};
-        position<2>  p_begin = {0, 3};
-        position<2>  p_extent = {3, 2};
-        Partition<2> p(data_dims, p_begin, p_extent);
-
-        std::vector<int> p_data = {3,3,3,3,3,3};
-
-        put_data(v, p_data, p);
-
-        CHECK(v == 
-            std::vector<int>
-            {
-                0,0,0,3,3,
-                0,0,0,3,3,
-                0,0,0,3,3
-            });
-            
-
-
-
-        p_begin = {0,0};
-        Partition<2> p2(data_dims, p_begin, p_extent);
-
-
-        put_data(v, p_data, p2);
-
-        CHECK(v == 
-            std::vector<int>
-            {
-                3,3,0,3,3,
-                3,3,0,3,3,
-                3,3,0,3,3
-            });
-
-
-
-    }
-
-
-
-
-    SECTION("test swap"){
-
-        //k,j,i
-        dimension<2> dim1 = {3,3};
-        position<2>  p1_begin = {0, 2};
-        position<2>  p1_extent = {3, 1};
-
-        Partition<2> p1(dim1, p1_begin, p1_extent);
-
-        std::vector<int> v1 = 
-        {
-            1,2,3,
-            1,2,3,
-            1,2,3
-        };
-
-        auto p1_data = get_data(v1, p1);
-
-        /////
-
-        dimension<2> dim2 = {3, 4};
-        position<2> p2_begin = {0,0};
-        position<2> p2_extent = {3, 1};
-
-        Partition<2> p2(dim2, p2_begin, p2_extent);        
-
-        std::vector<int> v2 = 
-        {
-            2,3,4,5,
-            2,3,4,5,
-            2,3,4,5
-        };
-
-        put_data(v2, p1_data, p2);
-
-        CHECK( v2 ==
-            std::vector<int>
-            {
-                3,3,4,5,
-                3,3,4,5,
-                3,3,4,5
-            }
-        );
-
-        p2_begin = {0, 3};
-        Partition<2> p3(dim2, p2_begin, p2_extent);
-
-        put_data(v2, p1_data, p3);
-
-        CHECK( v2 ==
-            std::vector<int>
-            {
-                3,3,4,3,
-                3,3,4,3,
-                3,3,4,3
-            }
-        );
-
-
-    }
-
-
-
-    SECTION("get_boundary"){
-
-        dimension<2> global_d = {3, 4};
-        
-        std::vector<int> data = 
-        {
-            0,0,0,0,
-            0,0,0,0,
-            0,0,0,0
-        };
-        
-
-        position<2>  p_begin = {1,0};
-        position<2>  p_extent= {2,2};
-
-        Partition<2> p(global_d, p_begin, p_extent);
-
-
-        for (auto pos : loop(p)){
-
-            auto idx = flatten<2, StorageOrder::RowMajor>(global_d, pos);
-            data[size_t(idx)] = 1;
-        }
-
-        CHECK(data == 
-        std::vector<int>
-        {
-            0,0,0,0,
-            1,1,0,0,
-            1,1,0,0
-        }
-        );
-
-
-
-        for (auto pos : loop(p.get_boundary({-1, 0}))){
-
-            auto idx = flatten<2, StorageOrder::RowMajor>(global_d, pos);
-            data[size_t(idx)] = 2;
-        }
-
-        CHECK(data == 
-        std::vector<int>
-        {
-            0,0,0,0,
-            2,2,0,0,
-            1,1,0,0
-        }
-        );
-
-
-        for (auto pos : loop(p.get_boundary({0, 1}))){
-
-            auto idx = flatten<2, StorageOrder::RowMajor>(global_d, pos);
-            data[size_t(idx)] = 3;
-        }
-
-        CHECK(data == 
-        std::vector<int>
-        {
-            0,0,0,0,
-            2,3,0,0,
-            1,3,0,0
-        }
-        );
-
-
-
-    }
-
-
-    SECTION("Paired loop"){
+    SECTION("pair loop"){
 
         std::vector<int> v1 = 
         {
@@ -697,14 +489,12 @@ TEST_CASE("Test Partition"){
             2,0,0
         };
 
-        dimension<2> d1 = {2,3};
-        dimension<2> d2 = {2,3};
-        Partition<2> p1(d1, {0,0}, {2,3});
-        Partition<2> p2(d2, {0,0}, {2,3});
+        Block<2> b1({0,0}, {2,3});
+        Block<2> b2({0,0}, {2,3});
 
-        for (auto [pos1, pos2] : loop(p1,p2, {0,1})){
-            auto i1 = flatten<2, StorageOrder::RowMajor>(d1, pos1);
-            auto i2 = flatten<2, StorageOrder::RowMajor>(d2, pos2);
+        for (auto [pos1, pos2] : loop(b1,b2, {0,1})){
+            auto i1 = flatten<2, StorageOrder::RowMajor>(b1.dimensions(), pos1);
+            auto i2 = flatten<2, StorageOrder::RowMajor>(b2.dimensions(), pos2);
 
             v1[size_t(i1)] = v2[size_t(i2)];
 
@@ -720,8 +510,80 @@ TEST_CASE("Test Partition"){
 
     }
 
+    SECTION("get_boundary"){
+
+
+        Block<2> block({0,0}, {3,4});
+
+        std::vector<int> data = 
+        {
+            0,0,0,0,
+            0,0,0,0,
+            0,0,0,0
+        };
+        
+
+        position<2>  p_begin = {1,0};
+        position<2>  p_extent= {2,2};
+
+        auto subblock = block.get_subblock(p_begin, p_extent);
+
+
+        for (auto pos : loop(subblock)){
+
+            auto idx = flatten<2, StorageOrder::RowMajor>(block.dimensions(), pos);
+            data[size_t(idx)] = 1;
+        }
+
+        CHECK(data == 
+        std::vector<int>
+        {
+            0,0,0,0,
+            1,1,0,0,
+            1,1,0,0
+        }
+        );
+
+
+        for (auto pos : loop(subblock.get_boundary({-1, 0}))){
+
+            auto idx = flatten<2, StorageOrder::RowMajor>(block.dimensions(), pos);
+            data[size_t(idx)] = 2;
+        }
+
+        CHECK(data == 
+        std::vector<int>
+        {
+            0,0,0,0,
+            2,2,0,0,
+            1,1,0,0
+        }
+        );
+
+        for (auto pos : loop(subblock.get_boundary({0, 1}))){
+
+            auto idx = flatten<2, StorageOrder::RowMajor>(block.dimensions(), pos);
+            data[size_t(idx)] = 3;
+        }
+
+        CHECK(data == 
+        std::vector<int>
+        {
+            0,0,0,0,
+            2,3,0,0,
+            1,3,0,0
+        }
+        );
+
+
+    }
+
+
 
 }
+
+
+
 
 TEST_CASE("Test tile") {
 
@@ -837,9 +699,11 @@ TEST_CASE("Test TiledData"){
 
 
 
+
 TEST_CASE("Tile apply"){
 
     using namespace JADA;
+
 
 
     /*
@@ -861,7 +725,6 @@ TEST_CASE("Tile apply"){
 
 
     }
-    */
 
 
     SECTION("pick_boundary()"){
@@ -903,6 +766,7 @@ TEST_CASE("Tile apply"){
 
    }
 
+    */
 
    /*
 
@@ -933,6 +797,7 @@ TEST_CASE("Tile apply"){
    }
     */
 
+   /*
    SECTION("apply_end()"){
 
         SECTION("Symmetric stencil"){
@@ -983,7 +848,7 @@ TEST_CASE("Tile apply"){
 
     
 
-
+    */
 
 }
 

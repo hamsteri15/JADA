@@ -158,7 +158,6 @@ TEST_CASE("Test get_shift"){
 }
 
 
-
 TEST_CASE("Test flatten"){
     using namespace JADA;
 
