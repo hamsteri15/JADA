@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <initializer_list>
 #include <algorithm>
+#include <iostream>
 
 #include "utils/runtime_assert.hpp"
 
@@ -27,6 +28,12 @@ template <class T, size_t L, class S> struct MathVectorBase {
     using const_iterator_t = const T*;
     using reverese_iterator_t = std::reverse_iterator<iterator_t>;
     using const_reverse_iterator_t = std::reverse_iterator<const_iterator_t>;
+
+
+
+    template<class TT, size_t LL, class SS>
+    friend std::ostream& operator<<(std::ostream& os, const MathVectorBase<TT,LL,SS>& v);
+
 
 
     inline constexpr T*                 data()      noexcept       {return get_ptr();}
@@ -196,6 +203,23 @@ template <class T, size_t L, class S> struct MathVectorBase {
 
     // clang-format on
 };
+
+
+template<class T, size_t L, class S>
+std::ostream& operator<<(std::ostream& os, const MathVectorBase<T,L,S>& v) {
+
+    os << "{";
+    for (size_t i = 0; i < L; ++i){
+        os << v[i] << " ";
+    }
+    os << "}"; 
+    return os;
+
+}
+
+
+
+
 
 
 } // namespace JADA

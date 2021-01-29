@@ -65,6 +65,8 @@ template <size_t N> struct SubBlock : public Block<N> {
 
     bool shares_boundary(const SubBlock<N>& rhs);
 
+    const Block<N>& get_parent() const {return m_parent;}
+
 private:
     const Block<N>& m_parent;
 
@@ -73,9 +75,6 @@ private:
         return (begin.all_positive() && ((begin + extent) <= dims));
     }
 };
-
-
-
 
 ///
 ///@brief Loops over the positions shared by partition owner and neighbour. Usage:
@@ -97,5 +96,110 @@ auto loop(const Block<N>& lhs, const Block<N>& rhs, position<N> direction){
     return paired_md_indices(bo.loop_begin(), bn.loop_begin(), extent);
 
 }
+
+template <size_t N, class Iter>
+static auto pick_data(Iter in, const SubBlock<N>& block) {
+
+    using ET = typename std::iterator_traits<Iter>::value_type;
+
+    std::vector<ET> ret(block.size());
+
+    const auto dims = block.get_parent().dimensions();
+
+    idx_t i_out = 0;
+    for (auto pos_in : loop(block)) {
+
+        auto i_in          = flatten<N, StorageOrder::RowMajor>(dims, pos_in);
+        ret[size_t(i_out)] = in[i_in];
+        i_out++;
+    }
+
+    return ret;
+}
+
+template<size_t N, class Iter>
+static auto pick_data(Iter in, const Block<N>& block, position<N> dir, idx_t width){
+
+
+    auto boundary = block.get_boundary(dir);
+
+    /*
+    position<N> begin;
+
+    for (size_t i = 0; i < N; ++i){
+
+        if (dir[i] <= 0){
+            begin[i] = boundary.begin()[i] - dir[i] * (width - 1);
+        }
+        else {
+            begin[i] = boundary.begin()[i] - dir[i] * (width + 1);
+        }
+
+
+
+    }
+    */
+
+
+    
+    auto begin = boundary.begin() - dir * (width-1);
+    //auto begin = boundary.begin() - dir * (width - 1);
+    auto extent = (dir * width).abs();
+
+    for (size_t i = 0; i < N; ++i){
+        if (extent[i] == 0) {
+            extent[i] = idx_t(block.dimensions()[i]);
+        }
+    }
+
+    
+
+    std::cout << begin << extent << std::endl;
+
+    auto subblock = block.get_subblock(begin, extent);
+
+    return pick_data(in, subblock);
+}
+
+/*
+template<size_t N, class Iter>
+static auto pick_data(Iter in1, Iter in2, const Block<N>& block1, const Block<N>& block2, position<N> direction, idx_t width1, idx_t width2){
+
+    using ET = typename std::iterator_traits<Iter>::value_type;
+
+    Utils::runtime_assert(width1 > 0, "Invalid width to pick_data");
+    Utils::runtime_assert(width2 > 0, "Invalid width to pick_data");
+
+    auto extent_ret = block1.extent() + block2.extent();
+    auto begin_ret = extent_ret * 0;
+
+    Block<N> block_ret(begin_ret, extent_ret);
+
+    std::vector<ET> ret(block_ret.size());
+
+    idx_t i_out = 0;
+    for (auto [p1, p2] : loop(block1, block2, direction)){
+
+        for (idx_t i = 0; i < width1; ++i){
+
+            auto pos_data = p1 - direction*i;
+            auto dims = block1.dimensions();
+            auto i_in = flatten<N, StorageOrder::RowMajor>(dims, pos_data);
+            block_ret[size_t(i_out)] = in1[i_in];
+        }
+
+
+
+    }
+
+
+
+
+}
+*/
+
+
+
+
 
 } // namespace JADA

@@ -578,8 +578,60 @@ TEST_CASE("Test Block"){
 
     }
 
+    SECTION("Block pick_data") {
+
+        SECTION("Subblock") {
+
+            std::vector<int> data
+            {1, 1, 0, 0, 
+             1, 1, 2, 0, 
+             0, 0, 0, 2};
+
+            Block<2> block({0, 0}, {3, 4});
+
+            auto sblock1 = block.get_subblock({0, 0}, {2, 2});
+            auto sblock2 = block.get_subblock({1, 2}, {2, 2});
+
+            /*
+            for (auto [j,i] : loop(sblock)){
+                std::cout << j << " " <<i << std::endl;
+            }
+            */
+
+            auto subset1 = pick_data(data.begin(), sblock1);
+            auto subset2 = pick_data(data.begin(), sblock2);
+
+            CHECK(subset1 == std::vector<int>{1, 1, 1, 1});
+            CHECK(subset2 == std::vector<int>{2, 0, 0, 2});
+        }
+
+        SECTION("Boundary"){
+
+            std::vector<int> data
+            {1, 1, 0, 0, 
+             1, 1, 2, 0, 
+             0, 0, 0, 2};
+
+            Block<2> block({0, 0}, {3, 4});
+            idx_t width = 2;
+            auto subset1 = pick_data(data.begin(), block, {0, 1}, width);
+            auto subset2 = pick_data(data.begin(), block, {0, -1}, width);
+            CHECK(subset1 == std::vector<int>
+            {
+                0,0,
+                2,0,
+                0,2
+            });
+            CHECK(subset2 == std::vector<int>
+            {
+                1,1,
+                1,1,
+                0,0
+            });
 
 
+        }
+    }
 }
 
 
