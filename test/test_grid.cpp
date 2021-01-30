@@ -616,6 +616,9 @@ TEST_CASE("Test Block"){
             idx_t width = 2;
             auto subset1 = pick_data(data.begin(), block, {0, 1}, width);
             auto subset2 = pick_data(data.begin(), block, {0, -1}, width);
+            auto subset3 = pick_data(data.begin(), block, {1, 0}, width);
+            auto subset4 = pick_data(data.begin(), block, {-1, 0}, width);
+            auto subset5 = pick_data(data.begin(), block, {1, 1}, width);
             CHECK(subset1 == std::vector<int>
             {
                 0,0,
@@ -629,6 +632,17 @@ TEST_CASE("Test Block"){
                 0,0
             });
 
+            CHECK(subset3 == std::vector<int>
+            {
+                1,1,2,0,
+                0,0,0,2
+            });
+
+            CHECK(subset5 == std::vector<int>
+            {
+                2,0,
+                0,2
+            });
 
         }
     }

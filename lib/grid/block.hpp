@@ -123,26 +123,34 @@ static auto pick_data(Iter in, const Block<N>& block, position<N> dir, idx_t wid
 
     auto boundary = block.get_boundary(dir);
 
-    /*
+
+
+    std::cout << boundary.begin();
+
+    
     position<N> begin;
 
     for (size_t i = 0; i < N; ++i){
 
-        if (dir[i] <= 0){
+        if (dir[i] >= 0){
             begin[i] = boundary.begin()[i] - dir[i] * (width - 1);
         }
+
         else {
-            begin[i] = boundary.begin()[i] - dir[i] * (width + 1);
+            begin[i] = boundary.begin()[i];
         }
 
-
-
     }
-    */
+    
 
 
     
-    auto begin = boundary.begin() - dir * (width-1);
+//    auto begin = boundary.begin() - dir * (width-1);
+
+
+
+
+
     //auto begin = boundary.begin() - dir * (width - 1);
     auto extent = (dir * width).abs();
 
