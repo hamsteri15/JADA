@@ -9,6 +9,7 @@
 #include "grid/boundary.hpp"
 #include "grid/tiled_data.hpp"
 #include "grid/tile_apply.hpp"
+#include "grid/data.hpp"
 
 template <class Loop>
 static std::vector<int> set_ones(const std::vector<int>& v, Loop loop) {
@@ -619,6 +620,7 @@ TEST_CASE("Test Block"){
             auto subset3 = pick_data(data.begin(), block, {1, 0}, width);
             auto subset4 = pick_data(data.begin(), block, {-1, 0}, width);
             auto subset5 = pick_data(data.begin(), block, {1, 1}, width);
+            auto subset6 = pick_data(data.begin(), block, {-1, 1}, width);
             CHECK(subset1 == std::vector<int>
             {
                 0,0,
@@ -637,17 +639,43 @@ TEST_CASE("Test Block"){
                 1,1,2,0,
                 0,0,0,2
             });
-
+            CHECK(subset4 == std::vector<int>
+            {
+                1,1,0,0,
+                1,1,2,0
+            });
             CHECK(subset5 == std::vector<int>
             {
                 2,0,
                 0,2
+            });
+            CHECK(subset6 == std::vector<int>
+            {
+                0,0,
+                2,0
             });
 
         }
     }
 }
 
+TEST_CASE("Test data"){
+
+    using namespace JADA;
+
+    SECTION("Constructors"){
+
+        std::vector<int> d = {1,2,3,
+                              4,5,6};
+
+        Block<2> b({0,0}, {2,3});
+        Block<2> b2({0,0}, {3,3});
+
+        REQUIRE_NOTHROW(Data(b,d));
+        REQUIRE_THROWS(Data(b2,d));
+
+    }
+}
 
 
 
@@ -771,151 +799,26 @@ TEST_CASE("Tile apply"){
     using namespace JADA;
 
 
-
     /*
     SECTION("1D"){
 
 
-        std::vector<int> in = {1,2,3,4,5};
+        std::vector<int> in = {0, 1,2,3,4,5, 0};
+        Block<1> b_in({0}, {7});
         std::vector<int> out = {0,0,0,0,0};
+        Block<1> b_out({0}, {5});
 
-        Partition<1> p({5}, {2}, {1});
+        auto in_data = Data(b_in, in);
+        auto out_data= Data(b_out, out);
 
-        apply(in, out, p, CD4());
+        apply(in_data, out_data, TEMP_OP2());
 
-        CHECK(out[2] == 1 + 2 + 3 + 4 + 5);
 
-        for (auto o : out){
-            std::cout << o << std::endl;
-        }
 
 
     }
 
-
-    SECTION("pick_boundary()"){
-
-        std::vector<int> lhs = {1,2,3,4,5};
-        std::vector<int> rhs = {6,7,8,9};
-       
-        SECTION("full lhs"){
-
-            std::vector<int> out = {0,0,0};
-            pick_boundary(lhs.cend(), rhs.cbegin(), out.begin(), -3, 3, 1,1);
-            CHECK(out == std::vector<int>{3,4,5});
-            
-            pick_boundary(lhs.cend(), rhs.cbegin(), out.begin(), -4, 3, 1,1);
-            CHECK(out == std::vector<int>{2,3,4});
-        }
-
-        SECTION("full rhs"){
-
-            std::vector<int> out = {0,0,0};
-            pick_boundary(lhs.cend(), rhs.cbegin(), out.begin(), 0, 3, 1,1);
-            CHECK(out == std::vector<int>{6,7,8});
-
-            pick_boundary(lhs.cend(), rhs.cbegin(), out.begin(), 1, 3, 1,1);
-            CHECK(out == std::vector<int>{7,8,9});
-        }
-        
-
-       SECTION("both"){
-
-            std::vector<int> out = {0,0,0,0,0};
-            pick_boundary(lhs.cend(), rhs.cbegin(), out.begin(), -3, 5, 1, 1);
-            CHECK(out == std::vector<int>{3,4,5,6,7});
-            
-            pick_boundary(lhs.cend(), rhs.cbegin(), out.begin(), -2, 5, 1, 1);
-            CHECK(out == std::vector<int>{4,5,6,7,8});
-
-       }
-
-   }
-
     */
-
-   /*
-
-   SECTION("apply_begin()"){
-
-        SECTION("Symmetric stencil"){
-
-            std::vector<int> in1 = {1,2,3,4,5};
-            std::vector<int> in2 = {6,7,8,9};
-            std::vector<int> out = {0,0,0,0,0};
-
-            Partition<1> p1({5}, {0}, {5});
-            Partition<1> p2({4}, {0}, {4});
-            
-            apply_begin(in1, in2, p1, p2, out, {1}, TEMP_OP1{});
-
-            CHECK(out ==
-            std::vector<int>
-            {
-                in1[2] + in1[3] + in1[4] + in2[0] + in2[1],
-                in1[3] + in1[4] + in2[0] + in2[1] + in2[2],
-                0,
-                0,
-                0
-            });
-        }
-
-   }
-    */
-
-   /*
-   SECTION("apply_end()"){
-
-        SECTION("Symmetric stencil"){
-
-            std::vector<int> in1 = {1,2,3,4,5};
-            std::vector<int> in2 = {6,7};
-            std::vector<int> out = {0,0,0,0,0};
-
-            Partition<1> p1({5}, {0}, {5});
-            Partition<1> p2({2}, {0}, {2});
-            
-            apply_end(in1, in2, p1, p2, out, {1}, TEMP_OP1{});
-
-            CHECK(out ==
-            std::vector<int>
-            {
-                0,
-                0,
-                0,
-                in1[1] + in1[2] + in1[3] + in1[4] + in2[0],
-                in1[2] + in1[3] + in1[4] + in2[0] + in2[1]
-            });
-        }
-
-        SECTION("Right biased stencil"){
-
-            std::vector<int> in1 = {1,2,3,4,5};
-            std::vector<int> in2 = {6,7,8};
-            std::vector<int> out = {0,0,0,0,0};
-
-            Partition<1> p1({5}, {0}, {5});
-            Partition<1> p2({3}, {0}, {3});
-        
-            apply_end(in1, in2, p1, p2, out, {1}, TEMP_OP2{});
-
-            CHECK(out ==
-            std::vector<int>
-            {
-                0,
-                0,
-                0,
-                in1[4] + in2[0],
-                in2[0] + in2[1]
-            });
-
-        }
-   }
-
-    
-
-    */
-
 }
 
 
