@@ -758,6 +758,15 @@ TEST_CASE("Test TileCollection"){
 
         CHECK(s.get_tiles(Orientation(1)).size() == 1);
 
+        constexpr Tile t4(-3, 2, Orientation(2));
+
+        constexpr TileCollection<4> s2({t1, t2, t3, t4});
+
+        CHECK(s2.barrier_begin(Orientation(0)) == 2);
+        CHECK(s2.barrier_begin(Orientation(2)) == 3);
+        CHECK(s2.barrier_end(Orientation(0)) == 2);
+        CHECK(s2.barrier_end(Orientation(2)) == 2);
+
 
 
 

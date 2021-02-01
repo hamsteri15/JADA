@@ -32,24 +32,24 @@ template <size_t N> struct TileCollection {
         return ret;
     }
 
-
-    constexpr std::vector<Tile> get_tiles(position<N> direction){
-        return get_tiles(Orientation(direction));
+    constexpr idx_t barrier_begin(Orientation o) const {
+        auto it = std::max_element(
+            std::cbegin(m_tiles),
+            std::cend(m_tiles),
+            [&](const Tile& lhs, const Tile& rhs) {return lhs.barrier_begin(o) < rhs.barrier_begin(o);}
+        );
+        return it->barrier_begin(o);
     }
 
-
-    /*
-    constexpr idx_t barrier_end(position<N> direction) const {
-
+    constexpr idx_t barrier_end(Orientation o) const {
+        auto it = std::max_element(
+            std::cbegin(m_tiles),
+            std::cend(m_tiles),
+            [&](const Tile& lhs, const Tile& rhs) {return lhs.barrier_end(o) < rhs.barrier_end(o);}
+        );
+        return it->barrier_end(o);
     }
-    constexpr idx_t barrier_end() const {
-        return std::max(idx_t(0), get_max());
-    }
 
-    constexpr idx_t barrier_begin() const {
-        return std::max(idx_t(0), -get_min());
-    }
-    */
 
 
 
