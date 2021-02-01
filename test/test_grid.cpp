@@ -8,6 +8,7 @@
 #include "grid/block.hpp"
 #include "grid/boundary.hpp"
 #include "grid/tile.hpp"
+#include "grid/tile_collection.hpp"
 #include "grid/data.hpp"
 
 template <class Loop>
@@ -743,7 +744,7 @@ TEST_CASE("Test tile") {
 
 
 
-TEST_CASE("Test Tiles"){
+TEST_CASE("Test TileCollection"){
 
     using namespace JADA;
 
@@ -753,7 +754,7 @@ TEST_CASE("Test Tiles"){
         constexpr Tile t2(-2, 2, Orientation(1));
         constexpr Tile t3(-2, 2, Orientation(2));
 
-        constexpr Tiles<3> s({t1,t2,t3}); 
+        constexpr TileCollection<3> s({t1,t2,t3}); 
 
         auto r = s.get_tiles(Orientation(1));
 
