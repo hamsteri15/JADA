@@ -7,8 +7,7 @@
 #include "grid/decomposition.hpp"
 #include "grid/block.hpp"
 #include "grid/boundary.hpp"
-#include "grid/tiled_data.hpp"
-#include "grid/tile_apply.hpp"
+#include "grid/tile.hpp"
 #include "grid/data.hpp"
 
 template <class Loop>
