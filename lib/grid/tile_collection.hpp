@@ -19,7 +19,7 @@ template <size_t N> struct TileCollection {
     constexpr std::vector<Tile> get_tiles(Orientation orr) const {
 
         // Not sure if this is stack allocated or not,
-        // consider returning an array somehow
+        // consider returning an array or an iterator pair
         std::vector<Tile> ret; ret.reserve(N);
 
        for (const auto& t : m_tiles){
@@ -33,21 +33,19 @@ template <size_t N> struct TileCollection {
     }
 
     constexpr idx_t barrier_begin(Orientation o) const {
-        auto it = std::max_element(
+        return std::max_element(
             std::cbegin(m_tiles),
             std::cend(m_tiles),
             [&](const Tile& lhs, const Tile& rhs) {return lhs.barrier_begin(o) < rhs.barrier_begin(o);}
-        );
-        return it->barrier_begin(o);
+        )->barrier_begin(o);
     }
 
     constexpr idx_t barrier_end(Orientation o) const {
-        auto it = std::max_element(
+        return std::max_element(
             std::cbegin(m_tiles),
             std::cend(m_tiles),
             [&](const Tile& lhs, const Tile& rhs) {return lhs.barrier_end(o) < rhs.barrier_end(o);}
-        );
-        return it->barrier_end(o);
+        )->barrier_end(o);
     }
 
 
