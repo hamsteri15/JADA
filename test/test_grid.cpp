@@ -677,6 +677,23 @@ TEST_CASE("Test data"){
 }
 
 
+TEST_CASE("Test orientation"){
+
+
+    using namespace JADA;
+
+    Orientation o1(0);
+    Orientation o2(1);
+    Orientation o3(2);
+    CHECK(o1.get_direction<3>() == position<3>{1, 0, 0} );
+    CHECK(o2.get_direction<3>() == position<3>{0, 1, 0} );
+    CHECK(o3.get_direction<3>() == position<3>{0, 0, 1} );
+    
+    REQUIRE_THROWS(o3.get_direction<2>());
+
+
+}
+
 
 TEST_CASE("Test tile") {
 
@@ -685,7 +702,7 @@ TEST_CASE("Test tile") {
 
     SECTION("Constructors"){
 
-        Tile t1(-2, 2, 0);
+        Tile t1(-2, 2, Orientation(0));
         CHECK(t1.get_min() == -2);
         CHECK(t1.get_max() ==  2);
         CHECK(t1.get_width() == 5);
@@ -695,7 +712,7 @@ TEST_CASE("Test tile") {
         CHECK(t1.barrier_begin() == 2);
 
 
-        Tile t2(0, 3, 0);
+        Tile t2(0, 3, Orientation(1));
         CHECK(t2.get_min() == 0);
         CHECK(t2.get_max() == 3);
         CHECK(t2.get_width() == 4);
@@ -704,7 +721,7 @@ TEST_CASE("Test tile") {
         CHECK(t2.barrier_end() == 3);
 
 
-        constexpr Tile t3(-2,2,1);
+        constexpr Tile t3(-2,2,Orientation(2));
         CHECK(t3.get_min() == -2);
         CHECK(t3.get_max() == 2);
         CHECK(t3.get_width() == 5);
@@ -722,9 +739,8 @@ TEST_CASE("Test tile") {
     }
 
 
-
-
 }
+
 
 
 TEST_CASE("Test Tiles"){
@@ -733,14 +749,21 @@ TEST_CASE("Test Tiles"){
 
     SECTION("Constructors"){
 
-        constexpr Tile t1(-2, 2, 0);
-        constexpr Tile t2(-2, 2, 1);
-        constexpr Tile t3(-2, 2, 2);
+        constexpr Tile t1(-2, 2, Orientation(0));
+        constexpr Tile t2(-2, 2, Orientation(1));
+        constexpr Tile t3(-2, 2, Orientation(2));
 
         constexpr Tiles<3> s({t1,t2,t3}); 
 
+        auto r = s.get_tiles(Orientation(1));
+
+
+        CHECK(r.size() == 0);
 
     }
+
+
+    
 
 
 
