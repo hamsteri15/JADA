@@ -11,7 +11,6 @@ namespace JADA {
 template<size_t N, class Storage, class Op>
 static void apply(const Data<N, Storage>& in, Data<N, Storage>& out, [[maybe_unused]] Op op){
 
-    
     using ET        = Storage::value_type;
     using tile_t    = Op::Shape;
     using storage_t = TiledData<tile_t, ET>;
@@ -28,10 +27,10 @@ static void apply(const Data<N, Storage>& in, Data<N, Storage>& out, [[maybe_unu
         data_out[idx] = Op::apply(storage_t(&data_in[idx]));
     }    
 
+    
 
 }
 */
-
 
 
 

@@ -13,8 +13,21 @@ struct Orientation{
     explicit constexpr Orientation(size_t id) : m_id(id) {}
 
     template<size_t N>
+    explicit constexpr Orientation(position<N> direction) {
+        Utils::runtime_assert(direction.elementwise_sum() == 1, "Invalid direction.");
+
+        auto iter = std::find_if(std::cbegin(direction),
+                                 std::cend(direction),
+                                 [](idx_t value) { return value == 1; });
+
+        m_id = size_t(std::distance(std::cbegin(direction), iter));
+
+    }
+
+
+    template<size_t N>
     constexpr position<N> get_direction() const {
-        Utils::runtime_assert(m_id < N, "Invalid orientation");
+        Utils::runtime_assert(m_id < N, "Invalid direction");
         position<N> p{};
         p[m_id] = idx_t(1);
         return p;
@@ -23,11 +36,17 @@ struct Orientation{
     constexpr auto operator<=>(const Orientation&) const = default;
 
 
+    constexpr size_t id() const {return m_id;}
+
 private:
 
     size_t m_id;
 
 };
+
+
+
+
 
 
 }

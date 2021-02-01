@@ -693,6 +693,12 @@ TEST_CASE("Test orientation"){
     REQUIRE_THROWS(o3.get_direction<2>());
 
 
+    Orientation o4(position<4>{0,0,1,0});
+
+    CHECK(o4.id() == 2);
+
+
+
 }
 
 
@@ -704,37 +710,30 @@ TEST_CASE("Test tile") {
     SECTION("Constructors"){
 
         Tile t1(-2, 2, Orientation(0));
-        CHECK(t1.get_min() == -2);
-        CHECK(t1.get_max() ==  2);
-        CHECK(t1.get_width() == 5);
+        CHECK(t1.get_min(Orientation(0)) == -2);
+        CHECK(t1.get_max(Orientation(0)) ==  2);
+        CHECK(t1.get_width(Orientation(0)) == 5);
 
 
-        CHECK(t1.barrier_end() == 2);
-        CHECK(t1.barrier_begin() == 2);
+        CHECK(t1.barrier_end(Orientation(0)) == 2);
+        CHECK(t1.barrier_begin(Orientation(0)) == 2);
 
 
         Tile t2(0, 3, Orientation(1));
-        CHECK(t2.get_min() == 0);
-        CHECK(t2.get_max() == 3);
-        CHECK(t2.get_width() == 4);
+        CHECK(t2.get_min(Orientation(1)) == 0);
+        CHECK(t2.get_max(Orientation(1)) == 3);
+        CHECK(t2.get_width(Orientation(1)) == 4);
 
-        CHECK(t2.barrier_begin() == 0);
-        CHECK(t2.barrier_end() == 3);
+        CHECK(t2.barrier_begin(Orientation(1)) == 0);
+        CHECK(t2.barrier_end(Orientation(1)) == 3);
 
 
         constexpr Tile t3(-2,2,Orientation(2));
-        CHECK(t3.get_min() == -2);
-        CHECK(t3.get_max() == 2);
-        CHECK(t3.get_width() == 5);
-        CHECK(t3.barrier_end() == 2);
-        CHECK(t3.barrier_begin() == 2);
 
-
-        constexpr size_t N = t3.get_width();
+        constexpr size_t N = t3.get_width(Orientation(2));
 
         std::array<int, N> arr = {1,2,3,4,5};
         CHECK(arr[3] == 4);
-
 
 
     }
@@ -756,10 +755,11 @@ TEST_CASE("Test TileCollection"){
 
         constexpr TileCollection<3> s({t1,t2,t3}); 
 
-        auto r = s.get_tiles(Orientation(1));
+
+        CHECK(s.get_tiles(Orientation(1)).size() == 1);
 
 
-        CHECK(r.size() == 0);
+
 
     }
 

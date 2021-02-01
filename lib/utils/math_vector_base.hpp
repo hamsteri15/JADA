@@ -62,6 +62,7 @@ template <class T, size_t L, class S> struct MathVectorBase {
     inline T max() const {return *std::max_element(cbegin(), cend());}
     inline T min() const {return *std::min_element(cbegin(), cend());}
     inline T elementwise_product() const { return std::accumulate(begin(), end(), T(1), std::multiplies{});}
+    inline T elementwise_sum() const { return std::accumulate(begin(), end(), T(0));}
 
 
 
