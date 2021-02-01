@@ -7,51 +7,82 @@
 
 namespace JADA{
 
-template<idx_t min, idx_t max>
-struct Tile{
 
-    static_assert(min < max, "Tile min must be smaller than tile max");
+struct Tile {
 
-    static constexpr idx_t get_min(){
-        return min;
-    }
+    constexpr Tile(idx_t min, idx_t max, size_t orr)
+        : m_min(min)
+        , m_max(max)
+        , m_orr(orr) {}
 
-    static constexpr idx_t get_max(){
-        return max;
-    }
+    constexpr idx_t  get_min() const { return m_min; }
+    constexpr idx_t  get_max() const { return m_max; }
+    constexpr size_t get_width() const { return size_t(m_max - m_min + 1); }
+    constexpr size_t get_orientation() const { return m_orr; }
 
-    static constexpr size_t get_width(){
-        //includes f[i = 0]
-        /*if constexpr ( (min * max) < 0){
-            return max - min + 1;
-        }*/
-        //does not include f[0]
-        return max - min + 1;
-    }
 
-    // {0,1,2,3,4,5,6,7}
-    //f[i] = f[i+1] + f[i+2] -> last index that can be computed = 5, -> barrier end = 2 + 1
-    //f[i] = f[i-3] + f[i-2] + f[i-1] -> last index that can be computed = 7 -> barrier end = 0
+    
 
-    static constexpr idx_t barrier_end(){
+
+    constexpr idx_t barrier_end() const {
         return std::max(idx_t(0), get_max());
     }
 
-    // {0,1,2,3,4,5,6,7}
-    //f[i] = f[i+1] + f[i+2] -> first index that can be computed = 0 -> barrier begin = 0
-    //f[i] = f[i-3] + f[i-2] + f[i-1] -> first index that can be computed = 3 -> barrier begin = 3
-    static constexpr idx_t barrier_begin(){
+    constexpr idx_t barrier_begin() const {
         return std::max(idx_t(0), -get_min());
     }
 
 
+private:
+    idx_t  m_min, m_max;
+    size_t m_orr;
 };
 
+template<size_t N>
+struct Tiles{
+
+    explicit constexpr Tiles(std::array<Tile, N> tiles) : m_tiles(tiles) {
+
+
+
+    }
+
+    constexpr std::array<Tile, N> get_tiles() const {return m_tiles;}
+
+
+    constexpr auto get_tiles(size_t orientation) const {
+
+        constexpr size_t count = unique(orientation);
+
+        std::array<Tile, count> ret;
+        return ret;
+
+
+    }
+    
 
 
 
 
 
+private:
+
+    std::array<Tile, N> m_tiles;
+
+
+    constexpr size_t unique(size_t orientation) const {
+        size_t count = 0;
+        for (const auto& t : m_tiles){
+            if (t.get_orientation() == orientation){
+                count++;
+            }
+        }
+        return count;
+    }
+
+
+
+};
 
 
 }

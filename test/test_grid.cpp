@@ -686,7 +686,7 @@ TEST_CASE("Test tile") {
 
     SECTION("Constructors"){
 
-        Tile<-2, 2> t1;
+        Tile t1(-2, 2, 0);
         CHECK(t1.get_min() == -2);
         CHECK(t1.get_max() ==  2);
         CHECK(t1.get_width() == 5);
@@ -696,7 +696,7 @@ TEST_CASE("Test tile") {
         CHECK(t1.barrier_begin() == 2);
 
 
-        Tile<0, 3> t2;
+        Tile t2(0, 3, 0);
         CHECK(t2.get_min() == 0);
         CHECK(t2.get_max() == 3);
         CHECK(t2.get_width() == 4);
@@ -705,6 +705,18 @@ TEST_CASE("Test tile") {
         CHECK(t2.barrier_end() == 3);
 
 
+        constexpr Tile t3(-2,2,1);
+        CHECK(t3.get_min() == -2);
+        CHECK(t3.get_max() == 2);
+        CHECK(t3.get_width() == 5);
+        CHECK(t3.barrier_end() == 2);
+        CHECK(t3.barrier_begin() == 2);
+
+
+        constexpr size_t N = t3.get_width();
+
+        std::array<int, N> arr = {1,2,3,4,5};
+        CHECK(arr[3] == 4);
 
 
 
@@ -715,6 +727,27 @@ TEST_CASE("Test tile") {
 
 }
 
+
+TEST_CASE("Test Tiles"){
+
+    using namespace JADA;
+
+    SECTION("Constructors"){
+
+        constexpr Tile t1(-2, 2, 0);
+        constexpr Tile t2(-2, 2, 1);
+        constexpr Tile t3(-2, 2, 2);
+
+        constexpr Tiles<3> s({t1,t2,t3}); 
+
+
+    }
+
+
+
+}
+
+/*
 struct TEMP_OP1 {
     using Shape = JADA::Tile<-2, 2>;
 
@@ -730,6 +763,7 @@ struct TEMP_OP2 {
         return f(1) + f(2);
     } 
 };
+
 
 TEST_CASE("Test TiledData"){
 
@@ -789,37 +823,10 @@ TEST_CASE("Test TiledData"){
 
 
 }
+*/
 
 
 
-
-
-TEST_CASE("Tile apply"){
-
-    using namespace JADA;
-
-
-    /*
-    SECTION("1D"){
-
-
-        std::vector<int> in = {0, 1,2,3,4,5, 0};
-        Block<1> b_in({0}, {7});
-        std::vector<int> out = {0,0,0,0,0};
-        Block<1> b_out({0}, {5});
-
-        auto in_data = Data(b_in, in);
-        auto out_data= Data(b_out, out);
-
-        apply(in_data, out_data, TEMP_OP2());
-
-
-
-
-    }
-
-    */
-}
 
 
 
