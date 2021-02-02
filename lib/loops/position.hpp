@@ -36,8 +36,8 @@ struct position : public Utils::MathVectorBase<idx_t, L, position<L>> {
         return true;
     }
 
-    const element_t* get_ptr() const { return m_storage.data(); }
-    element_t* get_ptr() { return m_storage.data(); }
+    constexpr const element_t* get_ptr() const { return m_storage.data(); }
+    constexpr element_t* get_ptr() { return m_storage.data(); }
 
 private:
     std::array<element_t, L> m_storage;

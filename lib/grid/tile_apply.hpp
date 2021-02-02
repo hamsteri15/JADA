@@ -2,35 +2,87 @@
 
 #include "grid/boundary.hpp"
 #include "grid/data.hpp"
+#include "grid/tile.hpp"
 #include "utils/constexpr_functions.hpp"
 #include "loops/flatten_index.hpp"
 
 namespace JADA {
 
-/*
-template<size_t N, class Storage, class Op>
-static void apply(const Data<N, Storage>& in, Data<N, Storage>& out, [[maybe_unused]] Op op){
 
-    using ET        = Storage::value_type;
-    using tile_t    = Op::Shape;
-    using storage_t = TiledData<tile_t, ET>;
+struct TEMP_OP1 {
 
-    Utils::runtime_assert(in.size() == out.size(), "Data size mismatch");
-
-    const auto& data_in = in.get_storage();
-    auto& data_out = out.get_storage();
-
-
-
-    for (auto pos : loop(in.get_block())){
-        auto idx = size_t(flatten<N, StorageOrder::RowMajor>(in.get_block().dimensions(), pos));
-        data_out[idx] = Op::apply(storage_t(&data_in[idx]));
-    }    
+    static constexpr Tile shape = Tile(-2, 2, Orientation(0));
 
     
+    template<class IT>
+    static auto apply(const IT f){
+        return f(-2) + f(-1) + f(0) + f(1) + f(2);
+    } 
+};
+
+
+template<class ConstIt>
+struct DataHandle{
+
+    constexpr DataHandle(ConstIt data, idx_t offset) : m_data(data), m_offset(offset){}
+
+
+    const auto operator() (idx_t i) const {
+        return m_data[i*m_offset];
+    }
+
+
+    ConstIt m_data;    
+    idx_t m_offset;
+};
+
+
+
+
+
+template<size_t N, class Storage, class Op>
+static void apply_interior(const Data<N, Storage>& in, Data<N, Storage>& out, [[maybe_unused]] Op op){
+
+
+
+
+    Utils::runtime_assert(in.size() == out.size(), "Size mismatch in apply interior");
+
+    constexpr auto ori = op.shape.get_orientation();
+    constexpr auto dir = to_direction<N>(ori);
+
+    //position<N> dir{};
+    //dir[0] = 1;
+//    constexpr position<N> dir = op.shape.get_orientation().get_direction<N>();
+
+
+    auto width_begin = op.shape.barrier_begin(ori);
+    auto width_end = op.shape.barrier_end(ori);
+
+
+    auto interior = get_interior_subblock(in.get_block(), dir, width_begin, width_end);
+    
+    auto block_dims = in.get_block().dimensions();
+
+    const auto offsets = get_shifts<N, StorageOrder::RowMajor>(block_dims);
+
+    [[maybe_unused]] const auto offset = idx_t(offsets[ori.id()]);
+
+    const auto& in_data = in.get_storage().data();
+    auto* out_data = out.get_storage().data();
+
+
+    for (auto pos : loop(interior)){
+
+        auto idx = flatten<N, StorageOrder::RowMajor>(block_dims, pos );
+
+        out_data[idx] = op.apply(DataHandle(&in_data[idx], offset));
+
+
+    }
+
 
 }
-*/
 
 
 

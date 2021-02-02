@@ -33,6 +33,8 @@ struct Orientation{
         return p;
     }
 
+
+
     constexpr auto operator<=>(const Orientation&) const = default;
 
 
@@ -44,9 +46,10 @@ private:
 
 };
 
-
-
-
-
-
+template <size_t N> static constexpr position<N> to_direction(Orientation o) {
+    Utils::runtime_assert(o.id() < N, "Invalid direction");
+    position<N> p{};
+    p[o.id()] = idx_t(1);
+    return p;
+}
 }

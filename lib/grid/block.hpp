@@ -23,6 +23,10 @@ template <size_t N> struct Block : public Loopable<Block<N>, N> {
             Utils::runtime_assert(extent.elementwise_product() != 0, "Zero size block." );
         }
 
+
+    static constexpr size_t num_spatial_dims() {return N;}
+
+
     size_t      size() const { return size_t(m_extent.elementwise_product()); }
     position<N> begin() const { return m_begin; }
     position<N> end() const { return m_begin + m_extent; }
@@ -97,6 +101,82 @@ auto loop(const Block<N>& lhs, const Block<N>& rhs, position<N> direction){
 
 }
 
+template<size_t N>
+static auto get_boundary_subblock(const Block<N>& block, position<N> dir, idx_t width) {
+
+    auto boundary = block.get_boundary(dir);
+    auto begin = boundary.begin();
+
+    for (size_t i = 0; i < N; ++i){
+        if (dir[i] >= 0){
+            begin[i] -= dir[i] * (width - 1);
+        }
+    }
+    
+    auto extent = (dir * width).abs();
+
+    for (size_t i = 0; i < N; ++i){
+        if (extent[i] == 0) {
+            extent[i] = idx_t(block.dimensions()[i]);
+        }
+    }
+
+    return block.get_subblock(begin, extent);
+}
+
+template<size_t N>
+static auto get_interior_subblock(const Block<N>& block, position<N> dir, idx_t width_begin, idx_t width_end){
+
+    auto begin = block.begin() + dir.abs() * width_begin;
+    auto end   = block.end() - dir.abs() * width_end;
+    auto extent = end - begin;
+    return block.get_subblock(begin, extent);
+
+
+    /*
+
+    auto sblock1 = get_boundary_subblock(block, dir, width_begin);
+    auto sblock2 = get_boundary_subblock(block, -dir, width_end);
+
+    auto b1 = sblock1.begin();
+    auto b2 = sblock2.begin();
+
+    auto e1 = sblock1.end();
+    auto e2 = sblock2.end();
+
+
+    position<N> begin{};
+    position<N> end{};
+
+    for (size_t i = 0; i < N; ++i){
+        if (b1[i] < b2[i]) {
+            begin[i] = b1[i];
+        }
+        else {
+            begin[i] = b2[i];
+        }
+
+        if (e1[i] > e2[i]){
+            end[i] = e1[i];
+        }
+        else {
+            end[i] = e2[i];
+        }
+
+
+    }
+
+    auto extent = end - begin;
+    return block.get_subblock(begin, extent);
+
+    //[x, x, x, 0, 0, 0, 0, 0, x, x]
+    */
+
+}
+
+
+
+
 template <size_t N, class Iter>
 static auto pick_data(Iter in, const SubBlock<N>& block) {
 
@@ -121,24 +201,8 @@ template<size_t N, class Iter>
 static auto pick_data(Iter in, const Block<N>& block, position<N> dir, idx_t width){
 
 
-    auto boundary = block.get_boundary(dir);
-    auto begin = boundary.begin();
-
-    for (size_t i = 0; i < N; ++i){
-        if (dir[i] >= 0){
-            begin[i] -= dir[i] * (width - 1);
-        }
-    }
     
-    auto extent = (dir * width).abs();
-
-    for (size_t i = 0; i < N; ++i){
-        if (extent[i] == 0) {
-            extent[i] = idx_t(block.dimensions()[i]);
-        }
-    }
-
-    auto subblock = block.get_subblock(begin, extent);
+    auto subblock = get_boundary_subblock(block, dir, width);
 
     return pick_data(in, subblock);
 }

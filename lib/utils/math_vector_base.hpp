@@ -18,8 +18,8 @@ template <class T, size_t L, class S> struct MathVectorBase {
     // clang-format off
 
     //CRTP injection of access to the data, these must be implemented by all derived classes
-    const T* get_ptr() const { return static_cast<const S*>(this)->get_ptr(); }
-          T* get_ptr()       { return static_cast<      S*>(this)->get_ptr(); }
+    constexpr const T* get_ptr() const { return static_cast<const S*>(this)->get_ptr(); }
+    constexpr       T* get_ptr()       { return static_cast<      S*>(this)->get_ptr(); }
 
 
 
@@ -54,12 +54,12 @@ template <class T, size_t L, class S> struct MathVectorBase {
     inline constexpr reverese_iterator_t        crend()     const noexcept {return const_reverse_iterator_t(begin());}
 
 
-    inline const T& operator[](size_t idx) const { return get_ptr()[idx]; }
-    inline       T& operator[](size_t idx)       { return get_ptr()[idx]; }
+    inline constexpr const T& operator[](size_t idx) const { return get_ptr()[idx]; }
+    inline constexpr     T& operator[](size_t idx)       { return get_ptr()[idx]; }
 
 
 
-    inline T max() const {return *std::max_element(cbegin(), cend());}
+    inline constexpr T max() const {return *std::max_element(cbegin(), cend());}
     inline T min() const {return *std::min_element(cbegin(), cend());}
     inline T elementwise_product() const { return std::accumulate(begin(), end(), T(1), std::multiplies{});}
     inline T elementwise_sum() const { return std::accumulate(begin(), end(), T(0));}
