@@ -609,28 +609,42 @@ TEST_CASE("Test Block"){
 
         SECTION("Interior Subblock"){
 
-            std::vector<int> data
-            {1, 1, 0, 0, 
-             1, 1, 2, 0, 
-             0, 0, 0, 2};
+            SECTION("ASD"){
 
-            Block<2> block({0, 0}, {3, 4});
 
+                Block<2> block({0, 0}, {3, 4});
+
+                
+
+                auto sblock1 = get_interior_subblock(block, {0,1}, 2, 1);
+                auto sblock2 = get_interior_subblock(block, {0,-1}, 2, 1);
+                auto sblock3 = get_interior_subblock(block, {1,0}, 1, 1);
+
+
+                CHECK(sblock1.begin() == position<2>{0, 2});
+                CHECK(sblock1.end() == position<2>{3, 3});
+
+                CHECK(sblock2.begin() == position<2>{0, 2});
+                CHECK(sblock2.end() == position<2>{3, 3});
+
+                CHECK(sblock3.begin() == position<2>{1, 0});
+                CHECK(sblock3.end() == position<2>{2, 4});
+
+            }
             
 
-            auto sblock1 = get_interior_subblock(block, {0,1}, 2, 1);
-            auto sblock2 = get_interior_subblock(block, {0,-1}, 2, 1);
-            auto sblock3 = get_interior_subblock(block, {1,0}, 1, 1);
 
 
-            CHECK(sblock1.begin() == position<2>{0, 2});
-            CHECK(sblock1.end() == position<2>{3, 3});
+            SECTION("Bug") {
+                Block<2> block({0, 0}, {3, 5});
 
-            CHECK(sblock2.begin() == position<2>{0, 2});
-            CHECK(sblock2.end() == position<2>{3, 3});
+                auto sblock1 = get_interior_subblock(block, {0,1}, 2, 2);
 
-            CHECK(sblock3.begin() == position<2>{1, 0});
-            CHECK(sblock3.end() == position<2>{2, 4});
+                CHECK(sblock1.begin() == position<2>{0, 2});
+                CHECK(sblock1.end() == position<2>{3, 3});
+
+            }
+
 
         }
 
@@ -694,6 +708,8 @@ TEST_CASE("Test data"){
 
     SECTION("Constructors"){
 
+
+
         std::vector<int> d = {1,2,3,
                               4,5,6};
 
@@ -704,6 +720,27 @@ TEST_CASE("Test data"){
         REQUIRE_THROWS(Data(b2,d));
 
     }
+}
+
+TEST_CASE("Test SplitData"){
+
+    using namespace JADA;
+
+    SECTION("Constructors") {
+
+        Block<2> b1({0,0}, {2,3});
+        Block<2> b2({0,0}, {3,3});
+
+        std::vector<int> s1(b1.size());
+        std::vector<int> s2(b2.size());
+
+        REQUIRE_THROWS(SplitData(b1, b2, s1, s2, {0, 1}));
+        REQUIRE_NOTHROW(SplitData(b1, b2, s1, s2, {1, 0}));
+
+
+    }
+
+
 }
 
 
@@ -828,7 +865,36 @@ TEST_CASE("Tile apply"){
 
     }
 
+    SECTION("2D"){
 
+        std::vector<int> in =
+            {1,2,3,4,5,6, 
+             1,2,3,4,5,6,
+             1,2,3,4,5,6,
+             1,2,3,4,5,6,
+             1,2,3,4,5,6};
+
+        std::vector<int> out(in.size());
+        Block<2> block({0, 0}, {5, 6});
+
+        auto data_in = Data(block, in);
+        auto data_out = Data(block, out);
+
+
+        auto constexpr op = TEMP_OP1();
+
+        apply_interior(data_in, data_out, op);
+
+        CHECK(out == std::vector<int>
+        {
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+            5*1, 5*2, 5*3, 5*4, 5*5, 5*6,
+            0,0,0,0,0,0,
+            0,0,0,0,0,0,
+        }); 
+
+    }
 
 }
 

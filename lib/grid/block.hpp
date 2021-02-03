@@ -132,49 +132,18 @@ static auto get_interior_subblock(const Block<N>& block, position<N> dir, idx_t 
     auto extent = end - begin;
     return block.get_subblock(begin, extent);
 
-
-    /*
-
-    auto sblock1 = get_boundary_subblock(block, dir, width_begin);
-    auto sblock2 = get_boundary_subblock(block, -dir, width_end);
-
-    auto b1 = sblock1.begin();
-    auto b2 = sblock2.begin();
-
-    auto e1 = sblock1.end();
-    auto e2 = sblock2.end();
-
-
-    position<N> begin{};
-    position<N> end{};
-
-    for (size_t i = 0; i < N; ++i){
-        if (b1[i] < b2[i]) {
-            begin[i] = b1[i];
-        }
-        else {
-            begin[i] = b2[i];
-        }
-
-        if (e1[i] > e2[i]){
-            end[i] = e1[i];
-        }
-        else {
-            end[i] = e2[i];
-        }
-
-
-    }
-
-    auto extent = end - begin;
-    return block.get_subblock(begin, extent);
-
-    //[x, x, x, 0, 0, 0, 0, 0, x, x]
-    */
-
 }
 
 
+
+
+template<size_t N>
+static auto merge(const Block<N>& block1, const Block<N>& block2) {
+
+    position<N> begin{};
+    auto extent = block1.dimensions() + block2.dimensions();
+    return Block<N>(begin, extent);
+}
 
 
 template <size_t N, class Iter>
