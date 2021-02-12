@@ -57,14 +57,6 @@ static void apply_interior(const Data<N, Storage>& in, Data<N, Storage>& out, [[
 
     auto interior = get_interior_subblock(in.get_block(), dir, width_begin, width_end);
 
-
-    std::cout << "Begin "<< interior.begin() << std::endl;
-    std::cout << "End " <<interior.end() << std::endl;
-    std::cout << "Block dims" << in.get_block().dimensions() << std::endl;
-
-    std::cout << width_begin << std::endl;
-    std::cout << width_end << std::endl;
-
     auto block_dims = in.get_block().dimensions();
 
     const auto offsets = get_shifts<N, StorageOrder::RowMajor>(block_dims);
@@ -86,6 +78,45 @@ static void apply_interior(const Data<N, Storage>& in, Data<N, Storage>& out, [[
 
 
 }
+
+/*
+
+apply_boarder(Data owner, Data out, Op op) {
+
+
+    
+    1) Compute owner_width
+    2) Compute neighbour width
+    3) Compute owner start
+    4) Compute neighbour start
+    5) Slice owner data
+    6) Get neighbour data
+    7) Combine datas
+    8) Call apply_interior
+
+
+
+
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
