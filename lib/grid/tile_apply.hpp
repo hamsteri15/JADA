@@ -31,6 +31,8 @@ template <class T, class P> struct DataHandle {
         return m_data(m_center + m_dir * i);
     }
 
+private:
+
     const T& m_data;
     const P& m_center;
     const P& m_dir;
@@ -60,26 +62,6 @@ static void apply_interior(const MdView<N, Storage>& in, MdView<N, Storage>& out
 
 }
 
-/*
-
-apply_boarder(MdView owner, MdView out, Op op) {
-
-
-    
-    1) Compute owner_width
-    2) Compute neighbour width
-    3) Compute owner start
-    4) Compute neighbour start
-    5) Slice owner data
-    6) Get neighbour data
-    7) Combine datas
-    8) Call apply_interior
-
-
-
-
-}
-*/
 
 
 

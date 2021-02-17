@@ -5,6 +5,8 @@
 #include "loops/flatten_index.hpp"
 namespace JADA{
 
+//Poor man's implementation of std::experimental::md_span, 
+//needs to be replaced when compilers start to provide the implementation.
 template <size_t N, class Container> struct MdView {
 
     MdView(const Block<N>& block, Container& storage)
