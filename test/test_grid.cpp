@@ -805,67 +805,6 @@ TEST_CASE("Test Tile") {
     }
 
 
-    SECTION("Free functions") {
-
-
-        Tile t1(-2, 2, Orientation(0));
-
-        CHECK(boundary_width(t1, Orientation(0)) == 6);
-        CHECK(boundary_width(t1, Orientation(1)) == 0);
-
-
-        Tile t2(-3, 0, Orientation(0));
-
-        CHECK(boundary_width(t2, Orientation(0)) == 0);
-        CHECK(boundary_width(t2, Orientation(1)) == 0);
-
-
-
-        /*
-
-        SECTION("Symmetric") {
-
-            SECTION("End") {
-                Tile t(-2, 2, Orientation(0));
-
-                auto [o_w, n_w] = owner_neighbour_width_end(t, Orientation(0));
-
-                CHECK(o_w == 4);
-                CHECK(n_w == 2);
-
-                auto [o_w2, n_w2] = owner_neighbour_width_end(t, Orientation(1));
-
-                CHECK(o_w2 == 0);
-                CHECK(n_w2 == 0);
-
-            }
-
-        }
-
-        SECTION("Left biased") {
-
-            SECTION("End") {
-
-                Tile t (-3, -1, Orientation(0));
-                auto [o_w, n_w] = owner_neighbour_width_end(t, Orientation(0));
-
-                CHECK(o_w == 0);
-                CHECK(n_w == 0);
-
-                
-                auto [o_w2, n_w2] = owner_neighbour_width_end(t, Orientation(1));
-
-                CHECK(o_w2 == 0);
-                CHECK(n_w2 == 0);
-
-            }
-
-        }
-
-        */
-
-
-    }
 
 
 
