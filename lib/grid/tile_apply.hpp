@@ -1,7 +1,7 @@
 #pragma once
 
 #include "grid/boundary.hpp"
-#include "grid/data.hpp"
+#include "grid/md_view.hpp"
 #include "grid/tile.hpp"
 #include "utils/constexpr_functions.hpp"
 #include "loops/flatten_index.hpp"
@@ -20,29 +20,24 @@ struct TEMP_OP1 {
     } 
 };
 
+template <class T, class P> struct DataHandle {
 
-template<class ConstIt>
-struct DataHandle{
+    DataHandle(const T& data, const P& center, const P& dir)
+        : m_data(data)
+        , m_center(center)
+        , m_dir(dir) {}
 
-    constexpr DataHandle(ConstIt data, idx_t offset) : m_data(data), m_offset(offset){}
-
-
-    const auto operator() (idx_t i) const {
-        return m_data[i*m_offset];
+    const auto operator()(idx_t i) const {
+        return m_data(m_center + m_dir * i);
     }
 
-
-    ConstIt m_data;    
-    idx_t m_offset;
+    const T& m_data;
+    const P& m_center;
+    const P& m_dir;
 };
 
-
-
-
-
 template<size_t N, class Storage, class Op>
-static void apply_interior(const Data<N, Storage>& in, Data<N, Storage>& out, [[maybe_unused]] Op op){
-
+static void apply_interior(const MdView<N, Storage>& in, MdView<N, Storage>& out, [[maybe_unused]] Op op){
 
 
 
@@ -57,23 +52,9 @@ static void apply_interior(const Data<N, Storage>& in, Data<N, Storage>& out, [[
 
     auto interior = get_interior_subblock(in.get_block(), dir, width_begin, width_end);
 
-    auto block_dims = in.get_block().dimensions();
-
-    const auto offsets = get_shifts<N, StorageOrder::RowMajor>(block_dims);
-
-    [[maybe_unused]] const auto offset = idx_t(offsets[ori.id()]);
-
-    const auto& in_data = in.get_storage().data();
-    auto* out_data = out.get_storage().data();
-
 
     for (auto pos : loop(interior)){
-
-        auto idx = flatten<N, StorageOrder::RowMajor>(block_dims, pos );
-
-        out_data[idx] = op.apply(DataHandle(&in_data[idx], offset));
-
-
+        out(pos) = op.apply(DataHandle(in, pos, dir));
     }
 
 
@@ -81,7 +62,7 @@ static void apply_interior(const Data<N, Storage>& in, Data<N, Storage>& out, [[
 
 /*
 
-apply_boarder(Data owner, Data out, Op op) {
+apply_boarder(MdView owner, MdView out, Op op) {
 
 
     

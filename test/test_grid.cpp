@@ -10,7 +10,7 @@
 #include "grid/tile.hpp"
 #include "grid/tile_collection.hpp"
 #include "grid/tile_apply.hpp"
-#include "grid/data.hpp"
+#include "grid/md_view.hpp"
 
 template <class Loop>
 static std::vector<int> set_ones(const std::vector<int>& v, Loop loop) {
@@ -716,32 +716,35 @@ TEST_CASE("Test data"){
         Block<2> b({0,0}, {2,3});
         Block<2> b2({0,0}, {3,3});
 
-        REQUIRE_NOTHROW(Data(b,d));
-        REQUIRE_THROWS(Data(b2,d));
-
-    }
-}
-
-TEST_CASE("Test SplitData"){
-
-    using namespace JADA;
-
-    SECTION("Constructors") {
-
-        Block<2> b1({0,0}, {2,3});
-        Block<2> b2({0,0}, {3,3});
-
-        std::vector<int> s1(b1.size());
-        std::vector<int> s2(b2.size());
-
-        REQUIRE_THROWS(SplitData(b1, b2, s1, s2, {0, 1}));
-        REQUIRE_NOTHROW(SplitData(b1, b2, s1, s2, {1, 0}));
-
+        REQUIRE_NOTHROW(MdView(b,d));
+        REQUIRE_THROWS(MdView(b2,d));
 
     }
 
 
+    SECTION("Element access") {
+
+        std::vector<int> d = {1,2,3,
+                              4,5,6};
+        
+        Block<2> b({0,0}, {2,3});
+
+        auto data = MdView(b,d);
+
+        CHECK(data({0,0}) == 1);
+        CHECK(data({1,0}) == 4);
+        data({1, 0}) = 55;
+        CHECK(data({1,0}) == 55);
+
+        REQUIRE_THROWS(
+            data({2, 1})
+        );
+
+    }
+
+
 }
+
 
 
 TEST_CASE("Test orientation"){
@@ -854,8 +857,8 @@ TEST_CASE("Tile apply"){
 
         Block<1> block({0}, {5});
 
-        auto data_in = Data(block, in);
-        auto data_out = Data(block, out);
+        auto data_in = MdView(block, in);
+        auto data_out = MdView(block, out);
 
 
         auto constexpr op = TEMP_OP1();
@@ -880,8 +883,8 @@ TEST_CASE("Tile apply"){
         std::vector<int> out(in.size());
         Block<2> block({0, 0}, {5, 6});
 
-        auto data_in = Data(block, in);
-        auto data_out = Data(block, out);
+        auto data_in = MdView(block, in);
+        auto data_out = MdView(block, out);
 
 
         auto constexpr op = TEMP_OP1();
