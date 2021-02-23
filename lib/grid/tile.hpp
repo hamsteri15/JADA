@@ -20,6 +20,11 @@ struct Tile {
         Utils::runtime_assert(max > min, "Tile max has to be larger than min");
     }
 
+
+    constexpr size_t neighbour_count(Orientation o) const {
+        return size_t(get_max(o) - get_min(o));
+    }
+
     constexpr idx_t get_min(Orientation o) const {
         if (o == m_orr) { return m_min; }
         return 0;

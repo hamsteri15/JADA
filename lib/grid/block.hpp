@@ -8,6 +8,7 @@
 #include "loops/paired_md_index_loops.hpp"
 #include "loops/position.hpp"
 #include "utils/runtime_assert.hpp"
+#include "grid/decomposition.hpp"
 
 namespace JADA {
 
@@ -79,6 +80,10 @@ private:
         return (begin.all_positive() && ((begin + extent) <= dims));
     }
 };
+
+
+
+
 
 ///
 ///@brief Loops over the positions shared by partition owner and neighbour. Usage:

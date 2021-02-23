@@ -2,9 +2,11 @@
 
 #include "grid/boundary.hpp"
 #include "grid/md_view.hpp"
+#include "grid/block.hpp"
 #include "grid/tile.hpp"
 #include "utils/constexpr_functions.hpp"
 #include "loops/flatten_index.hpp"
+#include "loops/neighbour_iterator.hpp"
 
 namespace JADA {
 
@@ -39,7 +41,21 @@ private:
 };
 
 template<size_t N, class Storage, class Op>
-static void apply_interior(const MdView<N, Storage>& in, MdView<N, Storage>& out, [[maybe_unused]] Op op){
+static void apply(const MdView<N, Storage>& in, MdView<N, Storage>& out, const Block<N>& block, Op op){
+
+    Utils::runtime_assert(in.size() == out.size(), "Size mismatch apply()");
+    
+    constexpr auto ori = op.shape.get_orientation();
+    constexpr auto dir = to_direction<N>(ori);
+
+    for (auto pos : loop(block)){
+        out(pos) = op.apply(DataHandle(in, pos, dir));
+    }
+
+}
+
+template<size_t N, class Storage, class Op>
+static void apply_interior(const MdView<N, Storage>& in, MdView<N, Storage>& out, Op op){
 
 
 
@@ -48,16 +64,12 @@ static void apply_interior(const MdView<N, Storage>& in, MdView<N, Storage>& out
     constexpr auto ori = op.shape.get_orientation();
     constexpr auto dir = to_direction<N>(ori);
 
-    auto width_begin = op.shape.barrier_begin(ori);
-    auto width_end = op.shape.barrier_end(ori);
-
+    constexpr auto width_begin = op.shape.barrier_begin(ori);
+    constexpr auto width_end = op.shape.barrier_end(ori);
 
     auto interior = get_interior_subblock(in.get_block(), dir, width_begin, width_end);
 
-
-    for (auto pos : loop(interior)){
-        out(pos) = op.apply(DataHandle(in, pos, dir));
-    }
+    apply(in, out, interior, op);
 
 
 }

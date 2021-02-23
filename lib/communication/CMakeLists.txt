@@ -1,0 +1,5 @@
+ADD_LIBRARY(communication INTERFACE)
+TARGET_INCLUDE_DIRECTORIES(communication INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+
+
+TARGET_LINK_LIBRARIES(communication PRIVATE INTERFACE project_warnings project_options loops)

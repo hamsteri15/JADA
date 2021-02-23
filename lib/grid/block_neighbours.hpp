@@ -3,10 +3,10 @@
 #include <array>
 #include <vector>
 
-enum class ConnectivityType { Star, Box };
 
 namespace JADA {
 
+enum class ConnectivityType { Star, Box };
 
 ///
 ///@brief For a given array returns a vector of permutations of the elements of the array
@@ -42,15 +42,15 @@ all_permutations_off(std::array<ET, N> arr) {
 ///
 ///@tparam N number of dimensions
 ///@tparam CT Connectivity type
-///@return std::vector<std::array<int, N>> vector of neighbour directions
+///@return std::vector<std::array<idx_t, N>> vector of neighbour directions
 ///
 template <size_t N, ConnectivityType CT>
-std::vector<std::array<int, N>> block_neighbours() {
+std::vector<std::array<idx_t, N>> block_neighbours() {
 
     if constexpr (CT == ConnectivityType::Star) {
 
-        std::array<int, N> a_positive{};
-        std::array<int, N> a_negative{};
+        std::array<idx_t, N> a_positive{};
+        std::array<idx_t, N> a_negative{};
         a_positive[0]       = 1;
         a_negative[0]       = -1;
         auto p_permutations = all_permutations_off(a_positive);
@@ -67,13 +67,13 @@ std::vector<std::array<int, N>> block_neighbours() {
     size_t n_combinations = 1;
     for (size_t i = 0; i < N; ++i) { n_combinations *= 3; }
 
-    std::vector<std::array<int, N>>
+    std::vector<std::array<idx_t, N>>
         combinations; 
         
     // neglect the no-op {0, 0, 0...}
     combinations.reserve(n_combinations - 1);
 
-    std::array<int, N> combination;
+    std::array<idx_t, N> combination;
     for (auto& c : combination) c = 1;
 
     for (size_t i = 0; i < n_combinations; ++i) {
@@ -90,7 +90,7 @@ std::vector<std::array<int, N>> block_neighbours() {
         //Neglect the no-op [0,0,0...]
         if (std::any_of(std::begin(combination),
                         std::end(combination),
-                        [](int c) { return c != 0; })) {
+                        [](idx_t c) { return c != 0; })) {
             combinations.emplace_back(combination);
         }
     }

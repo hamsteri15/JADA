@@ -13,10 +13,14 @@ struct position : public Utils::MathVectorBase<idx_t, L, position<L>> {
     using element_t = idx_t;
 
     inline constexpr position() = default;
+
+    inline constexpr position(std::array<element_t, L> arr) : m_storage(arr) {} 
+
     constexpr position(position const&) noexcept = default;
     constexpr position(position&&) noexcept = default;
     constexpr position& operator=(position const&) noexcept = default;
     constexpr position& operator=(position&&) noexcept = default;
+
 
     constexpr position(std::initializer_list<element_t> list) {
 

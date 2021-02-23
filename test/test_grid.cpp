@@ -207,19 +207,19 @@ TEST_CASE("Block neighbours"){
 
         REQUIRE_THAT(oned,
                      Catch::Matchers::UnorderedEquals(
-                         std::vector<std::array<int, 1>>{{1}, {-1}}));
+                         std::vector<std::array<idx_t, 1>>{{1}, {-1}}));
 
         auto twod = block_neighbours<2, ConnectivityType::Star>();
 
         REQUIRE_THAT(
             twod,
-            Catch::Matchers::UnorderedEquals(std::vector<std::array<int, 2>>{
+            Catch::Matchers::UnorderedEquals(std::vector<std::array<idx_t, 2>>{
                 {1, 0}, {0, 1}, {-1, 0}, {0, -1}}));
 
         auto threed = block_neighbours<3, ConnectivityType::Star>();
         REQUIRE_THAT(threed,
                      Catch::Matchers::UnorderedEquals(
-                         std::vector<std::array<int, 3>>{{1, 0, 0},
+                         std::vector<std::array<idx_t, 3>>{{1, 0, 0},
                                                          {0, 1, 0},
                                                          {0, 0, 1},
                                                          {-1, 0, 0},
@@ -235,7 +235,7 @@ TEST_CASE("Block neighbours"){
 
         CHECK_THAT(oned,
                      Catch::Matchers::UnorderedEquals(
-                         std::vector<std::array<int, 1>>{{1}, {-1}}));
+                         std::vector<std::array<idx_t, 1>>{{1}, {-1}}));
 
 
         auto twod = block_neighbours<2, ConnectivityType::Box>();
@@ -245,7 +245,7 @@ TEST_CASE("Block neighbours"){
 
         CHECK_THAT(twod,
                      Catch::Matchers::UnorderedEquals(
-                         std::vector<std::array<int, 2>>{
+                         std::vector<std::array<idx_t, 2>>{
                                                         {1, 0},
                                                          {0, 1},
                                                          {1, 1},

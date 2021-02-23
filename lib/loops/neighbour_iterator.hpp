@@ -21,6 +21,13 @@ struct neighbour_iterator
         : m_center(center)
         , m_neighbours(neighbours) {}
 
+    neighbour_iterator(Iter                 center,
+                       size_t               offset,
+                       std::array<idx_t, N> n_indices)
+        : neighbour_iterator(center,
+                             build_neighbour_iters(center, offset, n_indices)) {
+    }
+
     bool equal(neighbour_iterator const& other) const {
         return m_center == other.m_center;
     }
@@ -56,6 +63,16 @@ private:
 
     Iter                m_center;
     std::array<Iter, N> m_neighbours;
+
+    static std::array<Iter, N> build_neighbour_iters(
+        Iter center, size_t offset, std::array<idx_t, N> n_indices) {
+
+        std::array<Iter, N> neighbours;
+        for (size_t i = 0; i < N; ++i) {
+            neighbours[i] = center + idx_t(offset) * n_indices[i];
+        }
+        return neighbours;
+    }
 };
 
 
