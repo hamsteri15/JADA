@@ -7,10 +7,13 @@
 #include "loops/paired_md_index_loops.hpp"
 //#include "loops/serial_index_loops.hpp"
 #include "loops/loopable.hpp"
-
+#include "loops/neighbour_iterator.hpp"
 
 
 TEST_CASE("Test position"){
+
+    
+
 
     using namespace JADA;
 
@@ -461,3 +464,43 @@ TEST_CASE("Test Loopable"){
 
 }
 
+
+
+TEST_CASE("Test neighbour_iterator"){
+
+    using namespace JADA;
+
+    std::vector<int> v{1, 2, 3, 4, 5, 6, 7, 8};
+
+
+    auto it = neighbour_iterator(v.begin() + 1, std::array{v.begin(), v.begin()+2 } );
+
+
+    CHECK(*it == 2);
+    CHECK(*it.neighbour(0) == 1);
+    CHECK(*it.neighbour(1) == 3);
+
+    it++;
+
+    CHECK(*it == 3);
+    CHECK(*it.neighbour(0) == 2);
+    CHECK(*it.neighbour(1) == 4);
+
+    it = it + 2;
+
+    CHECK(*it == 5);
+    CHECK(*it.neighbour(0) == 4);
+    CHECK(*it.neighbour(1) == 6);
+
+    it--;
+    CHECK(*it == 4);
+    CHECK(*it.neighbour(0) == 3);
+    CHECK(*it.neighbour(1) == 5);
+
+    *it.neighbour(0) = 1;
+    CHECK(*it.neighbour(0) == 1);
+
+    REQUIRE_THROWS(it.neighbour(2));
+
+
+}
