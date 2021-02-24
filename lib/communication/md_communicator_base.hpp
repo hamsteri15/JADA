@@ -1,15 +1,28 @@
 #pragma once
 
 #include "communication/communicator.hpp"
+#include "grid/block_neighbours.hpp"
+#include "grid/decomposition.hpp"
 #include "loops/position.hpp"
 
 namespace JADA{
 
 //N n-spatial dirs, T datatype, Derived the class that derives from this
-template<class Derived> 
+template<size_t N, ConnectivityType CT, class Derived> 
 class MdCommunicatorBase{
+
+
 public:
 
+    MdCommunicatorBase() = default;
+
+    MdCommunicatorBase(idx_t id, Decomposition<N> dec) : m_id(id), m_decomposition(dec) {}
+
+
+
+//CRTP injected functions
+    
+    
     Derived* derived() {
         return static_cast<Derived*>(this);
     }
@@ -18,27 +31,46 @@ public:
         return static_cast<const Derived*>(this);
     }
 
-    //CRTP injected functions
-
-    //Checks if has a neighbour in direction dir
-    template<size_t N>
-    bool has_neighbour(position<N> dir) const{
-        return derived().has_neighbour(dir);
-    }
-
 
     //Send data to direction dir
-    template<size_t N, class T>
+    template<class T>
     void set(position<N> dir, T&& data, size_t tag){
         derived().set(dir, data, tag);
     }
 
 
     //Get data from direction dir
-    template<size_t N>
     auto get(position<N> dir, size_t tag) {
         return derived().get(dir, tag);
     }
+
+
+
+
+
+    ///
+    ///@brief Checks if a neighbour exists in direction dir
+    ///
+    ///@param dir direction to query the neighbour from
+    ///@return true if exists
+    ///@return false otherwise
+    ///
+    bool has_neighbour(position<N> dir) const {
+        return m_decomposition.get_neighbour(m_id, dir) != NEIGHBOUR_ID_NULL;
+    }
+
+
+
+    
+
+
+
+protected:
+
+    idx_t             m_id;
+    Decomposition<N>  m_decomposition;
+    static constexpr BlockNeighbours<N, CT> neighbours{};
+
 
 
 };
