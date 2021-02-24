@@ -16,7 +16,9 @@ class MockMdCommunicator : public MdCommunicatorBase<MockMdCommunicator<N, T>>{
     //using CT = typename ConnectivityType::Star;
 
     //TODO: make constexpr array of arrays
-    const std::vector<std::array<idx_t, N> > neighbour_dirs = block_neighbours<N, ConnectivityType::Star>();
+    const std::array<std::array<idx_t, N>, 2*N> neighbour_dirs = block_neighbours<N, ConnectivityType::Star>();
+
+
 
 
 public:

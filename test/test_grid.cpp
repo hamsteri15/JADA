@@ -23,8 +23,8 @@ static std::vector<int> set_ones(const std::vector<int>& v, Loop loop) {
 
 
 
-template<class T>
-bool is_unique(const std::vector<T>& arr){
+template<class Container>
+bool is_unique(const Container& arr){
 
     auto copy = arr;
     std::sort(std::begin(copy), std::end(copy));
@@ -203,66 +203,129 @@ TEST_CASE("Block neighbours"){
 
     SECTION("Star connectivity"){
 
-        auto oned = block_neighbours<1, ConnectivityType::Star>();
+        SECTION("1D") {
+            auto test = star_neighbours<1>();
 
-        REQUIRE_THAT(oned,
-                     Catch::Matchers::UnorderedEquals(
-                         std::vector<std::array<idx_t, 1>>{{1}, {-1}}));
+            std::array<std::array<idx_t, 1>, 2> correct
+            {
+                std::array<idx_t,1>{1}, std::array<idx_t,1>{-1}
+            };
 
-        auto twod = block_neighbours<2, ConnectivityType::Star>();
+            std::sort(test.begin(), test.end());
+            std::sort(correct.begin(), correct.end());
 
-        REQUIRE_THAT(
-            twod,
-            Catch::Matchers::UnorderedEquals(std::vector<std::array<idx_t, 2>>{
-                {1, 0}, {0, 1}, {-1, 0}, {0, -1}}));
+            CHECK(test == correct);
 
-        auto threed = block_neighbours<3, ConnectivityType::Star>();
-        REQUIRE_THAT(threed,
-                     Catch::Matchers::UnorderedEquals(
-                         std::vector<std::array<idx_t, 3>>{{1, 0, 0},
-                                                         {0, 1, 0},
-                                                         {0, 0, 1},
-                                                         {-1, 0, 0},
-                                                         {0, -1, 0},
-                                                         {0, 0, -1}}));
+        }
+
+
+        SECTION("2D") {
+            auto test = star_neighbours<2>();
+
+            std::array<std::array<idx_t, 2>, 4> correct
+            {
+                std::array<idx_t, 2>{1, 0}, 
+                std::array<idx_t, 2>{0, 1},
+                std::array<idx_t, 2>{-1, 0}, 
+                std::array<idx_t, 2>{0, -1}
+            };
+
+            std::sort(test.begin(), test.end());
+            std::sort(correct.begin(), correct.end());
+
+            CHECK(test == correct);
+
+            test[2][0] = 3;
+            CHECK(test != correct);
+
+
+        }
+
+        SECTION("3D") {
+            auto test = star_neighbours<3>();
+
+            std::array<std::array<idx_t, 3>, 6> correct
+            {
+                std::array<idx_t, 3>{1, 0, 0},
+                std::array<idx_t, 3>{0, 1, 0},
+                std::array<idx_t, 3>{0, 0, 1},
+                std::array<idx_t, 3>{-1, 0, 0},
+                std::array<idx_t, 3>{0, -1, 0},
+                std::array<idx_t, 3>{0, 0, -1}
+                
+            };
+
+            std::sort(test.begin(), test.end());
+            std::sort(correct.begin(), correct.end());
+
+            CHECK(test == correct);
+
+            test[2][0] = 3;
+            CHECK(test != correct);
+
+            static_assert(star_neighbours<3>().size() == 6, "star_neighbours not constexpr.");
+
+        }
+
+
     }
-
 
 
     SECTION("Box connecitvity"){
 
-        auto oned = block_neighbours<1, ConnectivityType::Box>();
+        SECTION("1D") {
+            auto test = box_neighbours<1>();
+            
+            std::array<std::array<idx_t, 1>, 2> correct
+            {
+                std::array<idx_t,1>{1}, std::array<idx_t,1>{-1}
+            };
 
-        CHECK_THAT(oned,
-                     Catch::Matchers::UnorderedEquals(
-                         std::vector<std::array<idx_t, 1>>{{1}, {-1}}));
+            std::sort(test.begin(), test.end());
+            std::sort(correct.begin(), correct.end());
 
-
-        auto twod = block_neighbours<2, ConnectivityType::Box>();
-        CHECK(
-            is_unique(twod)
-        );
-
-        CHECK_THAT(twod,
-                     Catch::Matchers::UnorderedEquals(
-                         std::vector<std::array<idx_t, 2>>{
-                                                        {1, 0},
-                                                         {0, 1},
-                                                         {1, 1},
-                                                         {-1, 0},
-                                                         {0, -1},
-                                                         {-1, -1},
-                                                         {-1, 1},
-                                                         {1, -1}
-                                                         }));
+            CHECK(test == correct);
 
 
+        }
 
-        CHECK(block_neighbours<3, ConnectivityType::Box>().size() == 3*3*3 - 1);
-        CHECK(block_neighbours<5, ConnectivityType::Box>().size() == 3*3*3*3*3 - 1);
 
-        CHECK(is_unique(block_neighbours<3, ConnectivityType::Box>()));
-        CHECK(is_unique(block_neighbours<5, ConnectivityType::Box>()));
+        SECTION("2D") {
+            auto test = box_neighbours<2>();
+            
+            std::array<std::array<idx_t, 2>, 8> correct
+            {
+                std::array<idx_t, 2>{1, 0},
+                std::array<idx_t, 2>{0, 1},
+                std::array<idx_t, 2>{1, 1},
+                std::array<idx_t, 2>{-1, 0},
+                std::array<idx_t, 2>{0, -1},
+                std::array<idx_t, 2>{-1, -1},
+                std::array<idx_t, 2>{-1, 1},
+                std::array<idx_t, 2>{1, -1}
+                
+            };
+
+            std::sort(test.begin(), test.end());
+            std::sort(correct.begin(), correct.end());
+
+            CHECK(test == correct);
+
+
+
+        }
+
+
+        CHECK(is_unique(box_neighbours<3>()));
+        CHECK(is_unique(box_neighbours<5>()));
+
+        CHECK(box_neighbours<3>().size() == 3*3*3 - 1);
+        CHECK(box_neighbours<5>().size() == 3*3*3*3*3 - 1);
+
+        static_assert(box_neighbours<3>().size() == 3*3*3 - 1, "box_neighbours() not constexpr");
+
+
+
 
     }
 
