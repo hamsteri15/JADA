@@ -213,6 +213,23 @@ TEST_CASE("Block neighbours"){
         CHECK(is_unique(BlockNeighbours<4, ConnectivityType::Box>().get()));
 
 
+
+        BlockNeighbours<2, ConnectivityType::Star> ns1;
+        BlockNeighbours<2, ConnectivityType::Box> ns2;
+
+//        static constexpr auto ns_const = BlockNeighbours<2, ConnectivityType::Star>();
+
+        constexpr BlockNeighbours<2, ConnectivityType::Star> ns_const;
+
+
+        static_assert(BlockNeighbours<2, ConnectivityType::Star>::idx({0,1}) == 0, "Not constexpr");
+
+        CHECK(ns1.idx({0,1}) == 0);
+        CHECK(ns2.idx({0,1}) == 0);
+        static_assert(ns_const.idx({0,1}) == 0, "BlockNeighbours not constexpr");
+
+
+
     }
 
 

@@ -60,9 +60,9 @@ template <class T, size_t L, class S> struct MathVectorBase {
 
 
     inline constexpr T max() const {return *std::max_element(cbegin(), cend());}
-    inline T min() const {return *std::min_element(cbegin(), cend());}
-    inline T elementwise_product() const { return std::accumulate(begin(), end(), T(1), std::multiplies{});}
-    inline T elementwise_sum() const { return std::accumulate(begin(), end(), T(0));}
+    inline constexpr T min() const {return *std::min_element(cbegin(), cend());}
+    inline constexpr T elementwise_product() const { return std::accumulate(begin(), end(), T(1), std::multiplies{});}
+    inline constexpr T elementwise_sum() const { return std::accumulate(begin(), end(), T(0));}
 
 
 
@@ -87,11 +87,11 @@ template <class T, size_t L, class S> struct MathVectorBase {
 
 
     //set()
-    inline void set(const T& a) {
+    inline constexpr void set(const T& a) {
         T* tp = get_ptr();
         for (size_t i = 0; i < L; i++) { tp[i] = a; };
     }
-    inline void set(const T* ptr) {
+    inline constexpr void set(const T* ptr) {
         runtime_assert(ptr, "Invalid pointer"); T* tp = get_ptr();
         for (size_t i = 0; i < L; i++) { tp[i] = ptr[i]; };
     }
@@ -99,93 +99,93 @@ template <class T, size_t L, class S> struct MathVectorBase {
     template <class V> inline void set(const MathVectorBase<T, L, V>& v){ set(v.get_ptr()); }
 
 
-    inline void set_zero() { set(0); }
+    inline constexpr void set_zero() { set(0); }
 
     //positivate
-    inline S operator+() const { return *this; }
+    inline constexpr S operator+() const { return *this; }
 
     //negate
-    inline S operator-() const {
+    inline constexpr S operator-() const {
         const T* tp = get_ptr(); S r; T* rp = r.get_ptr();
         for (size_t i = 0; i < L; i++) rp[i] = -tp[i];
         return r;
     }
 
     // ================= scalar operators + - * / %
-    inline S operator+(const T& a) const {
+    inline constexpr S operator+(const T& a) const {
         const T* tp = get_ptr(); S r; T* rp = r.get_ptr();
         for (size_t i = 0; i < L; i++) rp[i] = tp[i] + a;
         return r;
     }
-    inline S operator-(const T& a) const {
+    inline constexpr S operator-(const T& a) const {
         const T* tp = get_ptr(); S r; T* rp = r.get_ptr();
         for (size_t i = 0; i < L; i++) rp[i] = tp[i] - a;
         return r;
     }
-    inline S operator*(const T& a) const {
+    inline constexpr S operator*(const T& a) const {
         const T* tp = get_ptr(); S r; T* rp = r.get_ptr();
         for (size_t i = 0; i < L; i++) rp[i] = tp[i] * a;
         return r;
     }
-    inline S operator/(const T& a) const {
+    inline constexpr S operator/(const T& a) const {
         const T* tp = get_ptr(); S r; T* rp = r.get_ptr();
         for (size_t i = 0; i < L; i++) rp[i] = tp[i] / a;
         return r;
     }
-    inline S operator%(const T& a) const {
+    inline constexpr S operator%(const T& a) const {
         const T* tp = get_ptr(); S r; T* rp = r.get_ptr();
         for (size_t i = 0; i < L; i++) rp[i] = tp[i] % a;
         return r;
     }
 
     // ================= scalar operators += -= *= /= %=
-    inline S& operator=(const T& a)  { set(a);            return *static_cast<S*>(this); }
-    inline S& operator+=(const T& a) { set(operator+(a)); return *static_cast<S*>(this); }
-    inline S& operator-=(const T& a) { set(operator-(a)); return *static_cast<S*>(this); }
-    inline S& operator*=(const T& a) { set(operator*(a)); return *static_cast<S*>(this); }
-    inline S& operator/=(const T& a) { set(operator/(a)); return *static_cast<S*>(this); }
-    inline S& operator%=(const T& a) { set(operator%(a)); return *static_cast<S*>(this); }
+    inline constexpr S& operator=(const T& a)  { set(a);            return *static_cast<S*>(this); }
+    inline constexpr S& operator+=(const T& a) { set(operator+(a)); return *static_cast<S*>(this); }
+    inline constexpr S& operator-=(const T& a) { set(operator-(a)); return *static_cast<S*>(this); }
+    inline constexpr S& operator*=(const T& a) { set(operator*(a)); return *static_cast<S*>(this); }
+    inline constexpr S& operator/=(const T& a) { set(operator/(a)); return *static_cast<S*>(this); }
+    inline constexpr S& operator%=(const T& a) { set(operator%(a)); return *static_cast<S*>(this); }
     
     
     // ================= vector operators += -= *= /= %=
-    template <class V> inline S& operator=(const MathVectorBase<T, L, V>& v)  {set(v);            return *static_cast<S*>(this); }
-    template <class V> inline S& operator+=(const MathVectorBase<T, L, V>& v) {set(operator+(v)); return *static_cast<S*>(this); }
-    template <class V> inline S& operator-=(const MathVectorBase<T, L, V>& v) {set(operator-(v)); return *static_cast<S*>(this); }
-    template <class V> inline S& operator*=(const MathVectorBase<T, L, V>& v) {set(operator*(v)); return *static_cast<S*>(this); }
-    template <class V> inline S& operator/=(const MathVectorBase<T, L, V>& v) {set(operator/(v)); return *static_cast<S*>(this); }
-    template <class V> inline S& operator%=(const MathVectorBase<T, L, V>& v) {set(operator%(v)); return *static_cast<S*>(this); }
+    template <class V> inline constexpr S& operator=(const MathVectorBase<T, L, V>& v)  {set(v);            return *static_cast<S*>(this); }
+    template <class V> inline constexpr S& operator+=(const MathVectorBase<T, L, V>& v) {set(operator+(v)); return *static_cast<S*>(this); }
+    template <class V> inline constexpr S& operator-=(const MathVectorBase<T, L, V>& v) {set(operator-(v)); return *static_cast<S*>(this); }
+    template <class V> inline constexpr S& operator*=(const MathVectorBase<T, L, V>& v) {set(operator*(v)); return *static_cast<S*>(this); }
+    template <class V> inline constexpr S& operator/=(const MathVectorBase<T, L, V>& v) {set(operator/(v)); return *static_cast<S*>(this); }
+    template <class V> inline constexpr S& operator%=(const MathVectorBase<T, L, V>& v) {set(operator%(v)); return *static_cast<S*>(this); }
 
     // ================= vector operators + - * / %
     template <class V>
-    inline S operator+(const MathVectorBase<T, L, V>& v) const {
+    inline constexpr S operator+(const MathVectorBase<T, L, V>& v) const {
         const T* tp = get_ptr(); const T* vp = v.get_ptr(); S r; T* rp = r.get_ptr();
         for (size_t i = 0; i < L; i++) rp[i] = tp[i] + vp[i]; 
         return r;
     }
 
     template <class V>
-    inline S operator-(const MathVectorBase<T, L, V>& v) const {
+    inline constexpr S operator-(const MathVectorBase<T, L, V>& v) const {
         const T* tp = get_ptr(); const T* vp = v.get_ptr(); S r; T* rp = r.get_ptr();
         for (size_t i = 0; i < L; i++) rp[i] = tp[i] - vp[i];
         return r;
     }
 
     template <class V>
-    inline S operator*(const MathVectorBase<T, L, V>& v) const {
+    inline constexpr S operator*(const MathVectorBase<T, L, V>& v) const {
         const T* tp = get_ptr(); const T* vp = v.get_ptr(); S r; T* rp = r.get_ptr();
         for (size_t i = 0; i < L; i++) rp[i] = tp[i] * vp[i]; 
         return r;
     }
 
     template <class V>
-    inline S operator/(const MathVectorBase<T, L, V>& v) const {
+    inline constexpr S operator/(const MathVectorBase<T, L, V>& v) const {
         const T* tp = get_ptr(); const T* vp = v.get_ptr(); S r; T* rp = r.get_ptr();
         for (size_t i = 0; i < L; i++) rp[i] = tp[i] / vp[i]; 
         return r;
     }
     
     template <class V>
-    inline S operator%(const MathVectorBase<T, L, V>& v) const {
+    inline constexpr S operator%(const MathVectorBase<T, L, V>& v) const {
         const T* tp = get_ptr(); const T* vp = v.get_ptr(); S r; T* rp = r.get_ptr();
         for (size_t i = 0; i < L; i++) rp[i] = tp[i] % vp[i]; 
         return r;
@@ -193,14 +193,14 @@ template <class T, size_t L, class S> struct MathVectorBase {
 
     // ================= vector comparison operators + - * / %
     template <class V>
-    inline bool operator==(const MathVectorBase<T, L, V>& v) const {
+    inline constexpr bool operator==(const MathVectorBase<T, L, V>& v) const {
         const T* tp = get_ptr(); const T* vp = v.get_ptr();
         for (size_t i = 0; i < L; i++) if (tp[i] != vp[i]) return false;
         return true;
     }
 
     template <class V>
-    inline bool operator!=(const MathVectorBase<T, L, V>& v) const { return (!operator==(v)); }
+    inline constexpr bool operator!=(const MathVectorBase<T, L, V>& v) const { return (!operator==(v)); }
 
     // clang-format on
 };
