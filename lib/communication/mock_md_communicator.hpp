@@ -16,7 +16,10 @@ class MockMdCommunicator : public MdCommunicatorBase<MockMdCommunicator<N, T>>{
     //using CT = typename ConnectivityType::Star;
 
     //TODO: make constexpr array of arrays
-    const std::array<std::array<idx_t, N>, 2*N> neighbour_dirs = block_neighbours<N, ConnectivityType::Star>();
+    //const std::array<std::array<idx_t, N>, 2*N> neighbour_dirs = star_neighbours<N>();
+
+
+    const BlockNeighbours<N, ConnectivityType::Star> neighbours{};
 
 
 
@@ -37,14 +40,14 @@ public:
 
     void set(position<N> dir, T&& data, [[maybe_unused]] size_t tag){
 
-        const auto idx = size_t(buffer_idx(dir));
+        const auto idx = size_t(neighbours.idx(dir));
         m_send_buffer[idx]  = std::move(data);
 
     }
 
 
     T get(position<N> dir, [[maybe_unused]] size_t tag) {
-        const auto idx = size_t(buffer_idx(dir));
+        const auto idx = size_t(neighbours.idx(dir));
         return m_recv_buffer[idx];
     }
 
@@ -65,19 +68,6 @@ private:
     std::vector<T> m_recv_buffer;
 
     
-    idx_t buffer_idx(position<N> dir) {
-
-
-        for (size_t i = 0; i < neighbour_dirs.size(); ++i){
-
-            if (position<N>(neighbour_dirs[i]) == dir) {
-                return idx_t(i);
-            }
-        }
-
-        throw std::logic_error("Can not convert direction to buffer index");
-
-    }
     
 
 

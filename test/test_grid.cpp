@@ -198,13 +198,28 @@ TEST_CASE("Test Decomposition"){
 
 TEST_CASE("Block neighbours"){
 
+    
+
     using namespace JADA;
     using Catch::Matchers::Contains;
+    
+    SECTION("BlockNeighbours"){
+
+        REQUIRE_NOTHROW(BlockNeighbours<3, ConnectivityType::Star>());
+        REQUIRE_NOTHROW(BlockNeighbours<3, ConnectivityType::Box>());
+        
+        CHECK(is_unique(BlockNeighbours<3, ConnectivityType::Box>().get()));
+        CHECK(is_unique(BlockNeighbours<2, ConnectivityType::Star>().get()));
+        CHECK(is_unique(BlockNeighbours<4, ConnectivityType::Box>().get()));
+
+
+    }
+
 
     SECTION("Star connectivity"){
 
         SECTION("1D") {
-            auto test = star_neighbours<1>();
+            auto test = BlockNeighbours<1, ConnectivityType::Star>().get();
 
             std::array<std::array<idx_t, 1>, 2> correct
             {
@@ -220,7 +235,7 @@ TEST_CASE("Block neighbours"){
 
 
         SECTION("2D") {
-            auto test = star_neighbours<2>();
+            auto test = BlockNeighbours<2, ConnectivityType::Star>().get();
 
             std::array<std::array<idx_t, 2>, 4> correct
             {
@@ -242,7 +257,7 @@ TEST_CASE("Block neighbours"){
         }
 
         SECTION("3D") {
-            auto test = star_neighbours<3>();
+            auto test = BlockNeighbours<3, ConnectivityType::Star>().get();
 
             std::array<std::array<idx_t, 3>, 6> correct
             {
@@ -263,18 +278,16 @@ TEST_CASE("Block neighbours"){
             test[2][0] = 3;
             CHECK(test != correct);
 
-            static_assert(star_neighbours<3>().size() == 6, "star_neighbours not constexpr.");
 
         }
 
 
     }
 
-
     SECTION("Box connecitvity"){
 
         SECTION("1D") {
-            auto test = box_neighbours<1>();
+            auto test = BlockNeighbours<1, ConnectivityType::Box>().get();
             
             std::array<std::array<idx_t, 1>, 2> correct
             {
@@ -291,7 +304,7 @@ TEST_CASE("Block neighbours"){
 
 
         SECTION("2D") {
-            auto test = box_neighbours<2>();
+            auto test = BlockNeighbours<2, ConnectivityType::Box>().get();
             
             std::array<std::array<idx_t, 2>, 8> correct
             {
@@ -316,18 +329,8 @@ TEST_CASE("Block neighbours"){
         }
 
 
-        CHECK(is_unique(box_neighbours<3>()));
-        CHECK(is_unique(box_neighbours<5>()));
-
-        CHECK(box_neighbours<3>().size() == 3*3*3 - 1);
-        CHECK(box_neighbours<5>().size() == 3*3*3*3*3 - 1);
-
-        static_assert(box_neighbours<3>().size() == 3*3*3 - 1, "box_neighbours() not constexpr");
-
-
-
-
     }
+
 
 }
 

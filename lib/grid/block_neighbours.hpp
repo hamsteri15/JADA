@@ -1,5 +1,6 @@
 #pragma once
 #include "loops/unflatten_index.hpp"
+#include "loops/position.hpp"
 #include <array>
 #include <vector>
 
@@ -8,7 +9,67 @@ namespace JADA {
 
 enum class ConnectivityType { Star, Box };
 
-/*
+///
+///@brief Given N dimensions holds the possible neighbour directions that a block may have based on the
+///       connectivity type. For N=2 the neighbours for connectivity type Star are: 
+///       [1, 0], [-1, 0], [0,1], [0,-1]. 
+///       For N = 2 and Box connectivity, also the combinations are returned i.e. [1,-1] [-1, 1]...
+///
+///@tparam N number of spatial dimensions
+///@tparam CT connectivity type Box/Star
+///
+template<size_t N, ConnectivityType CT>
+struct BlockNeighbours{
+
+
+    constexpr BlockNeighbours() {
+        if constexpr (CT == ConnectivityType::Star) {
+            m_neighbours = star_neighbours();
+        }
+        else {
+            m_neighbours = box_neighbours();
+        }
+    }
+
+    constexpr auto get() const {
+        return m_neighbours;
+    }
+
+
+    constexpr size_t count() const {
+        return m_count;
+    }
+
+
+    constexpr size_t idx(position<N> neighbour) const {
+
+        for (size_t i = 0; i < count(); ++i){
+            if (position<N>(m_neighbours[i]) == neighbour) {return i;}
+        }
+        throw std::logic_error("Invalid neighbour");
+
+    }
+
+    static constexpr size_t neighbour_count() {
+
+    if constexpr (CT == ConnectivityType::Star) {
+        return 2*N;        
+    }
+
+    size_t n = 1;
+    for (size_t i = 0; i < N; ++i) {n *= 3;}
+    return n - 1; //neglect all zeroes
+
+    }
+
+private:
+
+    static constexpr size_t m_count = neighbour_count();
+    std::array<std::array<idx_t, N>, m_count> m_neighbours;
+
+
+
+
 ///
 ///@brief For a given array returns a vector of permutations of the elements of the array
 ///
@@ -17,32 +78,6 @@ enum class ConnectivityType { Star, Box };
 ///@param arr the input array
 ///@return constexpr std::vector<std::array<ET, N>> vector of permutations
 ///
-template <size_t N, class ET>
-constexpr std::vector<std::array<ET, N>>
-all_permutations_off(std::array<ET, N> arr) {
-
-    // TODO: preallocate
-    std::vector<std::array<ET, N>> permutations;
-
-    auto temp = arr;
-    std::sort(std::begin(temp), std::end(temp));
-    do {
-        permutations.push_back(temp);
-    } while (std::next_permutation(temp.begin(), temp.end()));
-
-    return permutations;
-}
-*/
-
-///
-///@brief For a given array returns a vector of permutations of the elements of the array
-///
-///@tparam N Dimensions of the array
-///@tparam ET Array element type
-///@param arr the input array
-///@return constexpr std::vector<std::array<ET, N>> vector of permutations
-///
-template<size_t N>
 static constexpr auto all_permutations_of(std::array<idx_t, N> arr) {
 
     constexpr size_t count = N;
@@ -66,24 +101,12 @@ static constexpr auto all_permutations_of(std::array<idx_t, N> arr) {
 
 
 
-template<size_t N, ConnectivityType CT>
-static constexpr size_t neighbour_count() {
-
-    if constexpr (CT == ConnectivityType::Star) {
-        return 2*N;        
-    }
-
-    size_t n = 1;
-    for (size_t i = 0; i < N; ++i) {n *= 3;}
-    return n - 1; //neglect all zeroes
-
-}
 
 
-template<size_t N>
+
 static constexpr auto star_neighbours() {
 
-    constexpr size_t n_count = neighbour_count<N, ConnectivityType::Star>();
+    constexpr size_t n_count = neighbour_count();
 
     std::array<idx_t, N> a_positive{};
     std::array<idx_t, N> a_negative{};
@@ -108,11 +131,10 @@ static constexpr auto star_neighbours() {
 
 }
 
-template<size_t N>
 static constexpr auto box_neighbours() {
 
     
-    constexpr auto n_combinations = neighbour_count<N, ConnectivityType::Box>();
+    constexpr auto n_combinations = neighbour_count();
 
     std::array<std::array<idx_t, N>, n_combinations> combinations;
 
@@ -145,30 +167,14 @@ static constexpr auto box_neighbours() {
 }
 
 
-///
-///@brief Given N dimensions returns the possible neighbour directions that a block may have based on the
-///       connectivity type. For N=2 the neighbours for connectivity type Star are: 
-///       [1, 0], [-1, 0], [0,1], [0,-1]. 
-///       For N = 2 and Box connectivity, also the combinations are returned i.e. [1,-1] [-1, 1]...
-///
-///@tparam N number of dimensions
-///@tparam CT Connectivity type
-///@return std::vector<std::array<idx_t, N>> vector of neighbour directions
-///
-template <size_t N, ConnectivityType CT>
-static constexpr auto block_neighbours() {
-
-    if constexpr (CT == ConnectivityType::Star) {
-        return star_neighbours<N>();
-    }
-
-    throw std::logic_error("For now");
-    //return box_neighbours<N>();
-
-    //Box type connectivity
 
 
-}
+
+
+
+
+};
+
 
 
 
