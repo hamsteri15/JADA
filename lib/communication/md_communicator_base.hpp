@@ -12,6 +12,8 @@ template<size_t N, ConnectivityType CT, class Derived>
 class MdCommunicatorBase{
 
 
+
+
 public:
 
     MdCommunicatorBase() = default;
@@ -22,6 +24,7 @@ public:
 
 //CRTP injected functions
     
+    /*
     
     Derived* derived() {
         return static_cast<Derived*>(this);
@@ -45,7 +48,7 @@ public:
     }
 
 
-
+    */
 
 
     ///

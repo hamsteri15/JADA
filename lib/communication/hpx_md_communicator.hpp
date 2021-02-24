@@ -12,7 +12,7 @@ class HpxMdCommunicator : public MdCommunicatorBase<N, CT, HpxMdCommunicator<N, 
 
 public:
 
-
+    //static constexpr ConnectivityType connectivity_t  = CT;
     using base_type = MdCommunicatorBase<N, CT, HpxMdCommunicator<N,T,CT>>;
     using channel_type = hpx::lcos::channel<T>;
     
@@ -21,6 +21,8 @@ public:
 
     HpxMdCommunicator(idx_t id, Decomposition<N> dec) : 
     base_type(id, dec) {}
+
+
 
 
 private:

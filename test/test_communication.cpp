@@ -26,7 +26,12 @@ TEST_CASE("Test HpxMdCommunicator") {
     SECTION("has_neighbour") {
 
 
-        HpxMdCommunicator<2, double> comm;
+        HpxMdCommunicator<2, double, ConnectivityType::Box> comm;
+        CHECK(comm.has_neighbour({0,1}) == true);
+        //MdCommunicatorBase<2, ConnectivityType::Box, HpxMdCommunicator<2, double>> asd;
+        //CHECK(asd.has_neighbour({0,1}) == true);
+        
+        
         //CHECK(comm.buffer_size() == 4);
 
 //        HpxMdCommunicator<2, double> comm();
