@@ -9,7 +9,25 @@ message("COMPILER ID " ${CMAKE_CXX_COMPILER_ID})
 # Link this 'library' to set the c++ standard / compile-time options requested
 add_library(project_options INTERFACE)
 
-target_compile_features(project_options INTERFACE cxx_std_20)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(CMAKE_CXX_STANDARD 20)
+
+
+
+
+#config boost
+include(cmake/ExternalBoost.cmake)
+
+#config hpx
+include(cmake/ExternalHpx.cmake)
+
+
+
+
+
+#target_compile_features(project_options INTERFACE cxx_std_20)
+#target_compile_features(project_options INTERFACE cxx_std_17)
 
 
 add_library(project_warnings INTERFACE)

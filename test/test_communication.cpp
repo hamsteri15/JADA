@@ -2,6 +2,9 @@
 
 #include "communication/communicator.hpp"
 #include "communication/mock_md_communicator.hpp"
+#include "communication/hpx_md_communicator.hpp"
+
+
 
 TEST_CASE("Test MockMdCommunicator") {
 

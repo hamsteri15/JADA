@@ -9,8 +9,8 @@ Although, the library is intended to be as dependency-free as possible, the foll
 - C++20 (for co-routines)
 - [CMake](https://cmake.org/) build script for cross-platform configuration (see 
   [here](#cmakeliststxt) for more info)
-- [Open MPI](https://www.open-mpi.org/) for distributed memory parallelization
-- [HDF5-parallel](https://www.hdfgroup.org) for output routines
+- [Hpx](https://stellar-group.org/libraries/hpx/) A runtime scheduler to handle all kinds of things parallel
+- [Boost](https://www.boost.org/) Extension to standard library
 
 In addition the following libraries are used but they ship alongside the library
 
