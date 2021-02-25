@@ -7,8 +7,7 @@
 
 namespace JADA{
 
-//N n-spatial dirs, T datatype, Derived the class that derives from this
-template<size_t N, ConnectivityType CT, class Derived> 
+template<size_t N, ConnectivityType CT> 
 class MdCommunicatorBase{
 
 

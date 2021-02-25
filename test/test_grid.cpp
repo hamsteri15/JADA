@@ -150,6 +150,15 @@ TEST_CASE("Test Decomposition"){
 
     SECTION("get_neighbour()"){
 
+        SECTION("Default constructed") {
+
+            Decomposition<2> dec;
+
+            CHECK(dec.get_neighbour(0, {0,1}) == NEIGHBOUR_ID_NULL);
+
+        }
+
+
         SECTION("1D"){
 
             SECTION("Periodic"){

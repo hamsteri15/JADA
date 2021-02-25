@@ -15,7 +15,15 @@ static constexpr idx_t NEIGHBOUR_ID_NULL = -42;
 
 template <size_t N> struct Decomposition {
 
-    Decomposition() = default;
+    Decomposition() {
+
+        for (size_t i = 0; i < N; ++i){
+            m_grid_dims[i] = 0;
+            m_dec_dims[i] = 0;
+            m_periodicity[i] = false;
+        }
+
+    }
 
     ///
     ///@brief Construct a decomposition from specified subdomain grid.
@@ -114,6 +122,7 @@ template <size_t N> struct Decomposition {
 
         Utils::runtime_assert(valid_id(domain_id), "Invalid domain id");
 
+        
         Utils::runtime_assert(std::equal(std::begin(offset),
                                          std::end(offset),
                                          std::begin(m_dec_dims),
@@ -121,6 +130,8 @@ template <size_t N> struct Decomposition {
                                              return std::abs(o) <= idx_t(d);
                                          }),
                               "Offset out of bounds.");
+
+        
 
         auto n_coords = get_domain_coords(domain_id) + offset;
 

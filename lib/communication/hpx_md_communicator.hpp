@@ -8,12 +8,12 @@
 namespace JADA {
 
 template <size_t N, class T, ConnectivityType CT = ConnectivityType::Star>
-class HpxMdCommunicator : public MdCommunicatorBase<N, CT, HpxMdCommunicator<N, T, CT>> {
+class HpxMdCommunicator : public MdCommunicatorBase<N, CT> {
 
 public:
 
     //static constexpr ConnectivityType connectivity_t  = CT;
-    using base_type = MdCommunicatorBase<N, CT, HpxMdCommunicator<N,T,CT>>;
+    using base_type = MdCommunicatorBase<N, CT>;
     using channel_type = hpx::lcos::channel<T>;
     
 
