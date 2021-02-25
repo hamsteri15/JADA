@@ -82,12 +82,12 @@ public:
     ///@param neighbour direction of a neighbour
     ///@return constexpr size_t the index of the neighbour
     ///
-    static constexpr size_t idx(position<N> neighbour) {
+    static constexpr idx_t idx(position<N> neighbour) {
 
         for (size_t i = 0; i < count(); ++i) {
-            if (position<N>(m_neighbours[i]) == neighbour) { return i; }
+            if (position<N>(m_neighbours[i]) == neighbour) { return idx_t(i); }
         }
-        return 43;
+        return -1;
         //throw std::logic_error("Invalid neighbour");
     }
 

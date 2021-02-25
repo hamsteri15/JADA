@@ -62,6 +62,9 @@ public:
     }
 
 
+    constexpr size_t neighbour_count() const {
+        return m_neighbours.count();
+    }
 
     
 
@@ -71,8 +74,15 @@ protected:
 
     idx_t             m_id;
     Decomposition<N>  m_decomposition;
-    static constexpr BlockNeighbours<N, CT> neighbours{};
+    static constexpr BlockNeighbours<N, CT> m_neighbours{};
 
+
+
+    constexpr size_t buffer_idx(position<N> dir) const {
+        idx_t idx = m_neighbours.idx(dir);
+        Utils::runtime_assert( (idx >= 0), "Invalid buffer idx");
+        return idx;
+    }
 
 
 };

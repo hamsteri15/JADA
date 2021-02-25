@@ -19,11 +19,10 @@ public:
 
     HpxMdCommunicator() = default;
 
-    HpxMdCommunicator(idx_t id, Decomposition<N> dec) : 
-    base_type(id, dec) {}
-
-
-
+    HpxMdCommunicator(idx_t id, Decomposition<N> dec)
+        : base_type(id, dec)
+        , m_send_buffer(this->neighbour_count())
+        , m_recv_buffer(this->neighbour_count()) {}
 
 private:
 
