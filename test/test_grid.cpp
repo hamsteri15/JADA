@@ -154,7 +154,8 @@ TEST_CASE("Test Decomposition"){
 
             Decomposition<2> dec;
 
-            CHECK(dec.get_neighbour(0, {0,1}) == NEIGHBOUR_ID_NULL);
+            REQUIRE_THROWS(dec.get_neighbour(0, {0,1}));
+
 
         }
 
