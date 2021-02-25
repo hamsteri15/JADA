@@ -61,13 +61,36 @@ public:
         return m_decomposition.get_neighbour(m_id, dir) != NEIGHBOUR_ID_NULL;
     }
 
+    idx_t neigbour_id(position<N> dir) const {
+        return m_decomposition.get_neighbour(m_id, dir);
+    }
+
+
+    idx_t id() const {
+        return m_id;
+    }
 
     constexpr size_t neighbour_count() const {
         return m_neighbours.count();
     }
 
-    
 
+    std::vector<idx_t> get_neighbour_ids() const {
+
+        auto dirs = m_neighbours.get();
+        std::vector<idx_t> n_ids; n_ids.reserve(dirs.size());
+
+        for (auto dir : dirs) {
+            n_ids.push_back(m_decomposition.get_neighbour(m_id, position<N>(dir)));
+        }
+        return n_ids;
+
+    }
+
+
+    constexpr auto get_all_neighbour_dirs() const {
+        return m_neighbours.get();
+    }
 
 
 protected:
@@ -81,8 +104,31 @@ protected:
     constexpr size_t buffer_idx(position<N> dir) const {
         idx_t idx = m_neighbours.idx(dir);
         Utils::runtime_assert( (idx >= 0), "Invalid buffer idx");
-        return idx;
+        return size_t(idx);
     }
+
+    std::vector<std::pair<position<N>, idx_t>> get_pairs() const {
+
+        auto dirs = m_neighbours.get();
+        std::vector<std::pair<position<N>, idx_t>> ret;
+        ret.reserve(dirs.size());
+
+        for (auto dir : dirs ){
+            ret.emplace_back(
+                std::make_pair(
+                    dir, 
+                    m_decomposition.get_neighbour(m_id, position<N>(dir))
+                    )
+            );
+        }
+        return ret;
+    }
+
+    /*
+    constexpr size_t buffer_idx(idx_t neighbour_id) const {
+
+    }
+    */    
 
 
 };
