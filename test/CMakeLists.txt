@@ -29,6 +29,7 @@ SET(ParallelTestSources
 # Build catch hpx main
 add_library(catch_hpx_main STATIC catch_hpx_main.cpp)
 
+target_link_libraries(catch_hpx_main PUBLIC ${HPX_LIB})
 
 add_executable(ParallelTest.bin ${ParallelTestSources})
 target_link_libraries(ParallelTest.bin PUBLIC catch_hpx_main communication)

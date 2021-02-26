@@ -35,15 +35,27 @@ public:
 
                     
                     [[maybe_unused]] auto recv_id = size_t(this->neigbour_id(dir));
+
                     m_recv[idx] = hpx::find_from_basename<channel_type>(name, recv_id);
                     
+//                    auto temp = hpx::find_here();                    
+
+                    auto temp = hpx::lcos::channel<T>(hpx::find_here());
+
                     //m_send[idx] = channel_type(this->id());
                     
                     //m_send[idx] = channel_type(hpx::find_here());
-                    /*
-                    hpx::register_with_basename(name, m_send[idx], size_t(this->id()));
-                    */
+                    
+                    //hpx::register_with_basename(name, m_send[idx], size_t(this->id()));
+                    
+
+
                 }
+
+                
+
+
+
 
             }
 

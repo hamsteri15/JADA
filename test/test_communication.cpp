@@ -53,7 +53,6 @@ TEST_CASE("Test MdCommunicatorBase"){
 }
 
 
-/*
 TEST_CASE("Test HpxMdCommunicator") {
 
     using namespace JADA;
@@ -61,12 +60,19 @@ TEST_CASE("Test HpxMdCommunicator") {
     SECTION("Constructors") {
 
         REQUIRE_NOTHROW(HpxMdCommunicator<2, double>());
+        
         REQUIRE_NOTHROW(HpxMdCommunicator<2, std::vector<double>>());
 
-        Decomposition<2> dec({10, 10}, {3,3}, {false, false});
 
-        REQUIRE_NOTHROW(HpxMdCommunicator<2, double>(0, dec));
+        idx_t rank = idx_t(hpx::get_locality_id());        
+        size_t n_domains = 2;
 
+        Decomposition<2> dec({100, 100}, n_domains, {false, false});
+        
+        //Decomposition<2> dec({10, 10}, {3,3}, {false, false});
+
+        REQUIRE_NOTHROW(HpxMdCommunicator<2, std::vector<double>>(rank, dec));
+                
 
     }
 
@@ -79,4 +85,3 @@ TEST_CASE("Test HpxMdCommunicator") {
 
 //    CHECK(1 == 2);
 }
-*/
