@@ -93,7 +93,7 @@ TEST_CASE("Test HpxMdCommunicator") {
     SECTION("set/get") {
 
         
-
+        /*
         size_t n_domains = hpx::get_num_localities(hpx::launch::sync);
 
         std::cout << "Domain count: " << n_domains << std::endl; 
@@ -118,7 +118,7 @@ TEST_CASE("Test HpxMdCommunicator") {
         for (auto f : from) {
             std::cout << f << std::endl;
         }
-        
+        */
 
     }
 

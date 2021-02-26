@@ -34,15 +34,18 @@ public:
 
             for (auto dir : dirs) {
 
+                auto name = to_string(dir);
+
                 if (this->has_neighbour(dir)) {
                     
+
                     auto idx = this->buffer_idx(dir);
 
                     auto n_id = size_t(this->neigbour_id(dir));
 
-                    m_recv[idx] = hpx::find_from_basename<channel_type>("some_name1", n_id);
+                    m_recv[idx] = hpx::find_from_basename<channel_type>(name, n_id);
                     m_send[idx] = channel_type(hpx::find_here());
-                    hpx::register_with_basename("some_name2", m_send[idx], size_t(this->id()));
+                    hpx::register_with_basename(name, m_send[idx], size_t(this->id()));
 
                 }
 
@@ -51,16 +54,28 @@ public:
         }
 
 
+    static std::string to_string(position<N> dir) {
+        std::ostringstream oss;
+        std::copy(dir.begin(), dir.end()-1,
+        std::ostream_iterator<idx_t>(oss, ","));
+
+    // Now add the last element with no delimiter
+        oss << dir[N-1];
+        return oss.str();
+    }
+
 
     void set(position<N> dir, T&& t, size_t tag)
     {
         // Send our data to the neighbor n using fire and forget semantics
         // Synchronization happens when receiving values.
-        Utils::runtime_assert(this->has_neighbour(dir), "Trying to set for invalid neighbour");
+        //Utils::runtime_assert(this->has_neighbour(dir), "Trying to set for invalid neighbour");
 
-        auto idx = this->buffer_idx(dir);
+            auto idx = this->buffer_idx(dir);
 
-        m_send[idx].set(hpx::launch::apply, std::move(t), tag);
+            m_send[idx].set(hpx::launch::apply, std::move(t), tag);
+
+
     }
 
     
@@ -68,9 +83,11 @@ public:
     {
         // Get our data from our neighbor, we return a future to allow the
         // algorithm to synchronize.
-        Utils::runtime_assert(this->has_neighbour(dir), "Trying to get from invalid neighbour");
-        auto idx = this->buffer_idx(dir);
-        return m_recv[idx].get(hpx::launch::async, tag);
+        //Utils::runtime_assert(this->has_neighbour(dir), "Trying to get from invalid neighbour");
+
+
+            auto idx = this->buffer_idx(dir);
+            return m_recv[idx].get(hpx::launch::async, tag);
     }
     
 

@@ -35,4 +35,9 @@ add_executable(ParallelTest.bin ${ParallelTestSources})
 target_link_libraries(ParallelTest.bin PUBLIC catch_hpx_main communication)
 target_compile_options(ParallelTest.bin PRIVATE -DDEBUG)
 
-add_test(NAME ParallelTest COMMAND ParallelTest.bin --hpx:localities=2)
+#./yourapp -l2 -0 &
+#./yourapp -1
+
+add_test(NAME ParallelTest COMMAND ParallelTest.bin)
+
+#add_test(NAME ParallelTest COMMAND ParallelTest.bin -l2 -0 & ParallelTest.bin -1)
