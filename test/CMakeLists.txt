@@ -29,10 +29,10 @@ SET(ParallelTestSources
 # Build catch hpx main
 add_library(catch_hpx_main STATIC catch_hpx_main.cpp)
 
-target_link_libraries(catch_hpx_main PUBLIC ${HPX_LIB})
+target_link_libraries(catch_hpx_main PUBLIC HPX::hpx)
 
 add_executable(ParallelTest.bin ${ParallelTestSources})
 target_link_libraries(ParallelTest.bin PUBLIC catch_hpx_main communication)
 target_compile_options(ParallelTest.bin PRIVATE -DDEBUG)
 
-add_test(NAME ParallelTest COMMAND ParallelTest.bin)
+add_test(NAME ParallelTest COMMAND ParallelTest.bin --hpx:localities=2)

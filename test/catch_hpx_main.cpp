@@ -8,7 +8,10 @@ int hpx_main(int argc, char* argv[])
 {
     // Any HPX application logic goes here...
     Catch::Session session;
-  
+
+    std::cout << "Running on " << hpx::get_num_localities(hpx::launch::sync) << " localities." << std::endl;
+
+
     [[maybe_unused]] const int result = session.run(argc, argv);
     return hpx::finalize();
 }
