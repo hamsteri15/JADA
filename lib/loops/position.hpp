@@ -16,6 +16,13 @@ struct position : public Utils::MathVectorBase<idx_t, L, position<L>> {
 
     inline constexpr position(std::array<element_t, L> arr) : m_storage(arr) {} 
 
+    inline constexpr position(dimension<L> dim) {
+        for (size_t i = 0; i < L; ++i) {
+            m_storage[i] = static_cast<idx_t>(dim[i]);
+        }
+    } 
+
+
     constexpr position(position const&) noexcept = default;
     constexpr position(position&&) noexcept = default;
     constexpr position& operator=(position const&) noexcept = default;
