@@ -308,6 +308,66 @@ private:
 };
 
 
+void put_to_barrier(local_data_t& local_data, const local_data_t& recv_data, position<2> dir) {
+    //note assumes that the recv_data size is already sliced
+
+    position<2> f_begin{};
+    position<2> f_end(recv_data.dimensions());
+
+    position<2> t_begin = local_data.barrier_begin(dir);
+    position<2> t_end = local_data.barrier_end(dir);
+
+    put_slice(recv_data, local_data, f_begin, f_end, t_begin, t_end);
+
+}
+
+
+local_data_t solve(local_data_t in, position<2> begin, position<2> end) {
+
+    local_data_t out(in);
+
+    for (auto pos : md_indices(begin, end)) {
+
+        for (auto s : stencil::indices) {
+            out[pos] += in[pos + s];
+        }
+
+    }
+    return out;
+}
+
+
+
+void do_boundary_work(const global_data_t& global_data, local_data_t& local_data, Comm comm, position<2> dir) {
+
+    auto neighbour_id = comm.neigbour_id(dir);
+
+    //get data from neighbour and put to my barriers
+    if (neighbour_id != NEIGHBOUR_ID_NULL) {
+    
+        auto neighbour_data = comm.get_neighbour_data(global_data, dir);
+
+        auto recv = get_slice(neighbour_data, neighbour_data.interior_begin(-dir), neighbour_data.interior_end(-dir));                
+        put_to_barrier(local_data, recv, dir);
+        
+    }
+    //fill barriers with ones
+    else {
+        
+        for (auto pos : md_indices(local_data.barrier_begin(dir), local_data.barrier_end(dir))){
+            local_data[pos] = 1.0; 
+        }
+
+    } 
+
+    //local_data = solve(local_data, local_data.interior_begin(dir), local_data.interior_end(dir));
+
+
+
+}
+
+
+
 void swap_boundaries(const MockComm& comm, global_data_t& global_data) {
 
 
@@ -317,49 +377,19 @@ void swap_boundaries(const MockComm& comm, global_data_t& global_data) {
 
     for (size_t i = 0; i < comms.size(); ++i) {
 
-        const auto& l_comm = comms.at(i);
-        auto& l_data = global_data.at(i);
-
+        auto& local_data = global_data.at(i);
 
         
+        const auto& local_comm = comms.at(i);
         for (auto dir : stencil::neighbour_dirs) {
-
-
-            auto n_id = l_comm.neigbour_id(dir);
-
-            if (n_id != NEIGHBOUR_ID_NULL) {
-          
-                auto n_data = l_comm.get_neighbour_data(global_data, dir);
-
-
-                put_slice(n_data, l_data, 
-                    n_data.interior_begin(-dir),
-                    n_data.interior_end(-dir),
-                    l_data.barrier_begin(dir),
-                    l_data.barrier_end(dir)
-
-                );
-
-                //auto recv = get_slice(n_data, n_data.interior_begin(-dir), n_data.interior_end(-dir));                
-                //position<2> f_begin{};
-                //position<2> f_end(recv.dimensions());
-
-                //position<2> t_begin = l_data.barrier_begin(dir);
-                //position<2> t_end = l_data.barrier_end(dir);
-
-
-                //put_slice(recv, l_data, f_begin, f_end, t_begin, t_end);
-                
-//
-            }
-            
-            
-        
-
-            
+            do_boundary_work(global_data, local_data, local_comm, dir);
         }
         
 
+        position<2> dir = {0,0}; //interior
+        local_data = solve(
+            local_data, local_data.interior_begin(dir) + idx_t(1), local_data.interior_end(dir) - idx_t(1)
+        );
 
 
     }
@@ -396,7 +426,8 @@ global_data_t init(Decomposition<2> dec){
 
         for (auto pos : md_indices(local_data.interior_begin({0,0}), local_data.interior_end({0,0}) )){
 
-            local_data[pos] = double(id + 1);
+            //local_data[pos] = double(id + 1);
+            local_data[pos] = double(1);
 
         }
 
@@ -409,26 +440,10 @@ global_data_t init(Decomposition<2> dec){
 
 }
 
-/*
-
-local_data_t solve(local_data_t in) {
-
-    local_data_t out(in);
-
-    for (auto [j,i] : md_indices(in.begin() + 1, in.end() - 1)) {
-
-        for (auto s : stencil::indices) {
-
-            out[{j,i}] += in[position<2>{j,i} + s];
-
-        }
 
 
-    }
-    return out;
-}
 
-*/
+
 
 int hpx_main() {
 
