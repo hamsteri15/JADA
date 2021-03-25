@@ -113,9 +113,9 @@ void do_work(const MockComm& comm, global_data_t& global_data) {
         const auto& local_comm = comms.at(i);
         for (auto dir : stencil::neighbour_dirs) {
             fill_barrier(global_data, local_in, local_comm, dir);
-            auto b_sol = solve_boundary(local_in, dir);
+            //auto b_sol = solve_boundary(local_in, dir);
 
-            //solve(local_in, local_out, local_in.interior_begin(dir), local_in.interior_end(dir));
+            solve(local_in, local_out, local_in.interior_begin(dir), local_in.interior_end(dir));
 
         }
         

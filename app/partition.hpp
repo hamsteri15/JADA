@@ -4,7 +4,11 @@
 #include "loops/position.hpp"
 #include "loops/flatten_index.hpp"
 
+#include "grid/block.hpp"
+#include "slices.hpp"
+
 using namespace JADA;
+
 
 
 template<size_t N, class T>
@@ -39,42 +43,26 @@ struct Partition {
 
 
     position<N> barrier_begin(position<N> dir) const{
-        
-        position<N> begin{};
-        
-        for (size_t i = 0; i < N; ++i) {
 
-            if (dir[i] < 0) {
-                begin[i] = 0;
-            }
-            else if (dir[i] > 0) {
-                begin[i] = idx_t(m_dimension[i] + m_padding[i]);
-            }
-            else if (dir[i] == 0) {
-                begin[i] = idx_t(m_padding[i]);
-            }
-
-        }
-        return begin;
+        return halo_begin(m_dimension, dir, m_padding);
+        
     }
 
     position<N> barrier_end(position<N> dir) const {
-        return barrier_begin(dir) + compute_extent(dir);
+        return halo_end(m_dimension, dir, m_padding);
     }
 
 
     position<N> interior_begin(position<N> dir) const {
 
-        auto begin = barrier_begin(dir);
-        begin -= dir * position<N>(m_padding);
-        return begin;
+        return boundary_begin(m_dimension, dir, m_padding);
     }
 
 
 
     position<N> interior_end(position<N> dir) const {
 
-        return interior_begin(dir) + compute_extent(dir);
+        return boundary_end(m_dimension, dir, m_padding);
 
     }
 
@@ -114,28 +102,81 @@ private:
     dimension<N>   m_dimension;
     dimension<N>   m_padding;
 
+};
 
-    position<N> compute_extent(position<N> dir) const {
+template<size_t N, class T, ConnectivityType CT>
+struct BoundaryData{
 
-        position<N> extent{};
+    BoundaryData(dimension<N> interior_dims, dimension<N> padding) : 
+    m_data(create(interior_dims, padding)){}
 
-        for (size_t i = 0; i < N; ++i){
-            if (std::abs(dir[i]) > 0) {
-                extent[i] = idx_t(m_padding[i]);
+
+    Partition<N, T> get(position<N> dir) const{
+        auto idx = m_neighbours.idx(dir);
+        return m_data.at(size_t(idx));
+    } 
+
+    
+    void put(Partition<N, T> p_data, position<N> dir) const {
+        auto idx = m_neighbours.idx(dir);
+        m_data.at(size_t(idx)) = p_data;
+    }
+    
+
+
+private:
+
+
+    std::vector<Partition<N, T>> m_data;
+    static constexpr BlockNeighbours<N, ConnectivityType::Star> m_neighbours{};
+
+
+    
+    static std::vector<Partition<N, T>> create_data(dimension<N> dims, dimension<N> padding) {
+
+        std::vector<Partition<N, T>> ret;
+
+        for (auto dir : m_neighbours.get()){
+
+            dimension<N> boundary_dims{};
+            for (size_t i = 0; i < N; ++i){
+                if (dir[i] == 0) {
+                    boundary_dims[i] = dims[i];
+                }
+                else {
+                    boundary_dims[i] = padding[i];
+                }
             }
-            else {
-                extent[i] = idx_t(m_dimension[i]);
-            }
+
+            ret.push_back(Partition<N, T>(dims, dimension<N>{}) );
+
         }
 
-        return extent;
+        return ret;        
 
     }
-
+    
 
 };
 
- 
+
+
+template<size_t N, class T>
+struct PartedPartition{
+
+    PartedPartition(dimension<N> dims, dimension<N> padding) : 
+    m_data(dims, padding),
+    m_boundary(dims, padding)
+    {}
+
+
+
+private:
+    Partition<N, T> m_data; //interior data
+    BoundaryData<N, T, ConnectivityType::Star> m_boundary; //barriers
+
+};
+
 
 
 
