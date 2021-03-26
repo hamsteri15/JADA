@@ -20,36 +20,6 @@ public:
     MdCommunicatorBase(idx_t id, Decomposition<N> dec) : m_id(id), m_decomposition(dec) {}
 
 
-
-//CRTP injected functions
-    
-    /*
-    
-    Derived* derived() {
-        return static_cast<Derived*>(this);
-    }
-
-    const Derived* derived() const {
-        return static_cast<const Derived*>(this);
-    }
-
-
-    //Send data to direction dir
-    template<class T>
-    void set(position<N> dir, T&& data, size_t tag){
-        derived().set(dir, data, tag);
-    }
-
-
-    //Get data from direction dir
-    auto get(position<N> dir, size_t tag) {
-        return derived().get(dir, tag);
-    }
-
-
-    */
-
-
     ///
     ///@brief Checks if a neighbour exists in direction dir
     ///

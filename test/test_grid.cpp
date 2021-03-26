@@ -10,7 +10,6 @@
 #include "grid/tile.hpp"
 #include "grid/tile_collection.hpp"
 #include "grid/tile_apply.hpp"
-#include "grid/md_view.hpp"
 
 template <class Loop>
 static std::vector<int> set_ones(const std::vector<int>& v, Loop loop) {
@@ -795,49 +794,6 @@ TEST_CASE("Test Block"){
     }
 }
 
-TEST_CASE("Test data"){
-
-    using namespace JADA;
-
-    SECTION("Constructors"){
-
-
-
-        std::vector<int> d = {1,2,3,
-                              4,5,6};
-
-        Block<2> b({0,0}, {2,3});
-        Block<2> b2({0,0}, {3,3});
-
-        REQUIRE_NOTHROW(MdView(b,d));
-        REQUIRE_THROWS(MdView(b2,d));
-
-    }
-
-
-    SECTION("Element access") {
-
-        std::vector<int> d = {1,2,3,
-                              4,5,6};
-        
-        Block<2> b({0,0}, {2,3});
-
-        auto data = MdView(b,d);
-
-        CHECK(data({0,0}) == 1);
-        CHECK(data({1,0}) == 4);
-        data({1, 0}) = 55;
-        CHECK(data({1,0}) == 55);
-
-        REQUIRE_THROWS(
-            data({2, 1})
-        );
-
-    }
-
-
-}
-
 
 
 TEST_CASE("Test orientation"){
@@ -939,6 +895,7 @@ TEST_CASE("Test TileCollection"){
 
 }
 
+/*
 TEST_CASE("Tile apply"){
 
     using namespace JADA;
@@ -999,7 +956,6 @@ TEST_CASE("Tile apply"){
 
 
 
-/*
 struct TEMP_OP1 {
     using Shape = JADA::Tile<-2, 2>;
 

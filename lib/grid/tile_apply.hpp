@@ -1,7 +1,6 @@
 #pragma once
 
 #include "grid/boundary.hpp"
-#include "grid/md_view.hpp"
 #include "grid/block.hpp"
 #include "grid/tile.hpp"
 #include "utils/constexpr_functions.hpp"
@@ -10,7 +9,7 @@
 
 namespace JADA {
 
-
+/*
 struct TEMP_OP1 {
 
     static constexpr Tile shape = Tile(-2, 2, Orientation(0));
@@ -73,7 +72,7 @@ static void apply_interior(const MdView<N, Storage>& in, MdView<N, Storage>& out
 
 
 }
-
+*/
 
 
 

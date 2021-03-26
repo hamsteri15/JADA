@@ -131,7 +131,11 @@ private:
     static constexpr BlockNeighbours<N, ConnectivityType::Star> m_neighbours{};
 
 
-    
+
+
+
+
+
     static std::vector<Partition<N, T>> create_data(dimension<N> dims, dimension<N> padding) {
 
         std::vector<Partition<N, T>> ret;
@@ -158,26 +162,6 @@ private:
     
 
 };
-
-
-
-template<size_t N, class T>
-struct PartedPartition{
-
-    PartedPartition(dimension<N> dims, dimension<N> padding) : 
-    m_data(dims, padding),
-    m_boundary(dims, padding)
-    {}
-
-
-
-private:
-    Partition<N, T> m_data; //interior data
-    BoundaryData<N, T, ConnectivityType::Star> m_boundary; //barriers
-
-};
-
-
 
 
 
