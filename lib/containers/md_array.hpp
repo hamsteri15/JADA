@@ -21,6 +21,11 @@ struct MdArray{
         return m_data.size();
     }
 
+
+    T* data()             {return m_data.data();}
+    const T* data() const {return m_data.data();}
+
+
     T& operator[](position<N> pos) {
 
         return m_data[static_cast<size_t>(flatten<N, SO>(m_dim, pos))];
@@ -30,6 +35,14 @@ struct MdArray{
 
         return m_data[static_cast<size_t>(flatten<N, SO>(m_dim, pos))];
     }
+
+
+    void set_all(T val) {
+        for (auto & v : m_data) {
+            v = val;
+        }
+    }
+
 
 
 private:

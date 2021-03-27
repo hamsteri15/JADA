@@ -54,16 +54,44 @@ private:
     std::array<element_t, L> m_storage;
 };
 
+
+
+template <size_t N>
+auto operator<(const position<N>& lhs, const position<N>& rhs) {
+    for (size_t i = 0; i < N; ++i) {
+        if (lhs[i] >= rhs[i]) { return false; }
+    }
+    return true;
+}
+
+template <size_t N>
+auto operator<=(const position<N>& lhs, const position<N>& rhs) {
+    for (size_t i = 0; i < N; ++i) {
+        if (lhs[i] > rhs[i]) { return false; }
+    }
+    return true;
+}
+
+template <size_t N>
+auto operator>(const position<N>& lhs, const position<N>& rhs) {
+    return !(lhs <= rhs);
+}
+
+template <size_t N>
+auto operator>=(const position<N>& lhs, const position<N>& rhs) {
+    return !(lhs < rhs);
+}
+
+
+
+
 //================================
 // <=> Comparisons with dimension
 //================================
 
 template <size_t N>
 auto operator==(const position<N>& lhs, const dimension<N>& rhs) {
-    for (size_t i = 0; i < N; ++i) {
-        if (lhs[i] != idx_t(rhs[i])) { return false; }
-    }
-    return true;
+    return (lhs == position<N>(rhs));
 }
 
 template <size_t N>
@@ -73,18 +101,13 @@ auto operator!=(const position<N>& lhs, const dimension<N>& rhs) {
 
 template <size_t N>
 auto operator<(const position<N>& lhs, const dimension<N>& rhs) {
-    for (size_t i = 0; i < N; ++i) {
-        if (lhs[i] >= idx_t(rhs[i])) { return false; }
-    }
-    return true;
+    return (lhs < position<N>(rhs));
+
 }
 
 template <size_t N>
 auto operator<=(const position<N>& lhs, const dimension<N>& rhs) {
-    for (size_t i = 0; i < N; ++i) {
-        if (lhs[i] > idx_t(rhs[i])) { return false; }
-    }
-    return true;
+    return (lhs <= position<N>(rhs));
 }
 
 template <size_t N>

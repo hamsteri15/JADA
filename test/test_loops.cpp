@@ -8,7 +8,7 @@
 //#include "loops/serial_index_loops.hpp"
 #include "loops/loopable.hpp"
 #include "loops/neighbour_iterator.hpp"
-
+#include "loops/direction.hpp"
 
 TEST_CASE("Test position"){
 
@@ -88,6 +88,32 @@ TEST_CASE("Test position"){
 
 }
 
+TEST_CASE("Test direction") {
+
+    using namespace JADA;
+
+    REQUIRE_NOTHROW(direction<2>{1,0});
+    REQUIRE_NOTHROW(direction<2>{1,-1});
+    REQUIRE_THROWS(direction<2>{2,-1});
+    REQUIRE_THROWS(direction<2>{0,-2});
+
+
+
+    position<2> p = position<2>{1,0} + direction<2>{1, 1};
+
+    CHECK(p[0] == 2);
+    CHECK(p[1] == 1);
+
+
+    direction<2> d = {1, -1};
+    dimension<2> D = {2,2};
+
+
+    CHECK(d < D);
+    CHECK( d != D);
+
+}
+
 
 TEST_CASE("Test dimension"){
 
@@ -96,10 +122,6 @@ TEST_CASE("Test dimension"){
     dimension<3> d= {1,2,3};
     CHECK(d[0] == 1);
     CHECK(d[2] == 3);
-
-
-
-
 }
 
 
