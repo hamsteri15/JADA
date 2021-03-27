@@ -18,7 +18,6 @@
 
 
 #include "grid/decomposition.hpp"
-#include "grid/block.hpp"
 #include "communication/hpx_md_communicator.hpp"
 
 #include "stencil.hpp"

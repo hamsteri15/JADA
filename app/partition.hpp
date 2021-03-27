@@ -4,7 +4,6 @@
 #include "loops/position.hpp"
 #include "loops/flatten_index.hpp"
 
-#include "grid/block.hpp"
 #include "slices.hpp"
 
 using namespace JADA;
