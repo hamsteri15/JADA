@@ -31,9 +31,6 @@ struct direction : public position<L> {
     }
 
 
-
-
-
 };
 
 }
