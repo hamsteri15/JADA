@@ -1,7 +1,7 @@
 #pragma once
 
 #include "containers/md_array.hpp"
-#include "grid/block_neighbours.hpp"
+#include "grid/neighbours.hpp"
 #include "loops/direction.hpp"
 
 namespace JADA {
@@ -19,10 +19,6 @@ template <size_t N, class T> struct StructuredData {
         , m_data(dim)
         , m_halos(create_halos(dim, padding)) {}
 
-    const storage_t& get_halo(direction<N> dir) const {
-        size_t idx = static_cast<size_t>(m_neighbours.idx(dir));
-        return m_halos.at(idx);
-    }
 
     void put_halo(const storage_t& data, direction<N> dir) {
 

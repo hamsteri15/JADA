@@ -1,7 +1,7 @@
 #pragma once
 
 #include "communication/communicator.hpp"
-#include "grid/block_neighbours.hpp"
+#include "grid/neighbours.hpp"
 #include "grid/decomposition.hpp"
 #include "loops/position.hpp"
 

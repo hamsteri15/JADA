@@ -50,16 +50,6 @@ template <size_t N, ConnectivityType CT> struct Neighbours {
 
 public:
 
-    //constexpr Neighbours() = default;
-
-    /*
-    constexpr Neighbours() {
-        if constexpr (CT == ConnectivityType::Star) {
-            m_neighbours = star_neighbours();
-        } else {
-            m_neighbours = box_neighbours();
-        }
-    }*/
 
 
     ///

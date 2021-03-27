@@ -3,7 +3,7 @@
 #include <array>
 #include <iostream>
 #include "grid/split.hpp"
-#include "grid/block_neighbours.hpp"
+#include "grid/neighbours.hpp"
 #include "grid/decomposition.hpp"
 
 template <class Loop>
