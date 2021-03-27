@@ -207,30 +207,30 @@ TEST_CASE("Block neighbours"){
     using namespace JADA;
     using Catch::Matchers::Contains;
     
-    SECTION("BlockNeighbours"){
+    SECTION("Neighbours"){
 
-        REQUIRE_NOTHROW(BlockNeighbours<3, ConnectivityType::Star>());
-        REQUIRE_NOTHROW(BlockNeighbours<3, ConnectivityType::Box>());
+        REQUIRE_NOTHROW(Neighbours<3, ConnectivityType::Star>());
+        REQUIRE_NOTHROW(Neighbours<3, ConnectivityType::Box>());
         
-        CHECK(is_unique(BlockNeighbours<3, ConnectivityType::Box>().get()));
-        CHECK(is_unique(BlockNeighbours<2, ConnectivityType::Star>().get()));
-        CHECK(is_unique(BlockNeighbours<4, ConnectivityType::Box>().get()));
+        CHECK(is_unique(Neighbours<3, ConnectivityType::Box>().get()));
+        CHECK(is_unique(Neighbours<2, ConnectivityType::Star>().get()));
+        CHECK(is_unique(Neighbours<4, ConnectivityType::Box>().get()));
 
 
 
-        BlockNeighbours<2, ConnectivityType::Star> ns1;
-        BlockNeighbours<2, ConnectivityType::Box> ns2;
+        Neighbours<2, ConnectivityType::Star> ns1;
+        Neighbours<2, ConnectivityType::Box> ns2;
 
-//        static constexpr auto ns_const = BlockNeighbours<2, ConnectivityType::Star>();
+//        static constexpr auto ns_const = Neighbours<2, ConnectivityType::Star>();
 
-        constexpr BlockNeighbours<2, ConnectivityType::Star> ns_const;
+        constexpr Neighbours<2, ConnectivityType::Star> ns_const;
 
 
-        static_assert(BlockNeighbours<2, ConnectivityType::Star>::idx({0,1}) == 0, "Not constexpr");
+        static_assert(Neighbours<2, ConnectivityType::Star>::idx({0,1}) == 0, "Not constexpr");
 
         CHECK(ns1.idx({0,1}) == 0);
         CHECK(ns2.idx({0,1}) == 0);
-        static_assert(ns_const.idx({0,1}) == 0, "BlockNeighbours not constexpr");
+        static_assert(ns_const.idx({0,1}) == 0, "Neighbours not constexpr");
 
 
 
@@ -240,7 +240,7 @@ TEST_CASE("Block neighbours"){
     SECTION("Star connectivity"){
 
         SECTION("1D") {
-            auto test = BlockNeighbours<1, ConnectivityType::Star>().get();
+            auto test = Neighbours<1, ConnectivityType::Star>().get();
 
             std::array<std::array<idx_t, 1>, 2> correct
             {
@@ -256,7 +256,7 @@ TEST_CASE("Block neighbours"){
 
 
         SECTION("2D") {
-            auto test = BlockNeighbours<2, ConnectivityType::Star>().get();
+            auto test = Neighbours<2, ConnectivityType::Star>().get();
 
             std::array<std::array<idx_t, 2>, 4> correct
             {
@@ -278,7 +278,7 @@ TEST_CASE("Block neighbours"){
         }
 
         SECTION("3D") {
-            auto test = BlockNeighbours<3, ConnectivityType::Star>().get();
+            auto test = Neighbours<3, ConnectivityType::Star>().get();
 
             std::array<std::array<idx_t, 3>, 6> correct
             {
@@ -308,7 +308,7 @@ TEST_CASE("Block neighbours"){
     SECTION("Box connecitvity"){
 
         SECTION("1D") {
-            auto test = BlockNeighbours<1, ConnectivityType::Box>().get();
+            auto test = Neighbours<1, ConnectivityType::Box>().get();
             
             std::array<std::array<idx_t, 1>, 2> correct
             {
@@ -325,7 +325,7 @@ TEST_CASE("Block neighbours"){
 
 
         SECTION("2D") {
-            auto test = BlockNeighbours<2, ConnectivityType::Box>().get();
+            auto test = Neighbours<2, ConnectivityType::Box>().get();
             
             std::array<std::array<idx_t, 2>, 8> correct
             {

@@ -67,7 +67,7 @@ template <size_t N, class T> struct StructuredData {
 
 private:
     static constexpr ConnectivityType       CT = ConnectivityType::Star;
-    static constexpr BlockNeighbours<N, CT> m_neighbours{};
+    static constexpr Neighbours<N, CT> m_neighbours{};
 
     dimension<N>               m_dim;
     dimension<N>               m_padding;

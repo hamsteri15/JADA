@@ -67,7 +67,7 @@ protected:
 
     idx_t             m_id;
     Decomposition<N>  m_decomposition;
-    static constexpr BlockNeighbours<N, CT> m_neighbours{};
+    static constexpr Neighbours<N, CT> m_neighbours{};
 
 
 

@@ -32,7 +32,7 @@ static constexpr size_t neighbour_count() {
 ///@tparam N number of spatial dimensions
 ///@tparam CT connectivity type Box/Star
 ///
-template <size_t N, ConnectivityType CT> struct BlockNeighbours {
+template <size_t N, ConnectivityType CT> struct Neighbours {
 
     static constexpr auto create() {
         if constexpr (CT == ConnectivityType::Star) {
@@ -50,10 +50,10 @@ template <size_t N, ConnectivityType CT> struct BlockNeighbours {
 
 public:
 
-    //constexpr BlockNeighbours() = default;
+    //constexpr Neighbours() = default;
 
     /*
-    constexpr BlockNeighbours() {
+    constexpr Neighbours() {
         if constexpr (CT == ConnectivityType::Star) {
             m_neighbours = star_neighbours();
         } else {

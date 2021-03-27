@@ -127,7 +127,7 @@ private:
 
 
     std::vector<Partition<N, T>> m_data;
-    static constexpr BlockNeighbours<N, ConnectivityType::Star> m_neighbours{};
+    static constexpr Neighbours<N, ConnectivityType::Star> m_neighbours{};
 
 
 
