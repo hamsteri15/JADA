@@ -2,6 +2,7 @@
 
 #include "containers/md_array.hpp"
 #include "grid/block_neighbours.hpp"
+#include "loops/direction.hpp"
 
 namespace JADA {
 
@@ -18,12 +19,12 @@ template <size_t N, class T> struct StructuredData {
         , m_data(dim)
         , m_halos(create_halos(dim, padding)) {}
 
-    const storage_t& get_halo(position<N> dir) const {
+    const storage_t& get_halo(direction<N> dir) const {
         size_t idx = static_cast<size_t>(m_neighbours.idx(dir));
         return m_halos.at(idx);
     }
 
-    void put_halo(const storage_t& data, position<N> dir) {
+    void put_halo(const storage_t& data, direction<N> dir) {
 
         size_t idx = static_cast<size_t>(m_neighbours.idx(dir));
         Utils::runtime_assert(m_halos.at(idx).size() == data.size(),
@@ -92,7 +93,7 @@ private:
 
     }
 
-    position<N> halo_begin(position<N> dir) const {
+    position<N> halo_begin(direction<N> dir) const {
 
         position<N> a{};
 
@@ -140,11 +141,7 @@ private:
 
 
 
-    position<N> which_dir(position<N> pos) const {
-        // TODO: make a separate function which returns a direction and the
-        // direction should handle
-        //      shifts of larger than one, i.e. communications overlapping the
-        //      next partition
+    direction<N> which_dir(position<N> pos) const {
 
         auto min = -position<N>(m_padding);
         auto max = position<N>(m_dim + m_padding);
@@ -153,7 +150,7 @@ private:
         Utils::runtime_assert((pos >= min) && (pos < max),
                               "Position out of bounds");
 
-        position<N> dir{};
+        direction<N> dir{};
 
         for (size_t i = 0; i < N; ++i) {
 

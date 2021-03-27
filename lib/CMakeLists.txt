@@ -1,7 +1,6 @@
 SET(LibrarySubDirs 
     loops
     stencil
-    operation
     grid
     communication
     ) #add more here if necessary
