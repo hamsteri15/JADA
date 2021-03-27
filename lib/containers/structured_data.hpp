@@ -29,7 +29,7 @@ template <size_t N, class T> struct StructuredData {
     }
 
 
-    const MdArray<N, T> get_interior() const {
+    const storage_t get_interior() const {
         return m_data;
     }
 
@@ -49,7 +49,7 @@ template <size_t N, class T> struct StructuredData {
             return m_data[pos];
         }
 
-        auto begin = halo_begin(which_dir(pos));
+        auto begin = halo_begin(get_direction(pos));
         auto x = pos - begin;
 
         auto& part = m_halos[size_t(p_idx)];
@@ -69,6 +69,15 @@ private:
     dimension<N>               m_padding;
     storage_t              m_data;
     std::vector<storage_t> m_halos;
+
+
+
+
+
+
+
+
+
 
     
     
@@ -91,25 +100,27 @@ private:
 
     position<N> halo_begin(direction<N> dir) const {
 
-        position<N> a{};
+        position<N> begin{};
 
         for (size_t i = 0; i < N; ++i){
             if (dir[i] < 0) {
-                a[i] = -idx_t(m_padding[i]);
+                begin[i] = -idx_t(m_padding[i]);
             }
 
             if (dir[i] > 0) {
-                a[i] = idx_t(m_dim[i]);
+                begin[i] = idx_t(m_dim[i]);
             }
         }
-        return a;
+        return begin;
     }
+
+
 
 
 
     idx_t which_part(position<N> pos) const {
 
-        auto dir = which_dir(pos);
+        auto dir = get_direction(pos);
 
         return m_neighbours.idx(dir);
 
@@ -137,7 +148,7 @@ private:
 
 
 
-    direction<N> which_dir(position<N> pos) const {
+    direction<N> get_direction(position<N> pos) const {
 
         auto min = -position<N>(m_padding);
         auto max = position<N>(m_dim + m_padding);
