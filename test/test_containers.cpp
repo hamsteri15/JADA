@@ -73,21 +73,25 @@ TEST_CASE("Test StructuredData"){
         size_t ngc_j = 1;
         size_t ngc_i = 2;
         
-//        size_t NJ = nj + 2*ngc_j;
-//        size_t NI = ni + 2*ngc_i;
-
         dimension<2> dims = {nj, ni};
         dimension<2> padding = {ngc_j, ngc_i};
 
 
         StructuredData<2, int> d(dims, padding);
 
-        REQUIRE_NOTHROW(d.access_any({-1,1}));
-        REQUIRE_NOTHROW(d.access_any({-1,-1}));
-        REQUIRE_NOTHROW(d.access_any({-idx_t(ngc_j),-idx_t(ngc_i)}));
-        REQUIRE_NOTHROW(d.access_any({0,0}));
-        REQUIRE_NOTHROW(d.access_any({idx_t(nj + ngc_j - 1), 0}));
-        REQUIRE_NOTHROW(d.access_any({0, idx_t(ni + ngc_i - 1)}));
+        d.at({0,0}) = 7;
+        const int& test = d.at({0,0});
+        CHECK(test == 7);
+
+        REQUIRE_NOTHROW(d.at({-1,1}));
+        REQUIRE_NOTHROW(d.at({-1,-1}));
+        REQUIRE_NOTHROW(d.at({-idx_t(ngc_j),-idx_t(ngc_i)}));
+        REQUIRE_NOTHROW(d.at({0,0}));
+        REQUIRE_NOTHROW(d.at({idx_t(nj + ngc_j - 1), 0}));
+        REQUIRE_NOTHROW(d.at({0, idx_t(ni + ngc_i - 1)}));
+
+        REQUIRE_THROWS(d.at({-2, 0}));
+        REQUIRE_THROWS(d.at({1, -3}));
 
 
 
@@ -98,25 +102,18 @@ TEST_CASE("Test StructuredData"){
         for (auto pos : md_indices(begin, end)){
 
             auto s_pos = pos - position<2>(padding);
-            d.access_any(s_pos) = idx;
+            d.at(s_pos) = idx;
             ++idx;
         }
-        
-        CHECK(
-            d.access_any({0,0}) == int(ngc_j * (ni + 2*ngc_i) + ngc_i)
-        );
 
-        /*
-        CHECK(
-            d.access_any({idx_t(nj - 1), idx_t(ni - 1)}) == int((nj + ngc_j) * ((ni + 2*ngc_i)) - ngc_i)
-        );*/
-
+        CHECK(d.at({0,0}) == 11);
+        CHECK(d.at({1,1}) == 21);
+        CHECK(d.at({idx_t(nj-1),idx_t(ni-1)}) == 42);
 
     }
 
 
 
-    //d.get_combined().pretty_print();
 
 
 
@@ -129,23 +126,23 @@ TEST_CASE("Test StructuredData"){
 
     StructuredData<2, int> d({8,9}, {2,2});
 
-    REQUIRE_NOTHROW(d.access_any({0, -1}));
+    REQUIRE_NOTHROW(d.at({0, -1}));
 
 
-    d.access_any({0,0}) = 3;
-    CHECK(d.access_any({0,0}) == 3);
+    d.at({0,0}) = 3;
+    CHECK(d.at({0,0}) == 3);
 
-    d.access_any({-1,0}) = 4;
-    CHECK(d.access_any({-1,0}) == 4);
+    d.at({-1,0}) = 4;
+    CHECK(d.at({-1,0}) == 4);
 
-    d.access_any({-2,0}) = 4;
-    CHECK(d.access_any({-2,0}) == 4);
+    d.at({-2,0}) = 4;
+    CHECK(d.at({-2,0}) == 4);
 
-    d.access_any({-1,-1}) = 4;
-    CHECK(d.access_any({-1,-1}) == 4);
+    d.at({-1,-1}) = 4;
+    CHECK(d.at({-1,-1}) == 4);
 
-    d.access_any({-2,-2}) = 4;
-    CHECK(d.access_any({-2,-2}) == 4);
+    d.at({-2,-2}) = 4;
+    CHECK(d.at({-2,-2}) == 4);
 
 
 
@@ -174,10 +171,10 @@ TEST_CASE("Test StructuredData"){
 
     for (auto pos : md_indices(position<2>{0,0}, position<2>{8,9})){
 
-        d.access_any(pos) = copy.access_any(pos + position<2>{-1,0})
-                          + copy.access_any(pos + position<2>{ 1,0})
-                          + copy.access_any(pos + position<2>{ 0,-1})
-                          + copy.access_any(pos + position<2>{ 0, 1});
+        d.at(pos) = copy.at(pos + position<2>{-1,0})
+                          + copy.at(pos + position<2>{ 1,0})
+                          + copy.at(pos + position<2>{ 0,-1})
+                          + copy.at(pos + position<2>{ 0, 1});
     }
 
 

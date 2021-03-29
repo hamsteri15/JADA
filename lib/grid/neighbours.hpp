@@ -70,7 +70,7 @@ public:
     ///@brief Converts a neighbour direction to an idx in the neighbours array
     ///
     ///@param neighbour direction of a neighbour
-    ///@return constexpr size_t the index of the neighbour
+    ///@return constexpr size_t the index of the neihbour if such neigbhour is found. -1 otherwise.
     ///
     static constexpr idx_t idx(position<N> neighbour) {
 

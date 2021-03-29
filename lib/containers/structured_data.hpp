@@ -6,13 +6,21 @@
 
 namespace JADA {
 
-template <size_t N, class T> struct StructuredData {
+template <size_t N, class T, ConnectivityType CT = ConnectivityType::Box> 
+struct StructuredData {
 
     using storage_t = MdArray<N, T, StorageOrder::RowMajor>;
 
 
     StructuredData() = default;
 
+
+    ///
+    ///@brief Construct from dimensions and padding
+    ///
+    ///@param dim dimensions of the data
+    ///@param padding padding to allow element access outside dimensions (for neighbour communication etc.)
+    ///
     StructuredData(dimension<N> dim, dimension<N> padding)
         : m_dim(dim)
         , m_padding(padding)
@@ -20,6 +28,13 @@ template <size_t N, class T> struct StructuredData {
         , m_halos(create_halos(dim, padding)) {}
 
 
+
+    ///
+    ///@brief Puts data to the halo storage indicated by dir
+    ///
+    ///@param data data to put
+    ///@param dir  direction indicating where to put
+    ///
     void put_halo(const storage_t& data, direction<N> dir) {
 
         size_t idx = static_cast<size_t>(m_neighbours.idx(dir));
@@ -28,81 +43,90 @@ template <size_t N, class T> struct StructuredData {
         m_halos.at(idx) = data;
     }
 
+
+    ///
+    ///@brief Get the halo data from direction dir
+    ///
+    ///@param dir direction to get the data from 
+    ///@return const storage_t& the data at direction
+    ///
     const storage_t& get_halo(direction<N> dir) const {
         size_t idx = static_cast<size_t>(m_neighbours.idx(dir));
         return m_halos.at(idx);
     }
 
+
+    ///
+    ///@brief Get the halo data from direction dir
+    ///
+    ///@param dir direction to get the data from 
+    ///@return storage_t& the data at direction
+    ///
     storage_t& get_halo(direction<N> dir) {
         size_t idx = static_cast<size_t>(m_neighbours.idx(dir));
         return m_halos.at(idx);
     }
 
 
-    const storage_t& get_interior() const {
-        return m_data;
-    }
 
-
-    void set_all(T val) {
-        m_data.set_all(val);
-        for (auto& p : m_halos) {
-            p.set_all(val);
-        }
-    }
-
-
+    ///
+    ///@brief Returns a contiguous storage where the halos are placed in to their correct positions
+    ///       based on the directions.
+    ///
+    ///@return storage_t a contiguous storage with dimensions: dimensions + 2*padding
+    ///
     storage_t get_combined() const {
 
         auto dims = m_dim + m_padding * size_t(2);
-
         MdArray<N, T> ret(dims);
 
         for (auto pos : md_indices(position<N>{}, position<N>(dims))){
             auto my_pos = pos - position<N>(m_padding);
-            ret[pos]= this->access_any(my_pos);
+            ret[pos]= this->at(my_pos);
         }
         return ret;
 
     }
 
 
+    ///
+    ///@brief Get a non-modifyable reference to the element at position pos. This call allows for
+    ///       accessing data at the halos such that the input pos can exceed the m_dims
+    ///       by min/max m_padding. For example dims = {10, 10} and padding{1,1}, would allow
+    ///       positions: {-1, -1} or {11, 11} to be accessed
+    ///
+    ///@param pos the position of the element to get
+    ///@return const T& reference to element at pos
+    ///
+    const T& at(position<N> pos) const {
 
-    const T& access_any(position<N> pos) const {
-
-        auto p_idx = which_part(pos);
-        if (p_idx == -1) {
+        if (in_interior(pos)) {
             return m_data[pos];
         }
-
-        auto begin = halo_begin(get_direction(pos));
-        auto x = pos - begin;
-
-        auto& part = m_halos[size_t(p_idx)];
-        return part[x];
+        return const_halo_element_access(pos);
     }
 
+    ///
+    ///@brief Get a modifyable reference to the element at position pos. This call allows for
+    ///       accessing data at the halos such that the input pos can exceed the m_dims
+    ///       by min/max m_padding. For example dims = {10, 10} and padding{1,1}, would allow
+    ///       positions: {-1, -1} or {11, 11} to be accessed
+    ///
+    ///@param pos the position of the element to get
+    ///@return T& reference to element at pos
+    ///
+    T& at(position<N> pos) {
 
-    T& access_any(position<N> pos) {
-
-        auto p_idx = which_part(pos);
-        if (p_idx == -1) {
+        if (in_interior(pos)) {
             return m_data[pos];
         }
-
-        auto begin = halo_begin(get_direction(pos));
-        auto x = pos - begin;
-
-        auto& part = m_halos[size_t(p_idx)];
-        return part[x];
-
+        return halo_element_access(pos);
     }
 
 
 
 
 private:
-    static constexpr ConnectivityType       CT = ConnectivityType::Box;
     static constexpr Neighbours<N, CT> m_neighbours{};
 
     dimension<N>               m_dim;
@@ -110,17 +134,45 @@ private:
     storage_t              m_data;
     std::vector<storage_t> m_halos;
 
+    ///
+    ///@brief Checks if a position belongs to interior region (m_data)
+    ///
+    ///@param pos position to query
+    ///@return true if belongs
+    ///@return false otherwise
+    ///
+    bool in_interior(position<N> pos) const {
 
+        return pos.all_positive() && (pos < m_dim);
+    }
 
+    T& halo_element_access(position<N> pos) {
 
+        const auto dir = get_direction(pos);
+        const auto part_idx = m_neighbours.idx(dir);
+        const auto x = pos - halo_begin(dir);
 
+        return m_halos[size_t(part_idx)][x];
 
+    }
 
+    const T& const_halo_element_access(position<N> pos) const{
 
+        const auto dir = get_direction(pos);
+        const auto part_idx = m_neighbours.idx(dir);
+        const auto x = pos - halo_begin(dir);
 
+        return m_halos[size_t(part_idx)][x];
 
-    
-    
+    }
+
+    ///
+    ///@brief Creates the galo buffers based on the dimensions and padding.
+    ///
+    ///@param dim dimensions of the "internal" data
+    ///@param padding external padding to the internal data
+    ///@return std::vector<storage_t> vector of halos in correct order
+    ///
     static std::vector<storage_t> create_halos(dimension<N> dim,
                                                    dimension<N> padding) {
 
@@ -138,6 +190,12 @@ private:
 
     }
 
+    ///
+    ///@brief Get the beginning position of the halo at direction dir
+    ///
+    ///@param dir direction of the halo region
+    ///@return position<N> beginning position of the halo
+    ///
     position<N> halo_begin(direction<N> dir) const {
 
         position<N> begin{};
@@ -154,17 +212,6 @@ private:
         return begin;
     }
 
-
-
-
-
-    idx_t which_part(position<N> pos) const {
-
-        auto dir = get_direction(pos);
-
-        return m_neighbours.idx(dir);
-
-    }
 
     static dimension<N> compute_halo_dims(dimension<N> dims,
                             position<N>  dir,
@@ -190,12 +237,6 @@ private:
 
     direction<N> get_direction(position<N> pos) const {
 
-        auto min = -position<N>(m_padding);
-        auto max = position<N>(m_dim + m_padding);
-
-        // TODO: get rid off
-        Utils::runtime_assert((pos >= min) && (pos < max),
-                              "Position out of bounds");
 
         direction<N> dir{};
 
@@ -211,6 +252,7 @@ private:
         }
         return dir;
     }
+
 
 
 };
