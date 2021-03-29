@@ -28,14 +28,18 @@ template <size_t N, class T> struct StructuredData {
         m_halos.at(idx) = data;
     }
 
-    const MdArray<N, T>& get_halo(direction<N> dir) const {
+    const storage_t& get_halo(direction<N> dir) const {
+        size_t idx = static_cast<size_t>(m_neighbours.idx(dir));
+        return m_halos.at(idx);
+    }
+
+    storage_t& get_halo(direction<N> dir) {
         size_t idx = static_cast<size_t>(m_neighbours.idx(dir));
         return m_halos.at(idx);
     }
 
 
-
-    const storage_t get_interior() const {
+    const storage_t& get_interior() const {
         return m_data;
     }
 
@@ -48,16 +52,15 @@ template <size_t N, class T> struct StructuredData {
     }
 
 
-    MdArray<N, T> get_combined() const {
+    storage_t get_combined() const {
 
         auto dims = m_dim + m_padding * size_t(2);
 
         MdArray<N, T> ret(dims);
 
         for (auto pos : md_indices(position<N>{}, position<N>(dims))){
-            //auto my_pos = halo_begin(direction<N>{});
             auto my_pos = pos - position<N>(m_padding);
-            ret[pos] = this->access_any(my_pos);
+            ret[pos]= this->access_any(my_pos);
         }
         return ret;
 
