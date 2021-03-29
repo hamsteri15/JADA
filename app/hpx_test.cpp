@@ -64,7 +64,7 @@ int hpx_main(){
     Decomposition<2> dec(
         {Ny, Nx},
         num_partitions,
-        {true, true}
+        {false, false}
     );
 
 
@@ -98,7 +98,7 @@ int hpx_main(){
     
 
     comms[0].set({1,0}, {1.0, 2.0, 3.0}, 0);
-    auto tt = comms[1].get({1, 0}, 0);
+    auto tt = comms[1].get({-1, 0}, 0);
     print(tt.get());
     
 

@@ -30,23 +30,65 @@ struct communicator_own
 
             static const char* basename = "stencil";
 
-            for (auto dir : m_neighbours.get()){
+            for (direction<N> dir : m_neighbours.get()){
 
                 if (dec.get_neighbour(id, dir) != NEIGHBOUR_ID_NULL){
 
-                    auto idx = size_t(m_neighbours.idx(dir));
-                    m_send[idx] = channel_type(hpx::find_here());
-                    hpx::register_with_basename(basename, m_send[idx], size_t(id));
+                    
+                    //size_t idx = 0;
+
+
+                    //m_recv[size_t(m_neighbours.idx(dir))] = 
+                    m_recv[size_t(0)] = 
+                                        hpx::find_from_basename<channel_type>(
+                                                basename, 
+                                                size_t(dec.get_neighbour(id, dir))
+                                                );
 
 
 
-                    size_t n_id = size_t(dec.get_neighbour(id, dir));
-                    m_recv[idx] = hpx::find_from_basename<channel_type>(basename, n_id);
 
+                    //auto idx2 = size_t(m_neighbours.idx(dir));
+                    m_send[size_t(0)] = channel_type(hpx::find_here());
+                    hpx::register_with_basename(basename, m_send[size_t(0)], size_t(id));
+                    /*
+                    m_send[idx2] = channel_type(hpx::find_here());
+                    hpx::register_with_basename(basename, m_send[idx2], size_t(id));
+                    */
+
+                    std::cout << "taalla " << id <<" " << dir<< std::endl;
+                    
 
 
                 }
             }
+
+            /*
+             // Retrieve the channel from our upper neighbor from which we receive
+                // the row we need to update the first row in our partition.
+                recv[up] = hpx::find_from_basename<channel_type>(down_name, rank - 1);
+
+                // Create the channel we use to send our first row to our upper
+                // neighbor
+                send[up] = channel_type(hpx::find_here());
+                // Register the channel with a name such that our neighbor can find it.
+                hpx::register_with_basename(up_name, send[up], rank);
+
+            */
+
+            /*
+
+            // Retrieve the channel from our neighbor below from which we receive
+                // the row we need to update the last row in our partition.
+                recv[down] = hpx::find_from_basename<channel_type>(up_name, rank + 1);
+                // Create the channel we use to send our last row to our neighbor
+                // below
+                send[down] = channel_type(hpx::find_here());
+                // Register the channel with a name such that our neighbor can find it.
+                hpx::register_with_basename(down_name, send[down], rank);
+
+            */
+
         }
     }
 
@@ -55,7 +97,7 @@ struct communicator_own
     {
         // Send our data to the neighbor n using fire and forget semantics
         // Synchronization happens when receiving values.
-        size_t n = size_t(m_neighbours.idx(dir));
+        size_t n = size_t(m_neighbours.idx(dir)) * 0;
         m_send[n].set(hpx::launch::apply, std::move(t), step);
     }
     
@@ -65,7 +107,7 @@ struct communicator_own
     {
         // Get our data from our neighbor, we return a future to allow the
         // algorithm to synchronize.
-        size_t n = size_t(m_neighbours.idx(dir));
+        size_t n = size_t(m_neighbours.idx(dir)) * 0;
         return m_recv[n].get(hpx::launch::async, step);
     }
     
