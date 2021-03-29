@@ -69,10 +69,37 @@ TEST_CASE("Test StructuredData"){
     REQUIRE_NOTHROW(d.access_any({0, -1}));
 
 
-    d.access_any({0,0}) = 3.0;
-    CHECK(d.access_any({0,0}) == 3.0);
+    d.access_any({0,0}) = 3;
+    CHECK(d.access_any({0,0}) == 3);
 
+    d.access_any({-1,0}) = 4;
+    CHECK(d.access_any({-1,0}) == 4);
 
+    d.access_any({-2,0}) = 4;
+    CHECK(d.access_any({-2,0}) == 4);
+
+    d.access_any({-1,-1}) = 4;
+    CHECK(d.access_any({-1,-1}) == 4);
+
+    d.access_any({-2,-2}) = 4;
+    CHECK(d.access_any({-2,-2}) == 4);
+    
+    Neighbours<2, ConnectivityType::Box> n;
+
+    int i = 1;
+    for (auto dir : n.get()){
+
+        auto copy = d.get_halo(dir);
+        copy.set_all(i);
+        d.put_halo(copy, dir);
+        ++i;
+    }
+
+    auto combined = d.get_combined();
+
+    combined.pretty_print();    
+
+    /*
     d.set_all(1);
 
     auto copy = d;
@@ -92,7 +119,7 @@ TEST_CASE("Test StructuredData"){
     for (size_t i = 0; i < 8*9; ++i){
         REQUIRE(interior.data()[i] == 4);
     }
-
+    */
 
 
 

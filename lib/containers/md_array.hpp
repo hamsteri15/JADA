@@ -45,6 +45,34 @@ struct MdArray{
 
 
 
+    //TODO: remove
+    void pretty_print() const {
+
+        if (N < 3) {
+
+            for (size_t j = 0; j < m_dim[0]; ++j){
+            for (size_t i = 0; i < m_dim[1]; ++i){
+
+                std::cout << this->operator[]({idx_t(j),idx_t(i)}) << " ";
+
+            }
+                std::cout << std::endl;
+            }
+
+
+        std::cout << std::endl;
+
+        }
+        else {
+
+            throw std::logic_error("Can not print more than two dimensions");
+        }
+
+    }
+
+
+
+
 private:
 
     dimension<N> m_dim;

@@ -28,6 +28,12 @@ template <size_t N, class T> struct StructuredData {
         m_halos.at(idx) = data;
     }
 
+    const MdArray<N, T>& get_halo(direction<N> dir) const {
+        size_t idx = static_cast<size_t>(m_neighbours.idx(dir));
+        return m_halos.at(idx);
+    }
+
+
 
     const storage_t get_interior() const {
         return m_data;
@@ -39,6 +45,38 @@ template <size_t N, class T> struct StructuredData {
         for (auto& p : m_halos) {
             p.set_all(val);
         }
+    }
+
+
+    MdArray<N, T> get_combined() const {
+
+        auto dims = m_dim + m_padding * size_t(2);
+
+        MdArray<N, T> ret(dims);
+
+        for (auto pos : md_indices(position<N>{}, position<N>(dims))){
+            //auto my_pos = halo_begin(direction<N>{});
+            auto my_pos = pos - position<N>(m_padding);
+            ret[pos] = this->access_any(my_pos);
+        }
+        return ret;
+
+    }
+
+
+
+    const T& access_any(position<N> pos) const {
+
+        auto p_idx = which_part(pos);
+        if (p_idx == -1) {
+            return m_data[pos];
+        }
+
+        auto begin = halo_begin(get_direction(pos));
+        auto x = pos - begin;
+
+        auto& part = m_halos[size_t(p_idx)];
+        return part[x];
     }
 
 
@@ -55,14 +93,13 @@ template <size_t N, class T> struct StructuredData {
         auto& part = m_halos[size_t(p_idx)];
         return part[x];
 
-
     }
 
 
 
 
 private:
-    static constexpr ConnectivityType       CT = ConnectivityType::Star;
+    static constexpr ConnectivityType       CT = ConnectivityType::Box;
     static constexpr Neighbours<N, CT> m_neighbours{};
 
     dimension<N>               m_dim;
