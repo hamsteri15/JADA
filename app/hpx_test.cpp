@@ -48,13 +48,13 @@ void print(std::vector<T> v) {
 int hpx_main(){
 
 
-    size_t Nx = 12;
-    size_t Ny = 13;
+    size_t Nx = 10;
+    size_t Ny = 10;
 
 
     std::size_t rank = hpx::get_locality_id();
     std::size_t num_localities = hpx::get_num_localities(hpx::launch::sync);
-    std::size_t num_local_partitions = 5;
+    std::size_t num_local_partitions = 4;
     std::size_t num_partitions = num_localities * num_local_partitions;
 
 
@@ -80,17 +80,14 @@ int hpx_main(){
     }    
 
 
-
-    //for ()
-
-
-
     auto all_dirs = comms[0].get_dirs();
+
+    
     for (auto& comm : comms){
 
         for (direction<2> dir : all_dirs) {
             if (comm.has_neighbour(dir)){
-                std::cout << "get" << std::endl;
+                std::cout << "Id: " << comm.id() << "  set: " << dir << std::endl;
                 comm.set(dir, {1, 2, 3}, 0);
             }
         }
@@ -98,22 +95,26 @@ int hpx_main(){
     }
 
 
-    
     for (auto& comm : comms) {
         for (direction<2> dir : all_dirs) {
 
-            if (comm.has_neighbour(-dir)){
+            if (comm.has_neighbour(dir)){
 
-                std::cout << dir << std::endl;
+                std::cout << "Id: " << comm.id() << "  get: " << dir << std::endl;
 
-                auto tt = comm.get(direction<2>(-dir), 0);
-                print(tt.get());
+                //auto tt = comm.get(direction<2>(-dir), 0).get();
+                //auto tt = comm.get(dir, 0).get();
+                auto tt = comm.get(dir, 0).get();
+                //print(tt);
             }
 
 
         }
     }
+    
 
+    
+    std::cout << "taalla" << std::endl;
     /*
     for (direction<2> dir : comms[0].get_dirs()){
 
@@ -121,7 +122,8 @@ int hpx_main(){
             comms[0].set(dir, {1, 2, 3}, 0);
 
 
-            auto tt = comms[1].get(direction<2>(-dir), 0);
+            //auto tt = comms[1].get(direction<2>(dir), 0);
+            auto tt = comms[1].get(dir, 0);
             print(tt.get());
 
         }

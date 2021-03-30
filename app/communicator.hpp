@@ -83,8 +83,11 @@ struct communicator_own
     }
 
     size_t recv_idx(direction<N> dir) const {
-        return size_t(m_neighbours.idx(-dir));
+        //return size_t(m_neighbours.idx(-dir));
+        return size_t(m_neighbours.idx(dir));
     }
+
+    idx_t id() const {return m_id;}
 
 
     void set(direction<N> dir, T&& t, std::size_t step)
