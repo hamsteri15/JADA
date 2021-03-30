@@ -35,16 +35,31 @@ struct communicator_own
                 if (dec.get_neighbour(id, dir) != NEIGHBOUR_ID_NULL){
 
                     
+                    std::ostringstream stream1;
+                    stream1 << dir;
+                    std::string basename_send =  stream1.str();
+                    
+
+
+
+                    //std::string basename = 
+                    
                     m_recv[recv_idx(dir)] = 
                                         hpx::find_from_basename<channel_type>(
-                                                basename, 
+                                                basename_send, 
                                                 size_t(dec.get_neighbour(id, dir))
                                                 );
 
 
 
+                    std::ostringstream stream2;
+                    stream2 << -dir;
+                    std::string basename_recv =  stream2.str();
+
+
+
                     m_send[send_idx(dir)] = channel_type(hpx::find_here());
-                    hpx::register_with_basename(basename, m_send[send_idx(dir)], size_t(id));
+                    hpx::register_with_basename(basename_recv, m_send[send_idx(dir)], size_t(id));
 
                 }
             }
@@ -82,7 +97,7 @@ struct communicator_own
         return size_t(m_neighbours.idx(dir));
     }
 
-    size_t recv_idx(direction<N> dir) const {
+    size_t recv_idx(direction<N> dir) const {      
         //return size_t(m_neighbours.idx(-dir));
         return size_t(m_neighbours.idx(dir));
     }
@@ -94,6 +109,14 @@ struct communicator_own
     {
         // Send our data to the neighbor n using fire and forget semantics
         // Synchronization happens when receiving values.
+        /*
+        std::cout << 
+                  "Id: " << m_id 
+                  << " sets to dir: " << dir 
+                  << " part id: " << get_neighbour(dir) 
+                  << " dir idx: " << send_idx(dir) 
+                  << std::endl;
+        */
         m_send[send_idx(dir)].set(hpx::launch::apply, std::move(t), step);
     }
     
@@ -103,6 +126,14 @@ struct communicator_own
     {
         // Get our data from our neighbor, we return a future to allow the
         // algorithm to synchronize.
+        /*
+        std::cout << 
+                  "Id: " << m_id 
+                  << " gets from dir: " << dir 
+                  << " part id: " << get_neighbour(dir) 
+                  << " dir idx: " << send_idx(dir) 
+                  << std::endl;
+        */
         return m_recv[recv_idx(dir)].get(hpx::launch::async, step);
     }
     
@@ -119,42 +150,14 @@ struct communicator_own
 
     }
 
+    size_t get_neighbour(direction<N> dir) const {
+        
+        Utils::runtime_assert(has_neighbour(dir), "Trying to get invalid neighbour");
+        return size_t(m_dec.get_neighbour(m_id, dir));
 
-        /*
+    }
 
-        if (num > 1)
-        {
-            // We have an upper neighbor if our rank is greater than zero.
-            if (rank > 0)
-            {
-                // Retrieve the channel from our upper neighbor from which we receive
-                // the row we need to update the first row in our partition.
-                recv[up] = hpx::find_from_basename<channel_type>(down_name, rank - 1);
-
-                // Create the channel we use to send our first row to our upper
-                // neighbor
-                send[up] = channel_type(hpx::find_here());
-                // Register the channel with a name such that our neighbor can find it.
-                hpx::register_with_basename(up_name, send[up], rank);
-            }
-            if (rank < num - 1)
-            {
-                // Retrieve the channel from our neighbor below from which we receive
-                // the row we need to update the last row in our partition.
-                recv[down] = hpx::find_from_basename<channel_type>(up_name, rank + 1);
-                // Create the channel we use to send our last row to our neighbor
-                // below
-                send[down] = channel_type(hpx::find_here());
-                // Register the channel with a name such that our neighbor can find it.
-                hpx::register_with_basename(down_name, send[down], rank);
-            }
-        }
-        */
-
-    
-
-
-
+       
 private:
 
     static constexpr Neighbours<N, ConnectivityType::Box> m_neighbours{};

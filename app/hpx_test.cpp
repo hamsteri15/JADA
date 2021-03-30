@@ -49,12 +49,12 @@ int hpx_main(){
 
 
     size_t Nx = 10;
-    size_t Ny = 10;
+    size_t Ny = 11;
 
 
     std::size_t rank = hpx::get_locality_id();
     std::size_t num_localities = hpx::get_num_localities(hpx::launch::sync);
-    std::size_t num_local_partitions = 4;
+    std::size_t num_local_partitions = 3;
     std::size_t num_partitions = num_localities * num_local_partitions;
 
 
@@ -87,8 +87,9 @@ int hpx_main(){
 
         for (direction<2> dir : all_dirs) {
             if (comm.has_neighbour(dir)){
-                std::cout << "Id: " << comm.id() << "  set: " << dir << std::endl;
-                comm.set(dir, {1, 2, 3}, 0);
+                //std::cout << "Id: " << comm.id() << "  set: " << dir << std::endl;
+                std::vector<double> send_data(1, double(comm.id()));
+                comm.set(dir, std::move(send_data), 0);
             }
         }
 
@@ -99,12 +100,15 @@ int hpx_main(){
         for (direction<2> dir : all_dirs) {
 
             if (comm.has_neighbour(dir)){
-
-                std::cout << "Id: " << comm.id() << "  get: " << dir << std::endl;
-
                 //auto tt = comm.get(direction<2>(-dir), 0).get();
                 //auto tt = comm.get(dir, 0).get();
                 auto tt = comm.get(dir, 0).get();
+
+                std::cout << comm.id() << " Received from: " << tt[0] << " from dir: " << dir << std::endl; 
+
+
+
+
                 //print(tt);
             }
 
