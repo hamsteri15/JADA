@@ -54,7 +54,7 @@ int hpx_main(){
 
     std::size_t rank = hpx::get_locality_id();
     std::size_t num_localities = hpx::get_num_localities(hpx::launch::sync);
-    std::size_t num_local_partitions = 2;
+    std::size_t num_local_partitions = 5;
     std::size_t num_partitions = num_localities * num_local_partitions;
 
 
@@ -68,43 +68,65 @@ int hpx_main(){
     );
 
 
-    idx_t id = 0; //this is the id of the partition
 
 
     std::vector<own_communicator_type> comms;
-    std::vector<communicator_type> comms2;
 
     for (idx_t i = 0; i < idx_t(num_local_partitions); ++i){
 
         comms.push_back(
             own_communicator_type(i, dec)
         );
-
-
-        comms2.push_back(
-            communicator_type(size_t(i), num_local_partitions)
-        );
-
-
-
     }    
 
 
+
+    //for ()
+
+
+
+    auto all_dirs = comms[0].get_dirs();
+    for (auto& comm : comms){
+
+        for (direction<2> dir : all_dirs) {
+            if (comm.has_neighbour(dir)){
+                std::cout << "get" << std::endl;
+                comm.set(dir, {1, 2, 3}, 0);
+            }
+        }
+
+    }
+
+
+    
+    for (auto& comm : comms) {
+        for (direction<2> dir : all_dirs) {
+
+            if (comm.has_neighbour(-dir)){
+
+                std::cout << dir << std::endl;
+
+                auto tt = comm.get(direction<2>(-dir), 0);
+                print(tt.get());
+            }
+
+
+        }
+    }
+
     /*
-    comms2[0].set(communicator_type::neighbor::down, {1.0, 1.0, 1.0}, 0);
-    auto t = comms2[1].get(communicator_type::neighbor::up, 0);
-    print(t.get());
+    for (direction<2> dir : comms[0].get_dirs()){
+
+        if (comms[0].has_neighbour(dir)) {
+            comms[0].set(dir, {1, 2, 3}, 0);
+
+
+            auto tt = comms[1].get(direction<2>(-dir), 0);
+            print(tt.get());
+
+        }
+    }
     */
-    
-
-    comms[0].set({1,0}, {1.0, 2.0, 3.0}, 0);
-    auto tt = comms[1].get({-1, 0}, 0);
-    print(tt.get());
-    
-
-    
-
-
 
     return hpx::finalize();
 

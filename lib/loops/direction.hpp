@@ -13,6 +13,9 @@ struct direction : public position<L> {
 
     inline constexpr direction() = default;
 
+    inline constexpr direction(position<L> pos) : position<L>(pos) {}
+
+
     inline constexpr direction(std::array<element_t, L> arr) : position<L>(arr) {
 
         Utils::runtime_assert(

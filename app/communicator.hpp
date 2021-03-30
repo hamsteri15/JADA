@@ -35,11 +35,7 @@ struct communicator_own
                 if (dec.get_neighbour(id, dir) != NEIGHBOUR_ID_NULL){
 
                     
-                    //size_t idx = 0;
-
-
-                    //m_recv[size_t(m_neighbours.idx(dir))] = 
-                    m_recv[size_t(0)] = 
+                    m_recv[recv_idx(dir)] = 
                                         hpx::find_from_basename<channel_type>(
                                                 basename, 
                                                 size_t(dec.get_neighbour(id, dir))
@@ -47,18 +43,8 @@ struct communicator_own
 
 
 
-
-                    //auto idx2 = size_t(m_neighbours.idx(dir));
-                    m_send[size_t(0)] = channel_type(hpx::find_here());
-                    hpx::register_with_basename(basename, m_send[size_t(0)], size_t(id));
-                    /*
-                    m_send[idx2] = channel_type(hpx::find_here());
-                    hpx::register_with_basename(basename, m_send[idx2], size_t(id));
-                    */
-
-                    std::cout << "taalla " << id <<" " << dir<< std::endl;
-                    
-
+                    m_send[send_idx(dir)] = channel_type(hpx::find_here());
+                    hpx::register_with_basename(basename, m_send[send_idx(dir)], size_t(id));
 
                 }
             }
@@ -92,13 +78,20 @@ struct communicator_own
         }
     }
 
-    
+    size_t send_idx(direction<N> dir) const {
+        return size_t(m_neighbours.idx(dir));
+    }
+
+    size_t recv_idx(direction<N> dir) const {
+        return size_t(m_neighbours.idx(-dir));
+    }
+
+
     void set(direction<N> dir, T&& t, std::size_t step)
     {
         // Send our data to the neighbor n using fire and forget semantics
         // Synchronization happens when receiving values.
-        size_t n = size_t(m_neighbours.idx(dir)) * 0;
-        m_send[n].set(hpx::launch::apply, std::move(t), step);
+        m_send[send_idx(dir)].set(hpx::launch::apply, std::move(t), step);
     }
     
 
@@ -107,11 +100,21 @@ struct communicator_own
     {
         // Get our data from our neighbor, we return a future to allow the
         // algorithm to synchronize.
-        size_t n = size_t(m_neighbours.idx(dir)) * 0;
-        return m_recv[n].get(hpx::launch::async, step);
+        return m_recv[recv_idx(dir)].get(hpx::launch::async, step);
     }
     
 
+
+    static constexpr auto get_dirs() {
+        return m_neighbours.get();
+    }
+
+
+    bool has_neighbour(direction<N> dir) const {
+
+        return m_dec.get_neighbour(m_id, dir) != NEIGHBOUR_ID_NULL;
+
+    }
 
 
         /*
