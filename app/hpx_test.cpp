@@ -49,12 +49,12 @@ int hpx_main(){
 
 
     size_t Nx = 10;
-    size_t Ny = 11;
+    size_t Ny = 10;
 
 
     std::size_t rank = hpx::get_locality_id();
     std::size_t num_localities = hpx::get_num_localities(hpx::launch::sync);
-    std::size_t num_local_partitions = 3;
+    std::size_t num_local_partitions = 4;
     std::size_t num_partitions = num_localities * num_local_partitions;
 
 
@@ -64,7 +64,7 @@ int hpx_main(){
     Decomposition<2> dec(
         {Ny, Nx},
         num_partitions,
-        {false, false}
+        {true, true}
     );
 
 
