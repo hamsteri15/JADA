@@ -57,13 +57,13 @@ private:
 
     static std::string send_name(direction<N> dir) {
         std::ostringstream stream;
-        stream << dir;
+        stream << -dir;
         return stream.str();
     }
 
     static std::string recv_name(direction<N> dir) {
         std::ostringstream stream;
-        stream << -dir; //neg
+        stream << dir; //neg
         return stream.str();
     }
 

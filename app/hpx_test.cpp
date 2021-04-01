@@ -59,7 +59,7 @@ int hpx_main(){
     Decomposition<2> dec(
         {Ny, Nx},
         num_local_partitions,
-        {false, false}
+        {true, true}
     );
 
     std::vector<own_communicator_type> comms;

@@ -67,20 +67,19 @@ TEST_CASE("Test HpxMdCommunicator") {
 
     SECTION("Constructors"){
     
-
+        /*
         REQUIRE_NOTHROW(HpxMdCommunicator<comm_data_t, 2, ConnectivityType::Box>());
 
         REQUIRE_NOTHROW(HpxMdCommunicator<comm_data_t, 2, ConnectivityType::Box>(
             0,
             Decomposition<2>({11,12}, 2, {false, false})
         ));
-
-        //REQUIRE_NOTHROW(communicator_t());
+        */
 
     }
 
     
-
+    /*
     SECTION("1by1 periodic star communication"){
 
         using comm_t = HpxMdCommunicator<comm_data_t, 2, ConnectivityType::Star>;
@@ -118,15 +117,16 @@ TEST_CASE("Test HpxMdCommunicator") {
         
         CHECK(comms[0].get({0, 1}, 0).get().front() == 0);
         CHECK(comms[0].get({1, 0}, 0).get().front() == 0);
-        /*
+        
         CHECK(comms[0].get({-1, 0}, 0).get().front() == 0);
         CHECK(comms[0].get({0, -1}, 0).get().front() == 0);
-        */
+        
 
     }
+    */
 
     
-        
+    
     SECTION("2by2 star communication"){
 
         using comm_t = HpxMdCommunicator<comm_data_t, 2, ConnectivityType::Star>;
@@ -182,9 +182,67 @@ TEST_CASE("Test HpxMdCommunicator") {
     }
 
     
+    /*
+    SECTION("2by2 periodic box communication"){
+
+        using comm_t = HpxMdCommunicator<comm_data_t, 2, ConnectivityType::Box>;
 
 
+        Decomposition<2> dec(
+            {10, 10},
+            {2,2},
+            {true, true}
+        );
 
+        std::vector<comm_t> comms = 
+        {
+            comm_t(0, dec),
+            comm_t(1, dec),
+            comm_t(2, dec),
+            comm_t(3, dec)
+        };
+
+        auto all_dirs = comms[0].get_directions();
+
+        
+        for (auto& comm : comms){
+
+            for (direction<2> dir : all_dirs) {
+                if (comm.has_neighbour(dir)){
+                    comm_data_t data(1, int(comm.id()));
+                    comm.set(dir, std::move(data), 0);
+                }
+            }
+
+        }
+
+        // topology is like this
+        //  ---- i 
+        //  |       0, 1
+        //  |       2, 3  
+        //  j
+        
+        for (auto& comm : comms){
+
+            for (direction<2> dir : all_dirs) {
+                if (comm.has_neighbour(dir)){
+                    auto data = comm.get(dir, 0).get();
+                    std::cout << "Id " << comm.id() << " got " << data.front() << " from " << dir << std::endl;
+                }
+            }
+
+        }
+        
+        //CHECK(comms[0].get({0, 1}, 0).get().front() == 1);
+//        CHECK(comms[0].get({0, -1}, 0).get().front() == 1);
+
+        //CHECK(comms[0].get({1, 0}, 0).get().front() == 2);
+        //CHECK(comms[0].get({-1, 0}, 0).get().front() == 2);
+
+    }
+
+    */
+    
 
 
 
