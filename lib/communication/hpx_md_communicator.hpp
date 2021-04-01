@@ -2,111 +2,63 @@
 
 #include <vector>
 
-#include "utils/runtime_assert.hpp"
-#include "communication/md_communicator_base.hpp"
+#include "communication/md_communicator.hpp"
 #include <hpx/include/lcos.hpp>
 
 namespace JADA {
 
-
-
-
-
-template <size_t N, class T, ConnectivityType CT = ConnectivityType::Star>
-class HpxMdCommunicator : public MdCommunicatorBase<N, CT> {
+template <typename T, size_t N, ConnectivityType CT>
+class HpxMdCommunicator : public MdCommunicator<N, CT> {
 
 public:
-
-    //static constexpr ConnectivityType connectivity_t  = CT;
-    using base_type = MdCommunicatorBase<N, CT>;
+    
+    using base_type = MdCommunicator<N, CT>;
     using channel_type = hpx::lcos::channel<T>;
     
+
 
     HpxMdCommunicator() = default;
 
     HpxMdCommunicator(idx_t id, Decomposition<N> dec)
-        : base_type(id, dec), m_send(this->neighbour_count()), m_recv(this->neighbour_count()) {
+        : MdCommunicator<N, CT>(id, dec) {
 
+        for (direction<N> dir : this->get_directions()){
 
-            auto dirs = this->get_all_neighbour_dirs();
+            if (this->has_neighbour(dir)) {
 
-            //std::string name = "name";
+                std::ostringstream stream1;
+                stream1 << dir;
+                std::string basename_send = stream1.str();
 
-            for (auto dir : dirs) {
+                m_recv[this->neighbour_idx(dir)] = hpx::find_from_basename<channel_type>(
+                    basename_send, this->get_neighbour(dir));
 
-                auto name = to_string(dir);
+                std::ostringstream stream2;
+                stream2 << -dir;
+                std::string basename_recv = stream2.str();
 
-                if (this->has_neighbour(dir)) {
-                    
-
-                    auto idx = this->buffer_idx(dir);
-
-                    auto n_id = size_t(this->neigbour_id(dir));
-
-                    m_recv[idx] = hpx::find_from_basename<channel_type>(name, n_id);
-                    m_send[idx] = channel_type(hpx::find_here());
-                    hpx::register_with_basename(name, m_send[idx], size_t(this->id()));
-
-                }
-
+                m_send[this->neighbour_idx(dir)] = channel_type(hpx::find_here());
+                hpx::register_with_basename(
+                    basename_recv, m_send[this->neighbour_idx(dir)], size_t(id));
             }
-
         }
-
-
-    static std::string to_string(position<N> dir) {
-        std::ostringstream oss;
-        std::copy(dir.begin(), dir.end()-1,
-        std::ostream_iterator<idx_t>(oss, ","));
-
-    // Now add the last element with no delimiter
-        oss << dir[N-1];
-        return oss.str();
     }
 
 
-    void set(position<N> dir, T&& t, size_t tag)
-    {
-        // Send our data to the neighbor n using fire and forget semantics
-        // Synchronization happens when receiving values.
-        //Utils::runtime_assert(this->has_neighbour(dir), "Trying to set for invalid neighbour");
-
-            auto idx = this->buffer_idx(dir);
-
-            m_send[idx].set(hpx::launch::apply, std::move(t), tag);
-
-
+    void set(direction<N> dir, T&& t, std::size_t step) {
+        m_send[this->neighbour_idx(dir)].set(hpx::launch::apply, std::move(t), step);
     }
 
-    
-    hpx::future<T> get(position<N> dir, size_t tag)
-    {
-        // Get our data from our neighbor, we return a future to allow the
-        // algorithm to synchronize.
-        //Utils::runtime_assert(this->has_neighbour(dir), "Trying to get from invalid neighbour");
-
-
-            auto idx = this->buffer_idx(dir);
-            return m_recv[idx].get(hpx::launch::async, tag);
+    hpx::future<T> get(direction<N> dir, std::size_t step) {
+        return m_recv[this->neighbour_idx(dir)].get(hpx::launch::async, step);
     }
-    
-
-
-
-
-
-
-
-
-
 
 
 private:
-
-    //TODO: could be arrays
-    std::vector<channel_type> m_send;
-    std::vector<channel_type> m_recv;
+    std::array<channel_type, base_type::neighbour_count()> m_recv;
+    std::array<channel_type, base_type::neighbour_count()> m_send;
 
 };
+
 
 } // namespace JADA

@@ -5,12 +5,12 @@ set(CMAKE_CXX_STANDARD 20)
 
 
 #see https://stellar-ci.org/hpx_test/manual/creating_hpx_projects.html
-add_hpx_executable(2d_stencil
-    SOURCES 2d_stencil.cpp
-    COMPONENT_DEPENDENCIES iostreams partitioned_vector #hpx deps
-    DEPENDENCIES grid loops communication project_warnings project_options                           #other deps
-    COMPILE_FLAGS       -Wno-unused-variable
-) 
+#add_hpx_executable(2d_stencil
+#    SOURCES 2d_stencil.cpp
+#    COMPONENT_DEPENDENCIES iostreams partitioned_vector #hpx deps
+#    DEPENDENCIES grid loops communication project_warnings project_options                           #other deps
+#    COMPILE_FLAGS       -Wno-unused-variable
+#) 
 
 #OR
 #find_package(HPX REQUIRED)

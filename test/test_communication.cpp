@@ -1,18 +1,29 @@
 #include "catch.hpp"
 
-//#include "communication/communicator.hpp"
-//#include "communication/mock_md_communicator.hpp"
-#include "communication/md_communicator_base.hpp"
-#include "communication/hpx_md_communicator.hpp"
+#include <hpx/algorithm.hpp>
+#include <hpx/chrono.hpp>
+#include <hpx/execution.hpp>
+#include <hpx/future.hpp>
 #include <hpx/include/components.hpp>
+#include <hpx/include/compute.hpp>
+#include <hpx/include/util.hpp>
+#include "communication/md_communicator.hpp"
+#include "communication/hpx_md_communicator.hpp"
+#include "grid/neighbours.hpp"
 #include <vector>
 
-
-
-typedef std::vector<double> vector_t;
-
+using vector_t = std::vector<double>;
 HPX_REGISTER_CHANNEL_DECLARATION(vector_t)
-HPX_REGISTER_CHANNEL(vector_t, stencil_communication)
+HPX_REGISTER_CHANNEL(vector_t, TEST_COMM_CHANNEL)
+
+
+using vector_t2 = std::vector<int>;
+HPX_REGISTER_CHANNEL_DECLARATION(vector_t2)
+HPX_REGISTER_CHANNEL(vector_t2, TEST_COMM_CHANNEL2)
+
+
+//using own_communicator_type = communicator_own<communication_type>;
+
 
 TEST_CASE("Test MdCommunicatorBase"){
 
@@ -20,25 +31,26 @@ TEST_CASE("Test MdCommunicatorBase"){
 
 
 
+
+
     SECTION("Constructors") {
 
-        REQUIRE_NOTHROW(MdCommunicatorBase<2, ConnectivityType::Star>());
+        REQUIRE_NOTHROW(MdCommunicator<2, ConnectivityType::Star>());
         
-        REQUIRE_NOTHROW(MdCommunicatorBase<2, ConnectivityType::Star>(
+        REQUIRE_NOTHROW(MdCommunicator<2, ConnectivityType::Star>(
             0,
             Decomposition<2>({10,10}, {3,3}, {false, false}) 
         ));
-        REQUIRE_THROWS(MdCommunicatorBase<2, ConnectivityType::Star>(
+        REQUIRE_THROWS(MdCommunicator<2, ConnectivityType::Star>(
             0,
             Decomposition<2>({10, 10}, {11, 3}, {false, false})
         ));
     }
 
-
     SECTION("Public member functions") {
 
 
-        MdCommunicatorBase<2, ConnectivityType::Star> comm(
+        MdCommunicator<2, ConnectivityType::Star> comm(
             0,
             Decomposition<2>({10, 10}, {4,4}, {false, false})
         );
@@ -47,82 +59,102 @@ TEST_CASE("Test MdCommunicatorBase"){
         CHECK(comm.has_neighbour({0,1}));
         CHECK(!comm.has_neighbour({-1, 0}));
 
-        CHECK(comm.get_neighbour_ids() == 
-            std::vector<idx_t>{1, 4, NEIGHBOUR_ID_NULL, NEIGHBOUR_ID_NULL}
-        );
-
-
-
-
     }
-
 
 
 }
 
 
+
 TEST_CASE("Test HpxMdCommunicator") {
+
 
     using namespace JADA;
 
-    SECTION("Constructors") {
-
-        REQUIRE_NOTHROW(HpxMdCommunicator<2, double>());
-        
-        REQUIRE_NOTHROW(HpxMdCommunicator<2, vector_t>());
 
 
-        size_t n_domains = 12;
+    SECTION("Constructors"){
+    
+        //using Comm = communicator_t<2, ConnectivityType::Box>;
 
-        
+        REQUIRE_NOTHROW(HpxMdCommunicator<std::vector<int>, 2, ConnectivityType::Star>());
+        REQUIRE_NOTHROW(HpxMdCommunicator<std::vector<int>, 2, ConnectivityType::Box>());
+        REQUIRE_NOTHROW(HpxMdCommunicator<std::vector<double>, 2, ConnectivityType::Box>());
 
-        REQUIRE_NOTHROW(
-            HpxMdCommunicator<2, vector_t>(
-                idx_t(hpx::get_locality_id()),
-                Decomposition<2>({100, 100}, n_domains, {true, true})
-            )
-        );
+        REQUIRE_NOTHROW(HpxMdCommunicator<std::vector<double>, 2, ConnectivityType::Box>(
+            0,
+            Decomposition<2>({11,12}, 2, {false, false})
+        ));
+
+        REQUIRE_NOTHROW(HpxMdCommunicator<std::vector<int>, 2, ConnectivityType::Star>(
+            1,
+            Decomposition<2>({11,12}, 2, {false, false})
+        ));
 
 
-
-
-                
+        //REQUIRE_NOTHROW(communicator_t());
 
     }
 
-    SECTION("set/get") {
+    SECTION("RENAME"){
 
-        
         /*
-        size_t n_domains = hpx::get_num_localities(hpx::launch::sync);
+        
+        dimension<2> dims = {15, 12};
+        size_t n_parts = 3;
+        std::array<bool, 2>  periodicity{false, false};
 
-        std::cout << "Domain count: " << n_domains << std::endl; 
 
-        //std::size_t num_localities = hpx::get_num_localities(hpx::launch::sync);
+        using Comm = HpxMdCommunicator<std::vector<int>, 2, ConnectivityType::Star>;
 
-        HpxMdCommunicator<2, vector_t> comm(
-                idx_t(hpx::get_locality_id()),
-                Decomposition<2>({100, 100}, n_domains, {true, true})
-            );
+        Decomposition<2> dec(dims, n_parts, periodicity);
 
-        position<2> dir = {1,0};
+        std::vector<Comm> comms;
 
-        size_t tag = 0;
+        for (size_t i = 0; i < n_parts; ++i){
 
-        comm.set(dir, std::vector<double>(11), tag);
+            comms.push_back(Comm(idx_t(i), dec));
+        }
+        
+
+        for (auto& comm : comms) {
+
+            for (auto dir : comm.get_directions()){
+                std::vector<int> data(3, int(comm.id()));
+                comm.set(dir, std::move(data), 0);
+            }
+
+        }
+
 
         
-        std::vector<double> from = comm.get(-dir, tag).get();
+        for (auto& comm : comms) {
 
-
-        for (auto f : from) {
-            std::cout << f << std::endl;
+            for (auto dir : comm.get_directions()){
+                auto data = comm.get(dir, 0).get();
+                std::cout << data[0] << std::endl;
+                
+            }
         }
         */
 
+
+
     }
 
-    
+
+    /*
+
+    for (size_t i = 0; i < n_parts; ++i) {
+
+    }
+    */
+
+
+
+
+
+
 
 
 

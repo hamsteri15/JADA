@@ -1,7 +1,7 @@
 #pragma once
 
 #include "loops/index_type.hpp"
-#include "communication/md_communicator_base.hpp"
+#include "communication/md_communicator.hpp"
 #include "grid/decomposition.hpp"
 
 using namespace JADA;
