@@ -20,8 +20,10 @@ public:
 
     HpxMdCommunicator() = default;
 
-    HpxMdCommunicator(idx_t id, Decomposition<N> dec)
+    HpxMdCommunicator(std::string name, idx_t id, Decomposition<N> dec)
         : MdCommunicator<N, CT>(id, dec) {
+
+            m_name = name;
 
         for (direction<N> dir : this->get_directions()){
 
@@ -29,12 +31,12 @@ public:
 
 
                 m_recv[recv_idx(dir)] = hpx::find_from_basename<channel_type>(
-                    send_name(dir), this->get_neighbour(dir));
+                    name + send_name(dir), this->get_neighbour(dir));
 
                 
                 m_send[send_idx(dir)] = channel_type(hpx::find_here());
                 hpx::register_with_basename(
-                    recv_name(dir), m_send[send_idx(dir)], size_t(id));
+                    name + recv_name(dir), m_send[send_idx(dir)], size_t(id));
             }
         }
     }
@@ -52,6 +54,7 @@ public:
 
 
 private:
+    std::string m_name; 
     std::array<channel_type, base_type::neighbour_count()> m_recv;
     std::array<channel_type, base_type::neighbour_count()> m_send;
 

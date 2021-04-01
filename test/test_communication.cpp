@@ -140,10 +140,10 @@ TEST_CASE("Test HpxMdCommunicator") {
 
         std::vector<comm_t> comms = 
         {
-            comm_t(0, dec),
-            comm_t(1, dec),
-            comm_t(2, dec),
-            comm_t(3, dec)
+            comm_t("Test1", 0, dec),
+            comm_t("Test1", 1, dec),
+            comm_t("Test1", 2, dec),
+            comm_t("Test1", 3, dec)
         };
 
         auto all_dirs = comms[0].get_directions();
@@ -182,7 +182,7 @@ TEST_CASE("Test HpxMdCommunicator") {
     }
 
     
-    /*
+    
     SECTION("2by2 periodic box communication"){
 
         using comm_t = HpxMdCommunicator<comm_data_t, 2, ConnectivityType::Box>;
@@ -196,10 +196,10 @@ TEST_CASE("Test HpxMdCommunicator") {
 
         std::vector<comm_t> comms = 
         {
-            comm_t(0, dec),
-            comm_t(1, dec),
-            comm_t(2, dec),
-            comm_t(3, dec)
+            comm_t("Test2", 0, dec),
+            comm_t("Test2", 1, dec),
+            comm_t("Test2", 2, dec),
+            comm_t("Test2", 3, dec)
         };
 
         auto all_dirs = comms[0].get_directions();
@@ -222,6 +222,17 @@ TEST_CASE("Test HpxMdCommunicator") {
         //  |       2, 3  
         //  j
         
+        
+        CHECK(comms[0].get({0, 1}, 0).get().front() == 1);
+        CHECK(comms[0].get({0, -1}, 0).get().front() == 1);
+
+        CHECK(comms[0].get({1, 0}, 0).get().front() == 2);
+        CHECK(comms[0].get({-1, 0}, 0).get().front() == 2);
+        
+        CHECK(comms[0].get({-1, -1}, 0).get().front() == 3);
+        CHECK(comms[0].get({1, 1}, 0).get().front() == 3);
+        
+        /*
         for (auto& comm : comms){
 
             for (direction<2> dir : all_dirs) {
@@ -232,16 +243,10 @@ TEST_CASE("Test HpxMdCommunicator") {
             }
 
         }
-        
-        //CHECK(comms[0].get({0, 1}, 0).get().front() == 1);
-//        CHECK(comms[0].get({0, -1}, 0).get().front() == 1);
-
-        //CHECK(comms[0].get({1, 0}, 0).get().front() == 2);
-        //CHECK(comms[0].get({-1, 0}, 0).get().front() == 2);
-
+        */
     }
 
-    */
+    
     
 
 

@@ -67,7 +67,7 @@ int hpx_main(){
     for (idx_t i = 0; i < idx_t(num_local_partitions); ++i){
 
         comms.push_back(
-            own_communicator_type(i, dec)
+            own_communicator_type("ASDF", i, dec)
         );
     }    
 
