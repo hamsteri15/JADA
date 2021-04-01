@@ -156,6 +156,15 @@ TEST_CASE("Test Decomposition"){
 
         SECTION("1D"){
 
+            SECTION("Self-send periodicity") {
+
+                Decomposition<1> dec({5}, {1}, {true});
+                CHECK(dec.get_neighbour(0, {1}) == 0);
+                CHECK(dec.get_neighbour(0, {-1}) == 0);
+
+            }
+
+
             SECTION("Periodic"){
                 dimension<1> n_nodes  = {5};
                 Decomposition<1> dec(n_nodes, 4, {true});
@@ -196,6 +205,21 @@ TEST_CASE("Test Decomposition"){
 
     }
 
+    SECTION("2D") {
+        SECTION("Periodic self-send") {
+
+            Decomposition<2> dec({10,10}, {1,1}, {true, true});
+
+            CHECK(dec.get_neighbour(0, {0,1}) == 0);
+            CHECK(dec.get_neighbour(0, {0,-1}) == 0);
+            CHECK(dec.get_neighbour(0, {1,0})== 0);
+            CHECK(dec.get_neighbour(0, {-1,0}) == 0);
+
+
+        }
+    }
+
+
 
 }
 
@@ -226,7 +250,7 @@ TEST_CASE("Block neighbours"){
         constexpr Neighbours<2, ConnectivityType::Star> ns_const;
 
 
-        static_assert(Neighbours<2, ConnectivityType::Star>::idx({0,1}) == 0, "Not constexpr");
+        static_assert(Neighbours<2, ConnectivityType::Star>::idx({0,1}) == 0, "Neighbours not constexpr");
 
         CHECK(ns1.idx({0,1}) == 0);
         CHECK(ns2.idx({0,1}) == 0);
@@ -235,6 +259,8 @@ TEST_CASE("Block neighbours"){
 
 
     }
+
+
 
 
     SECTION("Star connectivity"){
@@ -351,6 +377,21 @@ TEST_CASE("Block neighbours"){
 
 
     }
+
+    SECTION("Neighbours idx()"){
+
+        Neighbours<2, ConnectivityType::Star> n;
+
+        //The ordere shouldnt matter here so this is bit of a bad test...
+        CHECK(n.idx({0,1}) == 0);
+        CHECK(n.idx({1,0}) == 1);
+        CHECK(n.idx({-1,0}) == 2);
+        CHECK(n.idx({0,-1}) == 3);
+
+
+
+    }
+
 
 
 }

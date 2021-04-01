@@ -12,25 +12,17 @@
 #include "grid/neighbours.hpp"
 #include <vector>
 
-using vector_t = std::vector<double>;
-HPX_REGISTER_CHANNEL_DECLARATION(vector_t)
-HPX_REGISTER_CHANNEL(vector_t, TEST_COMM_CHANNEL)
+using comm_data_t = std::vector<int>;
+HPX_REGISTER_CHANNEL_DECLARATION(comm_data_t)
+HPX_REGISTER_CHANNEL(comm_data_t, TEST_COMM_CHANNEL)
 
+using namespace JADA;
 
-using vector_t2 = std::vector<int>;
-HPX_REGISTER_CHANNEL_DECLARATION(vector_t2)
-HPX_REGISTER_CHANNEL(vector_t2, TEST_COMM_CHANNEL2)
-
-
-//using own_communicator_type = communicator_own<communication_type>;
 
 
 TEST_CASE("Test MdCommunicatorBase"){
 
     using namespace JADA;
-
-
-
 
 
     SECTION("Constructors") {
@@ -75,81 +67,121 @@ TEST_CASE("Test HpxMdCommunicator") {
 
     SECTION("Constructors"){
     
-        //using Comm = communicator_t<2, ConnectivityType::Box>;
 
-        REQUIRE_NOTHROW(HpxMdCommunicator<std::vector<int>, 2, ConnectivityType::Star>());
-        REQUIRE_NOTHROW(HpxMdCommunicator<std::vector<int>, 2, ConnectivityType::Box>());
-        REQUIRE_NOTHROW(HpxMdCommunicator<std::vector<double>, 2, ConnectivityType::Box>());
+        REQUIRE_NOTHROW(HpxMdCommunicator<comm_data_t, 2, ConnectivityType::Box>());
 
-        REQUIRE_NOTHROW(HpxMdCommunicator<std::vector<double>, 2, ConnectivityType::Box>(
+        REQUIRE_NOTHROW(HpxMdCommunicator<comm_data_t, 2, ConnectivityType::Box>(
             0,
             Decomposition<2>({11,12}, 2, {false, false})
         ));
-
-        REQUIRE_NOTHROW(HpxMdCommunicator<std::vector<int>, 2, ConnectivityType::Star>(
-            1,
-            Decomposition<2>({11,12}, 2, {false, false})
-        ));
-
 
         //REQUIRE_NOTHROW(communicator_t());
 
     }
 
-    SECTION("RENAME"){
+    
 
+    SECTION("1by1 periodic star communication"){
+
+        using comm_t = HpxMdCommunicator<comm_data_t, 2, ConnectivityType::Star>;
+
+
+        Decomposition<2> dec(
+            {10, 10},
+            {1, 1},
+            {true, true}
+        );
+
+        std::vector<comm_t> comms = 
+        {
+            comm_t(0, dec),
+        };
+
+        auto all_dirs = comms[0].get_directions();
+
+        
+        for (auto& comm : comms){
+
+            for (direction<2> dir : all_dirs) {
+                if (comm.has_neighbour(dir)){
+                    std::cout << dir << std::endl;
+
+
+                    comm_data_t data(1, int(comm.id()));
+                    comm.set(dir, std::move(data), 0);
+                }
+            }
+
+        }
+
+
+        
+        CHECK(comms[0].get({0, 1}, 0).get().front() == 0);
+        CHECK(comms[0].get({1, 0}, 0).get().front() == 0);
         /*
-        
-        dimension<2> dims = {15, 12};
-        size_t n_parts = 3;
-        std::array<bool, 2>  periodicity{false, false};
-
-
-        using Comm = HpxMdCommunicator<std::vector<int>, 2, ConnectivityType::Star>;
-
-        Decomposition<2> dec(dims, n_parts, periodicity);
-
-        std::vector<Comm> comms;
-
-        for (size_t i = 0; i < n_parts; ++i){
-
-            comms.push_back(Comm(idx_t(i), dec));
-        }
-        
-
-        for (auto& comm : comms) {
-
-            for (auto dir : comm.get_directions()){
-                std::vector<int> data(3, int(comm.id()));
-                comm.set(dir, std::move(data), 0);
-            }
-
-        }
-
-
-        
-        for (auto& comm : comms) {
-
-            for (auto dir : comm.get_directions()){
-                auto data = comm.get(dir, 0).get();
-                std::cout << data[0] << std::endl;
-                
-            }
-        }
+        CHECK(comms[0].get({-1, 0}, 0).get().front() == 0);
+        CHECK(comms[0].get({0, -1}, 0).get().front() == 0);
         */
 
+    }
 
+    
+        
+    SECTION("2by2 star communication"){
+
+        using comm_t = HpxMdCommunicator<comm_data_t, 2, ConnectivityType::Star>;
+
+
+        Decomposition<2> dec(
+            {10, 10},
+            {2,2},
+            {false, false}
+        );
+
+        std::vector<comm_t> comms = 
+        {
+            comm_t(0, dec),
+            comm_t(1, dec),
+            comm_t(2, dec),
+            comm_t(3, dec)
+        };
+
+        auto all_dirs = comms[0].get_directions();
+
+        
+        for (auto& comm : comms){
+
+            for (direction<2> dir : all_dirs) {
+                if (comm.has_neighbour(dir)){
+                    comm_data_t data(1, int(comm.id()));
+                    comm.set(dir, std::move(data), 0);
+                }
+            }
+
+        }
+
+        // topology is like this
+        //  ---- i 
+        //  |       0, 1
+        //  |       2, 3  
+        //  j
+
+        CHECK(comms[0].get({0, 1}, 0).get().front() == 1);
+        CHECK(comms[0].get({1, 0}, 0).get().front() == 2);
+
+        CHECK(comms[1].get({0, -1}, 0).get().front() == 0);
+        CHECK(comms[1].get({1, 0}, 0).get().front() == 3);
+
+
+        CHECK(comms[2].get({0, 1}, 0).get().front() == 3);
+        CHECK(comms[2].get({-1, 0}, 0).get().front() == 0);
+        
+        CHECK(comms[3].get({0, -1}, 0).get().front() == 2);
+        CHECK(comms[3].get({-1, 0}, 0).get().front() == 1);
 
     }
 
-
-    /*
-
-    for (size_t i = 0; i < n_parts; ++i) {
-
-    }
-    */
-
+    
 
 
 

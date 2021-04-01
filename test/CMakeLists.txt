@@ -26,18 +26,24 @@ SET(ParallelTestSources
     test_communication.cpp;
 )
 
+add_hpx_executable(ParallelTest.bin
+    SOURCES catch_hpx_main.cpp ${ParallelTestSources}
+    COMPONENT_DEPENDENCIES iostreams partitioned_vector #hpx deps
+    DEPENDENCIES grid loops communication project_warnings project_options                           #other deps
+    #COMPILE_FLAGS       -Wno-unused-variable
+    COMPILE_FLAGS   -DDEBUG
+)
+
+#For some reason the below approach doesnt work
+###################################################
 # Build catch hpx main
-add_library(catch_hpx_main STATIC catch_hpx_main.cpp)
+#add_library(catch_hpx_main STATIC catch_hpx_main.cpp)
+#target_link_libraries(catch_hpx_main PUBLIC HPX::hpx)
+#add_executable(ParallelTest.bin ${ParallelTestSources})
+#target_link_libraries(ParallelTest.bin PUBLIC catch_hpx_main communication)
+#target_compile_options(ParallelTest.bin PRIVATE -DDEBUG)
 
-target_link_libraries(catch_hpx_main PUBLIC HPX::hpx)
-
-add_executable(ParallelTest.bin ${ParallelTestSources})
-target_link_libraries(ParallelTest.bin PUBLIC catch_hpx_main communication)
-target_compile_options(ParallelTest.bin PRIVATE -DDEBUG)
-
-#./yourapp -l2 -0 &
-#./yourapp -1
+###################################################
 
 add_test(NAME ParallelTest COMMAND ParallelTest.bin)
 
-#add_test(NAME ParallelTest COMMAND ParallelTest.bin -l2 -0 & ParallelTest.bin -1)

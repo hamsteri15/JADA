@@ -3,6 +3,7 @@
 #include "grid/decomposition.hpp"
 #include "grid/neighbours.hpp"
 #include "loops/direction.hpp"
+#include "utils/runtime_assert.hpp"
 
 namespace JADA {
 
@@ -13,7 +14,9 @@ public:
 
     MdCommunicator(idx_t id, Decomposition<N> dec)
         : m_id(id)
-        , m_dec(dec) {}
+        , m_dec(dec) {
+            Utils::runtime_assert(dec.valid_id(id), "Invalid part id, typically the id exceeds the number of partitions.");
+        }
 
     idx_t id() const { return m_id; }
 

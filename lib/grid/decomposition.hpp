@@ -172,6 +172,19 @@ template <size_t N> struct Decomposition {
     ///
     dimension<N> global_grid_dimensions() const { return m_grid_dims; }
 
+    ///
+    ///@brief Checks that the input id is valid.
+    ///
+    ///@param domain_id The id to validate.
+    ///@return true If valid.
+    ///@return false If invalid.
+    ///
+    bool valid_id(idx_t domain_id) const {
+        return (domain_id >= 0) &&
+               (domain_id < idx_t(m_dec_dims.elementwise_product()));
+    }
+
+
 private:
     dimension<N>        m_grid_dims;
     dimension<N>        m_dec_dims;
@@ -197,17 +210,6 @@ private:
         return flatten<N, StorageOrder::RowMajor>(m_dec_dims, coord);
     }
 
-    ///
-    ///@brief Checks that the input id is valid.
-    ///
-    ///@param domain_id The id to validate.
-    ///@return true If valid.
-    ///@return false If invalid.
-    ///
-    bool valid_id(idx_t domain_id) const {
-        return (domain_id >= 0) &&
-               (domain_id < idx_t(m_dec_dims.elementwise_product()));
-    }
 
     ///
     ///@brief Checks that the input local grid dimensions are valid.

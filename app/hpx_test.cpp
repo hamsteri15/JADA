@@ -18,7 +18,7 @@
 
 #include "containers/md_array.hpp"
 
-#include "communicator.hpp"
+#include "communication/hpx_md_communicator.hpp"
 
 using namespace JADA;
 
@@ -27,9 +27,10 @@ using namespace JADA;
 using communication_type = std::vector<double>;
 HPX_REGISTER_CHANNEL_DECLARATION(communication_type)
 HPX_REGISTER_CHANNEL(communication_type, stencil_communication)
-using communicator_type = communicator<communication_type>;
 
-using own_communicator_type = communicator_own<communication_type>;
+//using own_communicator_type = communicator_own<communication_type>;
+
+using own_communicator_type = HpxMdCommunicator<communication_type, 2, ConnectivityType::Box>;
 
 
 template<class T>
@@ -52,23 +53,14 @@ int hpx_main(){
     size_t Ny = 10;
 
 
-    std::size_t rank = hpx::get_locality_id();
-    std::size_t num_localities = hpx::get_num_localities(hpx::launch::sync);
     std::size_t num_local_partitions = 4;
-    std::size_t num_partitions = num_localities * num_local_partitions;
-
-
-
 
 
     Decomposition<2> dec(
         {Ny, Nx},
-        num_partitions,
-        {true, true}
+        num_local_partitions,
+        {false, false}
     );
-
-
-
 
     std::vector<own_communicator_type> comms;
 
@@ -80,7 +72,7 @@ int hpx_main(){
     }    
 
 
-    auto all_dirs = comms[0].get_dirs();
+    auto all_dirs = comms[0].get_directions();
 
     
     for (auto& comm : comms){
@@ -100,40 +92,13 @@ int hpx_main(){
         for (direction<2> dir : all_dirs) {
 
             if (comm.has_neighbour(dir)){
-                //auto tt = comm.get(direction<2>(-dir), 0).get();
-                //auto tt = comm.get(dir, 0).get();
                 auto tt = comm.get(dir, 0).get();
-
                 std::cout << comm.id() << " Received from: " << tt[0] << " from dir: " << dir << std::endl; 
-
-
-
-
-                //print(tt);
             }
 
 
         }
     }
-    
-
-    
-    std::cout << "taalla" << std::endl;
-    /*
-    for (direction<2> dir : comms[0].get_dirs()){
-
-        if (comms[0].has_neighbour(dir)) {
-            comms[0].set(dir, {1, 2, 3}, 0);
-
-
-            //auto tt = comms[1].get(direction<2>(dir), 0);
-            auto tt = comms[1].get(dir, 0);
-            print(tt.get());
-
-        }
-    }
-    */
-
     return hpx::finalize();
 
 }
