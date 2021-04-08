@@ -125,6 +125,24 @@ struct StructuredData {
 
 
 
+    position<N> begin() const {
+        return position<N>();
+    }
+
+    position<N> end() const {
+        return m_dim;
+    }
+
+
+    dimension<N> get_padding() const {
+        return m_padding;
+    }
+
+    dimension<N> get_dimension() const {
+        return m_dim;
+    }
+
+
 
 private:
     static constexpr Neighbours<N, CT> m_neighbours{};
