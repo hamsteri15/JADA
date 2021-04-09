@@ -6,6 +6,19 @@
 
 namespace JADA{
 
+template<size_t N>
+struct Region{
+
+    Region() = default;
+    Region(position<N> begin, position<N> end, std::vector<direction<N>> deps) : 
+    m_begin(begin), m_end(end), m_deps(deps) {}
+
+
+    position<N> m_begin;
+    position<N> m_end;
+    std::vector<direction<N>> m_deps;
+
+};
 
 
 template<size_t N, class T>
@@ -67,17 +80,6 @@ void fill_barrier(StructuredData<N, T>& in, direction<N> dir) {
 
 }
 
-template<size_t N, class T>
-void fill_barriers(StructuredData<N, T>& in) {
-
-    Neighbours<N, ConnectivityType::Star> n;    
-
-    for (direction<N> dir : n.get()) {
-
-        fill_barrier(in, dir);
-
-    }
-}
 
 template <size_t N, class T, class Op>
 void do_work(StructuredData<N, T>& in,
@@ -92,44 +94,66 @@ void do_work(StructuredData<N, T>& in,
     }
 }
 
-template<size_t N, class T, class Op>
-void apply_interior(StructuredData<N, T>& in, StructuredData<N, T>& out, [[maybe_unused]] Op op){
-    
-    //auto begin = get_begin(in, direction<N>{});
-    //auto end = in.end() - 1; 
-    //auto end = get_end(in, direction<N>{});
+template <size_t N, class T, class Op>
+void do_work(StructuredData<N, T>& in,
+             StructuredData<N, T>& out,
+             [[maybe_unused]] Op   op,
+             Region<N> region) {
 
-    auto begin = in.begin() + position<N>(in.get_padding());
-    auto end = in.end() - position<N>(in.get_padding());
+    for (auto dir : region.m_deps){
+        fill_barrier(in, dir);
+    }
 
 
-    do_work(in, out, op, begin, end);
-//    std::cout << end << " " << in.end() << std::endl;
+    do_work(in, out, op, region.m_begin, region.m_end);
 
 
 }
 
-    
-
-template<size_t N, class T, class Op>
-void apply_boundary(StructuredData<N, T>& in, StructuredData<N, T>& out, [[maybe_unused]] Op op, direction<N> dir){
 
 
-    fill_barrier(in, dir);
 
-    auto begin = get_begin(in, dir);
-    auto end = get_end(in, dir);
 
-    //std::cout << dir << begin << end << in.get_dimension() << std::endl;
-    /*
-    std::cout << " dir " << dir << std::endl;
-    std::cout << " begin " << begin << std::endl;
-    std::cout << " end " << end << std::endl;
-    std::cout << " dims " << in.get_dimension() << std::endl;
-     */          
+template<size_t N, class Op, class T>
+std::vector<Region<N>> create_regions(const StructuredData<N, T>& in, [[maybe_unused]] Op op) {
 
-    do_work(in, out, op, begin, end);
-    
+    std::vector<Region<N>> ret;
+
+
+    auto i_begin = in.begin() + position<N>(in.get_padding());
+    auto i_end = in.end() - position<N>(in.get_padding());
+
+    ret.push_back(
+        Region<N>(i_begin, i_end, std::vector<direction<N>>{})
+    );
+
+    constexpr auto dirs = Neighbours<N, ConnectivityType::Box>::get();
+
+    for (direction<N> dir : dirs) {
+        if (dir.abs().elementwise_sum() < 2) {
+
+            auto begin = get_begin(in, dir);
+            auto end = get_end(in, dir);
+
+            ret.push_back(Region<N>(begin, end, {dir}));          
+
+        }
+    }
+
+    for (direction<N> dir : dirs) {
+        if (dir.abs().elementwise_sum() >= 2) {
+
+            auto begin = get_begin(in, dir);
+            auto end = get_end(in, dir);
+
+            ret.push_back(Region<N>(begin, end, {dir}));          
+
+        }
+    } 
+
+    return ret;
+
+
 }
 
 
@@ -137,40 +161,18 @@ void apply_boundary(StructuredData<N, T>& in, StructuredData<N, T>& out, [[maybe
 template<size_t N, class T, class Op>
 void apply_stencil(StructuredData<N, T>& in, StructuredData<N, T>& out, [[maybe_unused]] Op op){
 
-    apply_interior(in, out, op);
+    //apply_interior(in, out, op);
 
-    Neighbours<N, ConnectivityType::Star> n;    
+    auto regions = create_regions(in, op);
 
-    for (direction<N> dir : n.get()) {
-
-        apply_boundary(in, out, op, dir);
-
+    for (auto region : regions) {
+        do_work(in, out, op, region);
     }
-    /*
-    auto begin = in.begin() + 1;
-    auto end = in.end() - 1;
 
-    for (auto pos : md_indices(begin, end)){
-        out.at(pos) = op(pos, in);
-    }
-    */
 
 
 }
 
 
-/*
 
-
-template<class T, class Op>
-void apply_stencil(const T& in, T& out, [[maybe_unused]] Op op){
-
-
-    out[0] = in[0];
-
-
-
-
-}
-*/
 }

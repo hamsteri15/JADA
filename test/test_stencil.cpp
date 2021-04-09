@@ -158,7 +158,7 @@ TEST_CASE("Test StencilPicker") {
 
 namespace JADA{
 
-struct Op {
+struct OpStar {
 
     template <class Some>
     auto operator()(position<2> pos, const Some& in) const {
@@ -170,25 +170,68 @@ struct Op {
     }
 };
 
+struct OpBox {
+
+    template <class Some>
+    auto operator()(position<2> pos, const Some& in) const {
+
+        return in.at(pos + position<2>{0, -1}) +
+               in.at(pos + position<2>{0, 1}) + 
+               in.at(pos + position<2>{1, 0}) +
+               in.at(pos + position<2>{-1, 0}) +
+               in.at(pos + position<2>{1, 1}) + 
+               in.at(pos + position<2>{-1, 1}) + 
+               in.at(pos + position<2>{-1, -1}) + 
+               in.at(pos + position<2>{1, -1}); 
+               
+    }
+};
+
 }
 
 TEST_CASE("Test apply stencil") {
 
     using namespace JADA;
+    SECTION("STAR operation"){
+        StructuredData<2, int> in({5,4}, {1,2});
+        StructuredData<2, int> out({5,4}, {1,2});
 
+        for (auto pos : md_indices(in.begin(), in.end())){
+            in.at(pos) = 1;
+        }
 
-    StructuredData<2, int> in({5,4}, {1,1});
-    StructuredData<2, int> out({5,4}, {1,1});
+        //fill_barriers(in);
+        //in.get_combined().pretty_print();
 
-    for (auto pos : md_indices(in.begin(), in.end())){
-        in.at(pos) = 1;
+        apply_stencil(in, out, OpStar{});
+
+        for (auto pos : md_indices(out.begin(), out.end())){
+            CHECK(out.at(pos) == 4); 
+        }
+
     }
 
-    fill_barriers(in);
-    in.get_combined().pretty_print();
+    SECTION("BOX operation"){
+        StructuredData<2, int> in({5,4}, {1,2});
+        StructuredData<2, int> out({5,4}, {1,2});
 
-    apply_stencil(in, out, Op{});
-    out.get_combined().pretty_print();
+        for (auto pos : md_indices(in.begin(), in.end())){
+            in.at(pos) = 1;
+        }
+
+        //fill_barriers(in);
+        //in.get_combined().pretty_print();
+
+        apply_stencil(in, out, OpBox{});
+
+        for (auto pos : md_indices(out.begin(), out.end())){
+            CHECK(out.at(pos) == 8); 
+        }
+
+    }
+
+
+
 
 
     /*
