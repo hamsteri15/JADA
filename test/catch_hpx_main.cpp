@@ -4,6 +4,10 @@
 #include <hpx/hpx_init.hpp>
 #include <hpx/hpx_start.hpp>
 
+
+
+
+
 int hpx_main(int argc, char* argv[])
 {
     // Any HPX application logic goes here...
@@ -13,7 +17,9 @@ int hpx_main(int argc, char* argv[])
 
 
     [[maybe_unused]] const int result = session.run(argc, argv);
-    return hpx::finalize();
+    hpx::finalize();
+    return result;
+    //return hpx::finalize();
 }
 
 int main(int argc, char* argv[])

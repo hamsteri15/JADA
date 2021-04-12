@@ -17,9 +17,17 @@ struct MdArray{
     MdArray(dimension<N> dim) : m_dim(dim), m_data(dim.elementwise_product()) 
     {}
 
+    MdArray(const storage_t& data, dimension<N> dim)
+        : m_dim(dim)
+        , m_data(data){}
+
     size_t size() const {
         return m_data.size();
     }
+
+
+    const storage_t& get_storage() const {return m_data;}
+    storage_t& get_storage() {return m_data;}
 
 
     T* data()             {return m_data.data();}

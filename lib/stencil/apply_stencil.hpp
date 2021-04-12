@@ -3,7 +3,7 @@
 #include "loops/md_index_loops.hpp"
 #include "containers/structured_data.hpp"
 #include "grid/neighbours.hpp"
-
+#include "communication/hpx_md_communicator.hpp"
 namespace JADA{
 
 template<size_t N>
@@ -80,6 +80,14 @@ void fill_barrier(StructuredData<N, T>& in, direction<N> dir) {
 
 }
 
+template<size_t N, class T, class Comm>
+void fill_barrier(StructuredData<N, T>& in, direction<N> dir, [[maybe_unused]] Comm comm) {
+    
+    auto halo = in.get_halo(dir);
+    halo.set_all(1);
+    in.put_halo(halo, dir);
+
+}
 
 template <size_t N, class T, class Op>
 void do_work(StructuredData<N, T>& in,
@@ -97,7 +105,7 @@ void do_work(StructuredData<N, T>& in,
 template <size_t N, class T, class Op>
 void do_work(StructuredData<N, T>& in,
              StructuredData<N, T>& out,
-             [[maybe_unused]] Op   op,
+              Op   op,
              Region<N> region) {
 
     for (auto dir : region.m_deps){
@@ -110,6 +118,22 @@ void do_work(StructuredData<N, T>& in,
 
 }
 
+template <size_t N, class T, class Op, class Comm>
+void do_work(StructuredData<N, T>& in,
+             StructuredData<N, T>& out,
+             Op   op,
+             Region<N> region,
+              Comm comm) {
+
+    for (auto dir : region.m_deps){
+        fill_barrier(in, dir, comm);
+    }
+
+
+    do_work(in, out, op, region.m_begin, region.m_end);
+
+
+}
 
 
 
@@ -159,7 +183,7 @@ std::vector<Region<N>> create_regions(const StructuredData<N, T>& in, [[maybe_un
 
 
 template<size_t N, class T, class Op>
-void apply_stencil(StructuredData<N, T>& in, StructuredData<N, T>& out, [[maybe_unused]] Op op){
+void apply_stencil(StructuredData<N, T>& in, StructuredData<N, T>& out,  Op op){
 
     //apply_interior(in, out, op);
 
@@ -172,6 +196,85 @@ void apply_stencil(StructuredData<N, T>& in, StructuredData<N, T>& out, [[maybe_
 
 
 }
+
+template<size_t N, class T, class Op, class Comm>
+void apply_stencil(StructuredData<N, T>& in, StructuredData<N, T>& out,  Op op,  Comm comm){
+
+    //apply_interior(in, out, op);
+
+    auto regions = create_regions(in, op);
+
+    for (auto region : regions) {
+        do_work(in, out, op, region, comm);
+    }
+
+
+
+}
+
+
+template<size_t N, class T, class Op>
+void apply_stencil(const std::vector<T>& in_v, std::vector<T>& out_v, dimension<N> dim, [[maybe_unused]] Op op) {
+
+    dimension<N> padding;
+    for (size_t i = 0; i < N; ++i){
+        padding[i] = size_t(1);
+    }
+
+
+
+    StructuredData<N, T> in(MdArray<N, T>(in_v, dim), dim, padding);
+    StructuredData<N, T> out(dim, padding);
+
+
+    apply_stencil(in, out, op);
+
+    const T* ptr = out.get_interior().data();
+
+    for (size_t i = 0; i < dim.elementwise_product(); ++i){
+        out_v[i] = ptr[i];
+    }
+
+}
+
+template <size_t N, class T, class Op>
+void apply_stencil(const std::vector<T>&                in_v,
+                   std::vector<T>&                      out_v,
+                   dimension<N>                         dim,
+                    Op                  op,
+                    HpxMdCommunicator<std::vector<T>, N, ConnectivityType::Box> comm) {
+
+
+    dimension<N> padding;
+    for (size_t i = 0; i < N; ++i){
+        padding[i] = size_t(1);
+    }
+
+
+
+    StructuredData<N, T> in(MdArray<N, T>(in_v, dim), dim, padding);
+    StructuredData<N, T> out(dim, padding);
+
+
+    apply_stencil(in, out, op, comm);
+
+    
+
+
+
+    const T* ptr = out.get_interior().data();
+
+    for (size_t i = 0; i < dim.elementwise_product(); ++i){
+        out_v[i] = ptr[i];
+    }
+
+}
+
+
+
+
+
+
 
 
 

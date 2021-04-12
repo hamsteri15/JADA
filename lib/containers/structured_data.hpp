@@ -29,6 +29,20 @@ struct StructuredData {
 
 
 
+    StructuredData(const storage_t& interior, dimension<N> dim, dimension<N> padding) : 
+    StructuredData(dim, padding)
+    {
+        m_data = interior;
+    }
+
+
+    const storage_t& get_interior() const {
+        return m_data;
+    }
+
+
+
+
     ///
     ///@brief Puts data to the halo storage indicated by dir
     ///

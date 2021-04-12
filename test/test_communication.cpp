@@ -12,9 +12,11 @@
 #include "grid/neighbours.hpp"
 #include <vector>
 
-using comm_data_t = std::vector<int>;
-HPX_REGISTER_CHANNEL_DECLARATION(comm_data_t)
-HPX_REGISTER_CHANNEL(comm_data_t, TEST_COMM_CHANNEL)
+
+using ivec_t = std::vector<int>;
+HPX_REGISTER_CHANNEL_DECLARATION(ivec_t)
+HPX_REGISTER_CHANNEL(ivec_t, TEST_COMM_CHANNEL)
+
 
 using namespace JADA;
 
@@ -79,10 +81,11 @@ TEST_CASE("Test HpxMdCommunicator") {
     }
 
     
-    /*
     SECTION("1by1 periodic star communication"){
 
+        using comm_data_t = std::vector<int>;
         using comm_t = HpxMdCommunicator<comm_data_t, 2, ConnectivityType::Star>;
+        std::string comm_name = "1by1_star";
 
 
         Decomposition<2> dec(
@@ -93,7 +96,7 @@ TEST_CASE("Test HpxMdCommunicator") {
 
         std::vector<comm_t> comms = 
         {
-            comm_t(0, dec),
+            comm_t(comm_name, 0, dec),
         };
 
         auto all_dirs = comms[0].get_directions();
@@ -103,8 +106,6 @@ TEST_CASE("Test HpxMdCommunicator") {
 
             for (direction<2> dir : all_dirs) {
                 if (comm.has_neighbour(dir)){
-                    std::cout << dir << std::endl;
-
 
                     comm_data_t data(1, int(comm.id()));
                     comm.set(dir, std::move(data), 0);
@@ -123,14 +124,14 @@ TEST_CASE("Test HpxMdCommunicator") {
         
 
     }
-    */
 
     
     
     SECTION("2by2 star communication"){
 
+        using comm_data_t = std::vector<int>;
         using comm_t = HpxMdCommunicator<comm_data_t, 2, ConnectivityType::Star>;
-
+        std::string comm_name = "2by2_star";
 
         Decomposition<2> dec(
             {10, 10},
@@ -140,10 +141,10 @@ TEST_CASE("Test HpxMdCommunicator") {
 
         std::vector<comm_t> comms = 
         {
-            comm_t("Test1", 0, dec),
-            comm_t("Test1", 1, dec),
-            comm_t("Test1", 2, dec),
-            comm_t("Test1", 3, dec)
+            comm_t(comm_name, 0, dec),
+            comm_t(comm_name, 1, dec),
+            comm_t(comm_name, 2, dec),
+            comm_t(comm_name, 3, dec)
         };
 
         auto all_dirs = comms[0].get_directions();
@@ -184,9 +185,11 @@ TEST_CASE("Test HpxMdCommunicator") {
     
     
     SECTION("2by2 periodic box communication"){
-
+        
+        using comm_data_t = std::vector<int>;
         using comm_t = HpxMdCommunicator<comm_data_t, 2, ConnectivityType::Box>;
 
+        std::string comm_name = "2by2_box_comm";
 
         Decomposition<2> dec(
             {10, 10},
@@ -196,10 +199,10 @@ TEST_CASE("Test HpxMdCommunicator") {
 
         std::vector<comm_t> comms = 
         {
-            comm_t("Test2", 0, dec),
-            comm_t("Test2", 1, dec),
-            comm_t("Test2", 2, dec),
-            comm_t("Test2", 3, dec)
+            comm_t(comm_name, 0, dec),
+            comm_t(comm_name, 1, dec),
+            comm_t(comm_name, 2, dec),
+            comm_t(comm_name, 3, dec)
         };
 
         auto all_dirs = comms[0].get_directions();
