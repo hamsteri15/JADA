@@ -79,6 +79,9 @@ struct MdArray{
     }
 
 
+    dimension<N> get_dimension() const {
+        return m_dim;
+    }
 
 
 private:

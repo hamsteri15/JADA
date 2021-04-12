@@ -18,6 +18,10 @@ struct Region{
     position<N> m_end;
     std::vector<direction<N>> m_deps;
 
+
+    position<N> begin() const {return m_begin;}
+    position<N> end()   const {return m_end;}
+
 };
 
 
@@ -80,14 +84,6 @@ void fill_barrier(StructuredData<N, T>& in, direction<N> dir) {
 
 }
 
-template<size_t N, class T, class Comm>
-void fill_barrier(StructuredData<N, T>& in, direction<N> dir, [[maybe_unused]] Comm comm) {
-    
-    auto halo = in.get_halo(dir);
-    halo.set_all(1);
-    in.put_halo(halo, dir);
-
-}
 
 template <size_t N, class T, class Op>
 void do_work(StructuredData<N, T>& in,
@@ -110,23 +106,6 @@ void do_work(StructuredData<N, T>& in,
 
     for (auto dir : region.m_deps){
         fill_barrier(in, dir);
-    }
-
-
-    do_work(in, out, op, region.m_begin, region.m_end);
-
-
-}
-
-template <size_t N, class T, class Op, class Comm>
-void do_work(StructuredData<N, T>& in,
-             StructuredData<N, T>& out,
-             Op   op,
-             Region<N> region,
-              Comm comm) {
-
-    for (auto dir : region.m_deps){
-        fill_barrier(in, dir, comm);
     }
 
 
@@ -187,6 +166,8 @@ void apply_stencil(StructuredData<N, T>& in, StructuredData<N, T>& out,  Op op){
 
     //apply_interior(in, out, op);
 
+
+    
     auto regions = create_regions(in, op);
 
     for (auto region : regions) {
@@ -197,18 +178,71 @@ void apply_stencil(StructuredData<N, T>& in, StructuredData<N, T>& out,  Op op){
 
 }
 
-template<size_t N, class T, class Op, class Comm>
-void apply_stencil(StructuredData<N, T>& in, StructuredData<N, T>& out,  Op op,  Comm comm){
+template<size_t N, class T, class Op>
+void apply_stencil(StructuredData<N, T>& in, StructuredData<N, T>& out,  Op op,  HpxMdCommunicator<std::vector<T>, N, ConnectivityType::Box> comm){
 
     //apply_interior(in, out, op);
 
+
+    auto dirs = Neighbours<N, ConnectivityType::Box>::get();
+
+    size_t step = 0;
+
+    for (direction<N> dir : dirs) {
+
+        if (comm.has_neighbour(dir)) {
+            
+            std::cout << dir << std::endl;
+            auto temp = in.get_halo(dir);
+            temp.set_all(1);
+            //auto tt = temp.get_storage();
+            comm.set(dir, std::move(temp.get_storage()), step);
+        }
+    }
+    
+    //hpx::barrier();
+
+    //this deadlocks because not all comms have called set yet, only the input comm.
+    // it seems that the comm has to be tied to the data structure :/
+    /*
+    for (direction<N> dir : dirs) {
+
+        if (comm.has_neighbour(dir)) {
+            
+            auto n_data = comm.get(dir, step).get();
+            MdArray<N, T> n_data_structured(n_data, in.get_halo(dir).get_dimension());
+            in.put_halo(n_data_structured, dir);
+        }
+    }
+    */
+    
     auto regions = create_regions(in, op);
+    for (auto region : regions) {
+
+        do_work(in, out, op, region.begin(), region.end());
+
+    }
+
+
+
+
+    /*
+    size_t step = 0;
+    
+    auto n_data = comm.get(dir, step).get();
+    MdArray<N, T> n_data_structured(n_data, in.get_halo(dir).get_dimension());
+    in.put_halo(n_data_structured, dir);
+    
+    auto temp = in.get_halo(dir); //should be get interior and done after solved
+    temp.set_all(1);
+    auto tt = temp.get_storage();
+    comm.set(dir, std::move(tt), step);
 
     for (auto region : regions) {
         do_work(in, out, op, region, comm);
     }
 
-
+    */
 
 }
 
