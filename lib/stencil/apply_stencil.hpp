@@ -1,9 +1,15 @@
 #pragma once
 
+#include <algorithm>
+#include <execution>
+
 #include "loops/md_index_loops.hpp"
+#include "loops/md_range_indices.hpp"
 #include "containers/structured_data.hpp"
 #include "grid/neighbours.hpp"
 #include "communication/hpx_md_communicator.hpp"
+
+
 namespace JADA{
 
 template<size_t N>
@@ -276,7 +282,7 @@ void apply_stencil(const std::vector<T>&                in_v,
                    std::vector<T>&                      out_v,
                    dimension<N>                         dim,
                     Op                  op,
-                    HpxMdCommunicator<std::vector<T>, N, ConnectivityType::Box> comm) {
+                   [[maybe_unused]] HpxMdCommunicator<std::vector<T>, N, ConnectivityType::Box> comm) {
 
 
     dimension<N> padding;
@@ -290,9 +296,29 @@ void apply_stencil(const std::vector<T>&                in_v,
     StructuredData<N, T> out(dim, padding);
 
 
-    apply_stencil(in, out, op, comm);
+//    apply_stencil(in, out, op, comm);
+
+
+    auto interior_region = create_regions(in, op).front();
+    auto view = md_range_indices(interior_region.begin(), interior_region.end());
+
+    std::for_each(
+        std::execution::par,
+        view.begin(), view.end(),
+        [&](auto pos) {
+            auto [i, j] = pos;
+            position<2> ppos = {i, j};
+            out.at(ppos) = op(ppos, in);
+            //std::cout << pos[0] << std::endl;
+            //position<N> ppos = pos;
+            //out.at(pos) = op(pos, in); 
+        }
+    );
 
     
+
+
+
 
 
 

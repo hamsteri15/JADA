@@ -10,5 +10,4 @@ TARGET_COMPILE_OPTIONS(loops INTERFACE
     )
 
 
-
 TARGET_LINK_LIBRARIES(loops PRIVATE INTERFACE project_warnings project_options)

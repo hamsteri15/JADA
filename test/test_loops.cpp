@@ -9,6 +9,7 @@
 #include "loops/loopable.hpp"
 #include "loops/neighbour_iterator.hpp"
 #include "loops/direction.hpp"
+#include "loops/md_range_indices.hpp"
 
 TEST_CASE("Test position"){
 
@@ -410,6 +411,96 @@ TEST_CASE("Test md_loops") {
     }
 }
 
+
+TEST_CASE("Test ranged indices") {
+
+    using namespace JADA;
+
+    SECTION("Array") {
+
+
+
+        std::array<size_t, 2> begin = {0,0};
+        std::array<size_t, 2> end = {3,6};
+
+        auto view = md_range_indices<2>(begin, end);
+
+        std::vector<size_t> is;
+        std::vector<size_t> js;
+        for (auto [i, j] : view) {
+            is.push_back(i);
+            js.push_back(j);
+        }
+
+        CHECK(is == std::vector<size_t>{0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2});
+        CHECK(js == std::vector<size_t>{0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5});
+
+
+        //CHECK(view.begin() == std::array<size_t, 2>{0,0});
+
+
+    }
+
+    SECTION("Position") {
+
+        SECTION("Positive") {
+            position<2> begin = {0,0};
+            position<2> end = {3,6};
+
+            auto view = md_range_indices<2>(begin, end);
+
+            std::vector<idx_t> is;
+            std::vector<idx_t> js;
+            /*for (auto [i, j] : view) {
+                is.push_back(i);
+                js.push_back(j);
+            }*/
+            for (position<2> pos : view) {
+                auto [i, j] = pos;
+                is.push_back(i);
+                js.push_back(j);
+            }
+
+            CHECK(is == std::vector<idx_t>{0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2});
+            CHECK(js == std::vector<idx_t>{0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5, 0, 1, 2, 3, 4, 5});
+
+        }
+
+        SECTION("Negative") {
+
+            position<2> begin = {-1,0};
+            position<2> end = {3,2};
+
+            auto view = md_range_indices<2>(begin, end);
+
+            std::vector<idx_t> is;
+            std::vector<idx_t> js;
+            
+            for (auto [i,j] : view) {
+                //auto [i, j] = pos;
+                is.push_back(i);
+                js.push_back(j);
+            }
+
+            CHECK(is == std::vector<idx_t>{-1, -1, 0, 0, 1, 1, 2, 2});
+            CHECK(js == std::vector<idx_t>{0, 1, 0, 1, 0, 1, 0, 1});
+
+
+
+        }
+
+
+
+        //CHECK(view.begin() == std::array<size_t, 2>{0,0});
+
+
+    }
+
+
+}
+
+
+
 TEST_CASE("Test paired md loops"){
 
     using namespace JADA;
@@ -450,6 +541,7 @@ TEST_CASE("Test paired md loops"){
 
 
 }
+
 
 TEST_CASE("Test Loopable"){
 

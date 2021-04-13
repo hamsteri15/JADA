@@ -1,8 +1,10 @@
 #pragma once
 
 #include "utils/math_vector.hpp"
+#include "utils/tuple_to_array.hpp"
 #include "loops/dimension.hpp"
 #include "loops/index_type.hpp"
+#include <range/v3/view/indices.hpp>
 #include <array>
 
 namespace JADA {
@@ -12,7 +14,13 @@ struct position : public Utils::MathVectorBase<idx_t, L, position<L>> {
 
     using element_t = idx_t;
 
+    //TODO: make some sense to the constructors to avoid implicit conversions
+
     inline constexpr position() = default;
+
+    template<class... Is>
+    inline constexpr position(const ranges::common_tuple<Is...>& t)
+        : m_storage(Utils::tuple_to_array(t)) {}
 
     inline constexpr position(std::array<element_t, L> arr) : m_storage(arr) {} 
 
