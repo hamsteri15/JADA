@@ -3,7 +3,6 @@
 #include "containers/md_array.hpp"
 #include "containers/md_view.hpp"
 #include "containers/structured_data.hpp"
-#include "containers/halo_offsets.hpp"
 #include "loops/md_index_loops.hpp"
 
 TEST_CASE("Test Soa"){
@@ -54,63 +53,6 @@ TEST_CASE("Test MdView"){
     CHECK(data[9] == 3.0);
 }
 
-TEST_CASE("Test halo_offsets"){
-
-    using namespace JADA;
-
-    dimension<2> dims{3, 5};
-    dimension<2> padding{1, 2};
-
-    std::vector<int> v(dims.elementwise_product());
-    auto view = MdView(dims, v);
-
-    v = {0, 0, 0, 0, 0,
-         0, 0, 0, 0, 0,
-         0, 0, 0, 0, 0};
-
-    auto set_ones = [&](direction<2> dir) {
-        auto begin = interior_begin(dims, padding, dir);
-        auto end   = interior_end(dims, padding, dir);
-        for (auto pos : md_indices(begin, end)) {
-            view[pos] = 1;
-        }
-    };
-
-    set_ones({1,0});
-    CHECK(v == 
-    std::vector<int>
-        {0, 0, 0, 0, 0,
-         0, 0, 0, 0, 0,
-         0, 0, 1, 0, 0}
-    );
-
-    set_ones({0,1});
-    CHECK(v == 
-    std::vector<int>
-        {0, 0, 0, 0, 0,
-         0, 0, 0, 1, 1,
-         0, 0, 1, 0, 0}
-    );
-
-    set_ones({-1,0});
-    CHECK(v == 
-    std::vector<int>
-        {0, 0, 1, 0, 0,
-         0, 0, 0, 1, 1,
-         0, 0, 1, 0, 0}
-    );
-
-    set_ones({-1,-1});
-    CHECK(v == 
-    std::vector<int>
-        {1, 1, 1, 0, 0,
-         0, 0, 0, 1, 1,
-         0, 0, 1, 0, 0}
-    );
-
-
-
-}
 
 
 TEST_CASE("Test StructuredData"){

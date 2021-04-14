@@ -1,9 +1,191 @@
 #include "catch.hpp"
 
 #include "stencil/apply_stencil.hpp"
+#include "stencil/create_parallel_regions.hpp"
+#include "stencil/create_interior_regions.hpp"
 #include "containers/structured_data.hpp"
 
 #include "ops.hpp"
+
+
+
+TEST_CASE("Test create_parallel_regions"){
+
+    using namespace JADA;
+
+
+    SECTION("begin / end") {
+
+        dimension<2> dims{3, 5};
+        dimension<2> padding{1, 2};
+
+        std::vector<int> v(dims.elementwise_product());
+        auto view = MdView(dims, v);
+
+        v = {0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0};
+
+        auto set_ones = [&](direction<2> dir) {
+            auto begin = parallel_region_begin(dims, padding, dir);
+            auto end   = parallel_region_end(dims, padding, dir);
+            for (auto pos : md_indices(begin, end)) {
+                view[pos] = 1;
+            }
+        };
+
+
+        
+
+
+        set_ones({1,0});
+        CHECK(v == 
+        std::vector<int>
+            {0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0,
+            0, 0, 1, 0, 0}
+        );
+
+        set_ones({0,1});
+        CHECK(v == 
+        std::vector<int>
+            {0, 0, 0, 0, 0,
+            0, 0, 0, 1, 1,
+            0, 0, 1, 0, 0}
+        );
+
+        set_ones({-1,0});
+        CHECK(v == 
+        std::vector<int>
+            {0, 0, 1, 0, 0,
+            0, 0, 0, 1, 1,
+            0, 0, 1, 0, 0}
+        );
+
+        set_ones({-1,-1});
+        CHECK(v == 
+        std::vector<int>
+            {1, 1, 1, 0, 0,
+            0, 0, 0, 1, 1,
+            0, 0, 1, 0, 0}
+        );
+
+        v = std::vector<int>(dims.elementwise_product());
+
+        set_ones({0,0});
+        CHECK(v == 
+        std::vector<int>
+            {0, 0, 0, 0, 0,
+             0, 0, 1, 0, 0,
+             0, 0, 0, 0, 0}
+        );
+    }
+
+
+    SECTION("All parallel regions ") {
+
+
+        CHECK( 1 == 1);
+
+    }
+
+
+}
+
+
+TEST_CASE("Test create_interior_regions") {
+
+    using namespace JADA;
+
+    
+    SECTION("begin / end") {
+
+        dimension<2> dims{3, 5};
+        dimension<2> padding{1, 2};
+
+        std::vector<int> v(dims.elementwise_product());
+        auto view = MdView(dims, v);
+
+        v = {0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0};
+
+        auto set_ones = [&](direction<2> dir) {
+            auto begin = interior_region_begin(dims, padding, dir);
+            auto end   = interior_region_end(dims, padding, dir);
+            for (auto pos : md_indices(begin, end)) {
+                view[pos] = 1;
+            }
+        };
+
+        v = std::vector<int>(dims.elementwise_product());
+        set_ones({1,0});
+        CHECK(v == 
+        std::vector<int>
+            {0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0,
+            1, 1, 1, 1, 1}
+        );
+
+        v = std::vector<int>(dims.elementwise_product());
+        set_ones({0,1});
+        CHECK(v == 
+        std::vector<int>
+           {0, 0, 0, 1, 1,
+            0, 0, 0, 1, 1,
+            0, 0, 0, 1, 1}
+        );
+
+        v = std::vector<int>(dims.elementwise_product());
+        set_ones({-1,0});
+        CHECK(v == 
+        std::vector<int>
+           {1, 1, 1, 1, 1,
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0}
+        );
+
+        v = std::vector<int>(dims.elementwise_product());
+        set_ones({-1,-1});
+        CHECK(v == 
+        std::vector<int>
+           {1, 1, 0, 0, 0,
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0}
+        );
+
+    }
+
+
+    SECTION("All parallel regions ") {
+
+        //This check ensures that each of the parallel region elements are
+        // accessed exactly once
+        dimension<2> dims{5, 7};
+        dimension<2> padding{1, 2};
+
+        auto data = MdArray<2, int>(dims);
+        auto regions = create_parallel_regions(dims, OpBox{});
+
+        for (auto r : regions) {
+
+            for (auto pos : md_indices(r.begin(), r.end())) {
+                data[pos] += 1;
+            }
+        }
+
+        for (auto e : data.get_storage()) {
+            REQUIRE(e == 1);
+        }
+
+
+    }
+    
+
+
+}
+
+
 
 /*
 #include "loops/flatten_index.hpp"
@@ -160,7 +342,7 @@ TEST_CASE("Test StencilPicker") {
 */
 
 
-
+/*
 TEST_CASE("Test apply stencil") {
 
     using namespace JADA;
@@ -230,3 +412,4 @@ TEST_CASE("Test apply stencil") {
 
 
 }
+*/

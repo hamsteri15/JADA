@@ -1,7 +1,6 @@
 #pragma once
 
 #include "containers/md_array.hpp"
-#include "containers/halo_offsets.hpp"
 #include "grid/neighbours.hpp"
 #include "loops/direction.hpp"
 
@@ -224,6 +223,7 @@ private:
 
     }
 
+
     ///
     ///@brief Get the beginning position of the halo at direction dir
     ///
@@ -263,7 +263,6 @@ private:
 
         return h_dims;
     }
-
 
 
 
