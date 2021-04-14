@@ -1,6 +1,7 @@
 #pragma once
 
 #include "containers/md_array.hpp"
+#include "containers/halo_offsets.hpp"
 #include "grid/neighbours.hpp"
 #include "loops/direction.hpp"
 
@@ -211,9 +212,10 @@ private:
         std::vector<storage_t> ret; 
         ret.reserve(m_neighbours.count()); 
 
-        for (auto dir : m_neighbours.get()) {
+        for (direction<N> dir : m_neighbours.get()) {
 
             ret.emplace_back(
+                //MdArray<N,T>(halo_dims(dim, padding, dir))
                 MdArray<N,T>(compute_halo_dims(dim, dir, padding))
             );            
 
@@ -244,7 +246,6 @@ private:
         return begin;
     }
 
-
     static dimension<N> compute_halo_dims(dimension<N> dims,
                             position<N>  dir,
                             dimension<N> padding) {
@@ -262,7 +263,6 @@ private:
 
         return h_dims;
     }
-
 
 
 

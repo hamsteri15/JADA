@@ -6,6 +6,8 @@
 #include "loops/md_index_loops.hpp"
 #include "loops/md_range_indices.hpp"
 #include "containers/structured_data.hpp"
+#include "containers/md_view.hpp"
+#include "containers/halo_offsets.hpp"
 #include "grid/neighbours.hpp"
 #include "communication/hpx_md_communicator.hpp"
 
@@ -31,52 +33,7 @@ struct Region{
 };
 
 
-template<size_t N, class T>
-position<N> get_begin(const StructuredData<N, T>& in, direction<N> dir){
 
-    auto dims = in.get_dimension();
-    auto padding = in.get_padding();
-
-    position<N> begin{};
-
-    for (size_t i = 0; i < N; ++i){
-        if (dir[i] < 0) {
-            begin[i] = 0;
-        }
-
-        else if (dir[i] == 0) {
-            begin[i] = idx_t(padding[i]);
-        }
-
-        else {
-            begin[i] = idx_t(dims[i] - padding[i]);
-        }
-    }
-    return begin;
-
-}
-
-template <size_t N, class T>
-position<N> get_end(const StructuredData<N, T>& in, direction<N> dir) {
-
-    auto         dims    = in.get_dimension();
-    auto         padding = in.get_padding();
-    
-    dimension<N> h_dims{};
-
-    for (size_t i = 0; i < N; ++i) {
-        if (dir[i] != 0) {
-            h_dims[i] = padding[i];
-        } 
-        else {
-            h_dims[i] = dims[i] - 2*padding[i];
-        }
-    }
-
-    return get_begin(in, dir) + position<N>(h_dims);
-
-    
-}
 
 
 
@@ -120,17 +77,27 @@ void do_work(StructuredData<N, T>& in,
 
 }
 
+template<size_t N, class Op>
+dimension<N> compute_padding([[maybe_unused]] Op op) {
+
+    dimension<N> padding;
+    for (size_t i = 0; i < N; ++i){
+        padding[i] = size_t(1);
+    }
+    return padding;
+}
 
 
-
-template<size_t N, class Op, class T>
-std::vector<Region<N>> create_regions(const StructuredData<N, T>& in, [[maybe_unused]] Op op) {
+template<size_t N, class Op>
+std::vector<Region<N>> create_regions(dimension<N> dims, Op op) {
 
     std::vector<Region<N>> ret;
 
+    auto padding = compute_padding<N, Op>(op);
 
-    auto i_begin = in.begin() + position<N>(in.get_padding());
-    auto i_end = in.end() - position<N>(in.get_padding());
+    //this is the interior region
+    auto i_begin = position<N>(padding);
+    auto i_end = position<N>(dims) - position<N>(padding);
 
     ret.push_back(
         Region<N>(i_begin, i_end, std::vector<direction<N>>{})
@@ -141,8 +108,8 @@ std::vector<Region<N>> create_regions(const StructuredData<N, T>& in, [[maybe_un
     for (direction<N> dir : dirs) {
         if (dir.abs().elementwise_sum() < 2) {
 
-            auto begin = get_begin(in, dir);
-            auto end = get_end(in, dir);
+            auto begin = interior_begin(dims, padding, dir);
+            auto end = interior_end(dims, padding, dir);
 
             ret.push_back(Region<N>(begin, end, {dir}));          
 
@@ -152,8 +119,8 @@ std::vector<Region<N>> create_regions(const StructuredData<N, T>& in, [[maybe_un
     for (direction<N> dir : dirs) {
         if (dir.abs().elementwise_sum() >= 2) {
 
-            auto begin = get_begin(in, dir);
-            auto end = get_end(in, dir);
+            auto begin = interior_begin(dims, padding, dir);
+            auto end = interior_end(dims, padding, dir);
 
             ret.push_back(Region<N>(begin, end, {dir}));          
 
@@ -163,6 +130,14 @@ std::vector<Region<N>> create_regions(const StructuredData<N, T>& in, [[maybe_un
     return ret;
 
 
+}
+
+
+
+template<size_t N, class Op, class T>
+std::vector<Region<N>> create_regions(const StructuredData<N, T>& in, Op op) {
+
+    return create_regions(in.get_dimension(), op);
 }
 
 
@@ -184,83 +159,12 @@ void apply_stencil(StructuredData<N, T>& in, StructuredData<N, T>& out,  Op op){
 
 }
 
-template<size_t N, class T, class Op>
-void apply_stencil(StructuredData<N, T>& in, StructuredData<N, T>& out,  Op op,  HpxMdCommunicator<std::vector<T>, N, ConnectivityType::Box> comm){
-
-    //apply_interior(in, out, op);
-
-
-    auto dirs = Neighbours<N, ConnectivityType::Box>::get();
-
-    size_t step = 0;
-
-    for (direction<N> dir : dirs) {
-
-        if (comm.has_neighbour(dir)) {
-            
-            std::cout << dir << std::endl;
-            auto temp = in.get_halo(dir);
-            temp.set_all(1);
-            //auto tt = temp.get_storage();
-            comm.set(dir, std::move(temp.get_storage()), step);
-        }
-    }
-    
-    //hpx::barrier();
-
-    //this deadlocks because not all comms have called set yet, only the input comm.
-    // it seems that the comm has to be tied to the data structure :/
-    /*
-    for (direction<N> dir : dirs) {
-
-        if (comm.has_neighbour(dir)) {
-            
-            auto n_data = comm.get(dir, step).get();
-            MdArray<N, T> n_data_structured(n_data, in.get_halo(dir).get_dimension());
-            in.put_halo(n_data_structured, dir);
-        }
-    }
-    */
-    
-    auto regions = create_regions(in, op);
-    for (auto region : regions) {
-
-        do_work(in, out, op, region.begin(), region.end());
-
-    }
-
-
-
-
-    /*
-    size_t step = 0;
-    
-    auto n_data = comm.get(dir, step).get();
-    MdArray<N, T> n_data_structured(n_data, in.get_halo(dir).get_dimension());
-    in.put_halo(n_data_structured, dir);
-    
-    auto temp = in.get_halo(dir); //should be get interior and done after solved
-    temp.set_all(1);
-    auto tt = temp.get_storage();
-    comm.set(dir, std::move(tt), step);
-
-    for (auto region : regions) {
-        do_work(in, out, op, region, comm);
-    }
-
-    */
-
-}
 
 
 template<size_t N, class T, class Op>
 void apply_stencil(const std::vector<T>& in_v, std::vector<T>& out_v, dimension<N> dim, [[maybe_unused]] Op op) {
 
-    dimension<N> padding;
-    for (size_t i = 0; i < N; ++i){
-        padding[i] = size_t(1);
-    }
-
+    auto padding = compute_padding<N, Op>(op);
 
 
     StructuredData<N, T> in(MdArray<N, T>(in_v, dim), dim, padding);
@@ -278,6 +182,43 @@ void apply_stencil(const std::vector<T>& in_v, std::vector<T>& out_v, dimension<
 }
 
 template <size_t N, class T, class Op>
+void call_sets(
+    const std::vector<T>&                                       in,
+    dimension<N>                                                dim,
+    [[maybe_unused]] Op                                                          op,
+    HpxMdCommunicator<std::vector<T>, N, ConnectivityType::Box> comm) {
+
+    size_t step  =0;
+
+    auto dirs = comm.get_directions();
+
+    auto padding = compute_padding<N, Op>(op);
+
+    auto view = MdView(dim, in);
+
+    for (direction<N> dir : dirs) {
+
+        if (comm.has_neighbour(dir)) {
+
+            auto begin = interior_begin(dim, padding, dir);
+            auto end = interior_end(dim, padding, dir);
+
+            std::vector<T> data;
+            for (auto pos : md_range_indices(begin, end)){
+                data.push_back(view[pos]);
+            }
+            comm.set(dir, std::move(data), step);
+            
+
+        }
+
+    }
+
+
+}
+
+
+template <size_t N, class T, class Op>
 void apply_stencil(const std::vector<T>&                in_v,
                    std::vector<T>&                      out_v,
                    dimension<N>                         dim,
@@ -285,10 +226,7 @@ void apply_stencil(const std::vector<T>&                in_v,
                    [[maybe_unused]] HpxMdCommunicator<std::vector<T>, N, ConnectivityType::Box> comm) {
 
 
-    dimension<N> padding;
-    for (size_t i = 0; i < N; ++i){
-        padding[i] = size_t(1);
-    }
+    auto padding = compute_padding<N, Op>(op); 
 
 
 
@@ -296,28 +234,65 @@ void apply_stencil(const std::vector<T>&                in_v,
     StructuredData<N, T> out(dim, padding);
 
 
-//    apply_stencil(in, out, op, comm);
 
+    call_sets(in_v, dim, op, comm);
 
-    auto interior_region = create_regions(in, op).front();
-    auto view = md_range_indices(interior_region.begin(), interior_region.end());
-
-    std::for_each(
-        std::execution::par,
-        view.begin(), view.end(),
-        [&](auto pos) {
-            auto [i, j] = pos;
-            position<2> ppos = {i, j};
-            out.at(ppos) = op(ppos, in);
-            //std::cout << pos[0] << std::endl;
-            //position<N> ppos = pos;
-            //out.at(pos) = op(pos, in); 
-        }
-    );
-
+    /*
     
+    for (direction<N> dir : dirs) {
+
+        if (comm.has_neighbour(dir)) {
+
+            auto data = in.get_halo(dir);
+            data.set_all(1);
+            comm.set(dir, std::move(data.get_storage()), step);
+
+        }
+        else {
+            //do something physical
+        }
 
 
+    }
+    */
+    std::cout << "tassa" << std::endl;
+
+
+    size_t step = 0;
+    auto dirs = comm.get_directions();
+    for (direction<N> dir : dirs){
+
+        if (comm.has_neighbour(dir)){
+            auto data = comm.get(dir, step).get();
+
+            auto b_dims = in.get_halo(dir).get_dimension();
+
+            std::cout << data.size() << " " << b_dims << std::endl;
+
+            Utils::runtime_assert(data.size() == b_dims.elementwise_product(), "Fail");
+
+
+            in.put_halo(MdArray<N, T>(data, b_dims), dir);
+
+        }
+
+    }
+    
+    
+    
+    auto regions = create_regions(in, op);
+    for (auto region : regions) {
+
+        auto view = md_range_indices(region.begin(), region.end());
+        std::for_each(
+            std::execution::par,
+            view.begin(), view.end(),
+            [&](auto pos){
+                out.at(pos) = op(pos, in);
+            }
+        );
+
+    }
 
 
 
