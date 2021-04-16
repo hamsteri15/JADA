@@ -84,8 +84,26 @@ TEST_CASE("Test create_parallel_regions"){
 
     SECTION("All parallel regions ") {
 
+        //This check ensures that each of the parallel region elements are
+        // accessed exactly once
+        dimension<2> dims{5, 7};
+        dimension<2> padding{1, 2};
 
-        CHECK( 1 == 1);
+        auto data = MdArray<2, int>(dims);
+        auto regions = create_parallel_regions(dims, OpBox{});
+
+        for (auto r : regions) {
+
+            for (auto pos : md_indices(r.begin(), r.end())) {
+                data[pos] += 1;
+            }
+        }
+
+        for (auto e : data.get_storage()) {
+            REQUIRE(e == 1);
+        }
+
+
 
     }
 
@@ -153,30 +171,55 @@ TEST_CASE("Test create_interior_regions") {
             0, 0, 0, 0, 0,
             0, 0, 0, 0, 0}
         );
+        
+        v = std::vector<int>(dims.elementwise_product());
+        set_ones({-1, 0});
+        CHECK(v == 
+        std::vector<int>
+           {1, 1, 1, 1, 1,
+            0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0}
+        );
 
     }
 
+    
+    SECTION("All interior regions ") {
 
-    SECTION("All parallel regions ") {
 
-        //This check ensures that each of the parallel region elements are
-        // accessed exactly once
-        dimension<2> dims{5, 7};
+        dimension<2> dims{3, 5};
         dimension<2> padding{1, 2};
 
-        auto data = MdArray<2, int>(dims);
-        auto regions = create_parallel_regions(dims, OpBox{});
+        std::vector<int> v(dims.elementwise_product());
+        auto view = MdView(dims, v);
 
-        for (auto r : regions) {
+        auto dirs = Neighbours<2, ConnectivityType::Box>::get();
+
+
+        for (direction<2> dir : dirs) {
+
+            auto r = create_interior_region(dims, padding, dir);
 
             for (auto pos : md_indices(r.begin(), r.end())) {
-                data[pos] += 1;
+
+                view[pos] += 1;
+
+
             }
+
         }
 
-        for (auto e : data.get_storage()) {
-            REQUIRE(e == 1);
-        }
+
+        //the corners are accessed three times, once for row and column and once for the separate "corner access"
+        CHECK(v == 
+        std::vector<int>
+           {3, 3, 1, 3, 3,
+            1, 1, 0, 1, 1,
+            3, 3, 1, 3, 3}
+        );
+
+
+
 
 
     }

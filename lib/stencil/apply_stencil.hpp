@@ -39,9 +39,9 @@ void apply_stencil([[maybe_unused]] const std::vector<T>& in,
 
     size_t step = 0;
 
+    auto dirs = Neighbours<N, ConnectivityType::Box>::get();
 
-
-    for (direction<N> dir : comm.get_directions() ){
+    for (direction<N> dir : dirs ){
 
         if (comm.has_neighbour(dir)) {
             auto r = create_interior_region(dim, padding, dir);
@@ -50,6 +50,7 @@ void apply_stencil([[maybe_unused]] const std::vector<T>& in,
             for (auto pos : md_indices(r.begin(), r.end())){
 
                 slice[i] = s_in.at(pos);
+                ++i;
             }
 
             comm.set(dir, std::move(slice), step);
@@ -60,7 +61,7 @@ void apply_stencil([[maybe_unused]] const std::vector<T>& in,
 
 
     
-    for (direction<N> dir : comm.get_directions()) {
+    for (direction<N> dir : dirs) {
 
         if (comm.has_neighbour(dir)){
 
@@ -71,7 +72,6 @@ void apply_stencil([[maybe_unused]] const std::vector<T>& in,
         }
 
     }
-    
 
 
     for (auto r : create_parallel_regions(dim, op)) {
