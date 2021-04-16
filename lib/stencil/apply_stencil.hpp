@@ -17,12 +17,12 @@
 
 namespace JADA{
 
-template <size_t N, class T, class Op>
-void apply_stencil([[maybe_unused]] const std::vector<T>& in,
-                   [[maybe_unused]] std::vector<T>&       out,
-                   [[maybe_unused]] dimension<N>          dim,
-                   [[maybe_unused]] Op                    op,
-                   [[maybe_unused]] HpxMdCommunicator<std::vector<T>, N, ConnectivityType::Box> comm ) {
+template <size_t N, class T, class Op, ConnectivityType CT>
+void apply_stencil( const std::vector<T>& in,
+                    std::vector<T>&       out,
+                    dimension<N>          dim,
+                    Op                    op,
+                    HpxMdCommunicator<std::vector<T>, N, CT> comm ) {
 
     
 
@@ -39,9 +39,8 @@ void apply_stencil([[maybe_unused]] const std::vector<T>& in,
 
     size_t step = 0;
 
-    auto dirs = Neighbours<N, ConnectivityType::Box>::get();
 
-    for (direction<N> dir : dirs ){
+    for (direction<N> dir : comm.get_directions() ){
 
         if (comm.has_neighbour(dir)) {
             auto r = create_interior_region(dim, padding, dir);
@@ -61,7 +60,7 @@ void apply_stencil([[maybe_unused]] const std::vector<T>& in,
 
 
     
-    for (direction<N> dir : dirs) {
+    for (direction<N> dir : comm.get_directions()) {
 
         if (comm.has_neighbour(dir)){
 
