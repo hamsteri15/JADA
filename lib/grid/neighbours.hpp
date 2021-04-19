@@ -1,6 +1,6 @@
 #pragma once
-#include "loops/position.hpp"
 #include "loops/unflatten_index.hpp"
+#include "loops/direction.hpp"
 #include <array>
 #include <vector>
 
@@ -43,10 +43,9 @@ template <size_t N, ConnectivityType CT> struct Neighbours {
     }
 
 
-
     static constexpr size_t m_count = detail::neighbour_count<N, CT>();
 
-    static constexpr std::array<std::array<idx_t, N>, m_count> m_neighbours = create();
+    static constexpr std::array<direction<N>, m_count> m_neighbours = create();
 
 public:
 
@@ -72,10 +71,10 @@ public:
     ///@param neighbour direction of a neighbour
     ///@return constexpr size_t the index of the neihbour if such neigbhour is found. -1 otherwise.
     ///
-    static constexpr idx_t idx(position<N> neighbour) {
+    static constexpr idx_t idx(direction<N> dir) {
 
         for (size_t i = 0; i < count(); ++i) {
-            if (position<N>(m_neighbours[i]) == neighbour) { return idx_t(i); }
+            if (m_neighbours[i] == dir) { return idx_t(i); }
         }
         return -1;
         //throw std::logic_error("Invalid neighbour");
@@ -91,11 +90,11 @@ private:
     ///@param arr the input array
     ///@return constexpr std::vector<std::array<ET, N>> vector of permutations
     ///
-    static constexpr auto all_permutations_of(std::array<idx_t, N> arr) {
+    static constexpr auto all_permutations_of(direction<N> arr) {
 
-        std::array<std::array<idx_t, N>, N> permutations;
+        std::array<direction<N>, N> permutations;
 
-        // std::vector<std::array<idx_t, N>> permutations(count);
+        // std::vector<direction<N>> permutations(count);
         auto temp = arr;
         std::sort(std::begin(temp), std::end(temp));
 
@@ -112,20 +111,20 @@ private:
     ///
     ///@brief Computes the star neighbours
     ///
-    ///@return constexpr auto std::array<std::array<idx_t, N> 2*N> neighbours
+    ///@return constexpr auto std::array<direction<N> 2*N> neighbours
     ///
     static constexpr auto star_neighbours() {
 
         constexpr size_t n_count = detail::neighbour_count<N, CT>();
 
-        std::array<idx_t, N> a_positive{};
-        std::array<idx_t, N> a_negative{};
+        direction<N> a_positive{};
+        direction<N> a_negative{};
         a_positive[0]       = 1;
         a_negative[0]       = -1;
         auto p_permutations = all_permutations_of(a_positive);
         auto n_permutations = all_permutations_of(a_negative);
 
-        std::array<std::array<idx_t, N>, n_count> all;
+        std::array<direction<N>, n_count> all;
 
         for (size_t i = 0; i < p_permutations.size(); ++i) {
             all[i] = p_permutations[i];
@@ -141,15 +140,15 @@ private:
     ///
     ///@brief Computes the box neighbour directions
     ///
-    ///@return constexpr auto std::array<std::array<idx_t, N>, 3^N>
+    ///@return constexpr auto std::array<direction<N>, 3^N>
     ///
     static constexpr auto box_neighbours() {
 
         constexpr auto n_combinations = detail::neighbour_count<N, CT>();
 
-        std::array<std::array<idx_t, N>, n_combinations> combinations;
+        std::array<direction<N>, n_combinations> combinations;
 
-        std::array<idx_t, N> combination;
+        direction<N> combination;
         for (auto& c : combination) c = 1;
 
         size_t j = 0;

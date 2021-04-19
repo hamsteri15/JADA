@@ -260,17 +260,17 @@ TEST_CASE("Block neighbours"){
 
     }
 
-
-
+    
+    
 
     SECTION("Star connectivity"){
 
         SECTION("1D") {
             auto test = Neighbours<1, ConnectivityType::Star>().get();
 
-            std::array<std::array<idx_t, 1>, 2> correct
+            std::array<direction<1>, 2> correct
             {
-                std::array<idx_t,1>{1}, std::array<idx_t,1>{-1}
+                direction<1>{1}, direction<1>{-1}
             };
 
             std::sort(test.begin(), test.end());
@@ -280,16 +280,16 @@ TEST_CASE("Block neighbours"){
 
         }
 
-
+        
         SECTION("2D") {
             auto test = Neighbours<2, ConnectivityType::Star>().get();
 
-            std::array<std::array<idx_t, 2>, 4> correct
+            std::array<direction<2>, 4> correct
             {
-                std::array<idx_t, 2>{1, 0}, 
-                std::array<idx_t, 2>{0, 1},
-                std::array<idx_t, 2>{-1, 0}, 
-                std::array<idx_t, 2>{0, -1}
+                direction<2>{1, 0}, 
+                direction<2>{0, 1},
+                direction<2>{-1, 0}, 
+                direction<2>{0, -1}
             };
 
             std::sort(test.begin(), test.end());
@@ -302,18 +302,19 @@ TEST_CASE("Block neighbours"){
 
 
         }
-
+        
+        
         SECTION("3D") {
             auto test = Neighbours<3, ConnectivityType::Star>().get();
 
-            std::array<std::array<idx_t, 3>, 6> correct
+            std::array<direction<3>, 6> correct
             {
-                std::array<idx_t, 3>{1, 0, 0},
-                std::array<idx_t, 3>{0, 1, 0},
-                std::array<idx_t, 3>{0, 0, 1},
-                std::array<idx_t, 3>{-1, 0, 0},
-                std::array<idx_t, 3>{0, -1, 0},
-                std::array<idx_t, 3>{0, 0, -1}
+                direction<3>{1, 0, 0},
+                direction<3>{0, 1, 0},
+                direction<3>{0, 0, 1},
+                direction<3>{-1, 0, 0},
+                direction<3>{0, -1, 0},
+                direction<3>{0, 0, -1}
                 
             };
 
@@ -327,18 +328,20 @@ TEST_CASE("Block neighbours"){
 
 
         }
-
+        
 
     }
 
+
+    
     SECTION("Box connecitvity"){
 
         SECTION("1D") {
             auto test = Neighbours<1, ConnectivityType::Box>().get();
             
-            std::array<std::array<idx_t, 1>, 2> correct
+            std::array<direction<1>, 2> correct
             {
-                std::array<idx_t,1>{1}, std::array<idx_t,1>{-1}
+                direction<1>{1}, direction<1>{-1}
             };
 
             std::sort(test.begin(), test.end());
@@ -353,16 +356,16 @@ TEST_CASE("Block neighbours"){
         SECTION("2D") {
             auto test = Neighbours<2, ConnectivityType::Box>().get();
             
-            std::array<std::array<idx_t, 2>, 8> correct
+            std::array<direction<2>, 8> correct
             {
-                std::array<idx_t, 2>{1, 0},
-                std::array<idx_t, 2>{0, 1},
-                std::array<idx_t, 2>{1, 1},
-                std::array<idx_t, 2>{-1, 0},
-                std::array<idx_t, 2>{0, -1},
-                std::array<idx_t, 2>{-1, -1},
-                std::array<idx_t, 2>{-1, 1},
-                std::array<idx_t, 2>{1, -1}
+                direction<2>{1, 0},
+                direction<2>{0, 1},
+                direction<2>{1, 1},
+                direction<2>{-1, 0},
+                direction<2>{0, -1},
+                direction<2>{-1, -1},
+                direction<2>{-1, 1},
+                direction<2>{1, -1}
                 
             };
 
@@ -391,7 +394,7 @@ TEST_CASE("Block neighbours"){
 
 
     }
-
+    
 
 
 }
