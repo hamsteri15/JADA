@@ -1,0 +1,5 @@
+ADD_LIBRARY(algorithms INTERFACE)
+TARGET_INCLUDE_DIRECTORIES(algorithms INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+
+
+TARGET_LINK_LIBRARIES(algorithms PRIVATE INTERFACE project_warnings project_options loops)
