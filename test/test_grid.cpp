@@ -231,6 +231,13 @@ TEST_CASE("Block neighbours"){
     using namespace JADA;
     using Catch::Matchers::Contains;
     
+
+    //ensures that same comparator is used for all array of array comparisons
+    auto comp = [](auto lhs, auto rhs) {
+        return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+    };
+    
+    
     SECTION("Neighbours"){
 
         REQUIRE_NOTHROW(Neighbours<3, ConnectivityType::Star>());
@@ -261,7 +268,7 @@ TEST_CASE("Block neighbours"){
     }
 
     
-    
+
 
     SECTION("Star connectivity"){
 
@@ -282,7 +289,10 @@ TEST_CASE("Block neighbours"){
 
         
         SECTION("2D") {
-            auto test = Neighbours<2, ConnectivityType::Star>().get();
+
+            using namespace Catch::Matchers;
+
+            std::array<direction<2>, 4> test = Neighbours<2, ConnectivityType::Star>().get();
 
             std::array<direction<2>, 4> correct
             {
@@ -291,18 +301,17 @@ TEST_CASE("Block neighbours"){
                 direction<2>{-1, 0}, 
                 direction<2>{0, -1}
             };
-
-            std::sort(test.begin(), test.end());
-            std::sort(correct.begin(), correct.end());
+            
+            std::sort(test.begin(), test.end(), comp);
+            std::sort(correct.begin(), correct.end(), comp);
 
             CHECK(test == correct);
 
             test[2][0] = 3;
             CHECK(test != correct);
 
-
         }
-        
+
         
         SECTION("3D") {
             auto test = Neighbours<3, ConnectivityType::Star>().get();
@@ -318,8 +327,8 @@ TEST_CASE("Block neighbours"){
                 
             };
 
-            std::sort(test.begin(), test.end());
-            std::sort(correct.begin(), correct.end());
+            std::sort(test.begin(), test.end(), comp);
+            std::sort(correct.begin(), correct.end(), comp);
 
             CHECK(test == correct);
 
@@ -328,7 +337,6 @@ TEST_CASE("Block neighbours"){
 
 
         }
-        
 
     }
 
@@ -344,8 +352,8 @@ TEST_CASE("Block neighbours"){
                 direction<1>{1}, direction<1>{-1}
             };
 
-            std::sort(test.begin(), test.end());
-            std::sort(correct.begin(), correct.end());
+            std::sort(test.begin(), test.end(), comp);
+            std::sort(correct.begin(), correct.end(), comp);
 
             CHECK(test == correct);
 
@@ -369,8 +377,8 @@ TEST_CASE("Block neighbours"){
                 
             };
 
-            std::sort(test.begin(), test.end());
-            std::sort(correct.begin(), correct.end());
+            std::sort(test.begin(), test.end(), comp);
+            std::sort(correct.begin(), correct.end(), comp);
 
             CHECK(test == correct);
 
@@ -378,10 +386,10 @@ TEST_CASE("Block neighbours"){
 
         }
 
-
     }
 
     SECTION("Neighbours idx()"){
+
 
         Neighbours<2, ConnectivityType::Star> n;
 
@@ -390,7 +398,6 @@ TEST_CASE("Block neighbours"){
         CHECK(n.idx({1,0}) == 1);
         CHECK(n.idx({-1,0}) == 2);
         CHECK(n.idx({0,-1}) == 3);
-
 
 
     }

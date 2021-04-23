@@ -35,6 +35,8 @@ template <class T, size_t L, class S> struct MathVectorBase {
     friend std::ostream& operator<<(std::ostream& os, const MathVectorBase<TT,LL,SS>& v);
 
 
+    inline constexpr size_t             size() const noexcept      {return L;}
+    inline constexpr size_t             size()       noexcept      {return L;}
 
     inline constexpr T*                 data()      noexcept       {return get_ptr();}
     inline constexpr const T*           data()      const noexcept {return get_ptr();}
