@@ -9,6 +9,7 @@ namespace JADA {
 template <size_t N, ConnectivityType CT> 
 struct DimensionHandle {
 
+    static constexpr Neighbours<N, CT> m_neighbours{};
 
 
     dimension<N> get_padding() const {
@@ -36,12 +37,14 @@ struct DimensionHandle {
             get_padding()
         );
 
-        return std::make_pair(
-            halo_idx,
+        return std::make_pair<size_t, size_t>(
+            halo_idx + 1,
             size_t(flatten<N, StorageOrder::RowMajor>(halo_dims, x))
-        )
+        );
 
     }
+
+
 
     bool in_inner(position<N> pos) const {
         return pos.all_positive() && (pos < m_inner_dims);

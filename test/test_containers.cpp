@@ -3,6 +3,7 @@
 #include "containers/md_array.hpp"
 #include "containers/md_view.hpp"
 #include "containers/structured_data.hpp"
+#include "containers/md_indexable.hpp"
 #include "loops/md_index_loops.hpp"
 
 TEST_CASE("Test Soa"){
@@ -15,8 +16,44 @@ TEST_CASE("Test Soa"){
     }
 
 }
+namespace JADA {
+
+template<size_t N>
+struct Stuff : MdIndexable<double, N, Stuff<N>>{
+
+   explicit Stuff(dimension<N> dim) : m_dim(dim), m_data(dim.elementwise_product()) {}
 
 
+    constexpr const double* get_ptr() const { return m_data.data();}
+    constexpr       double* get_ptr()       { return m_data.data(); }
+    constexpr dimension<N> const get_dimension() const { return m_dim; }
+
+private:
+    dimension<N>        m_dim;
+    std::vector<double> m_data;
+
+};
+
+}
+
+
+TEST_CASE("Test MdIndexable") {
+
+    using namespace JADA;
+
+
+    Stuff<3> s(dimension<3>{3,4,5});
+
+    REQUIRE_NOTHROW(s.data());
+
+
+    //s(position<3>{1,3,3}) = 32.0;
+
+//    CHECK(s({1,3,3}) == 32.0);
+
+
+
+}
 
 
 TEST_CASE("Test MdArray"){
