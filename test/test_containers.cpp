@@ -19,7 +19,7 @@ TEST_CASE("Test Soa"){
 namespace JADA {
 
 template<size_t N>
-struct Stuff : MdIndexable<double, N, Stuff<N>>{
+struct Stuff : MdIndexable<N, Stuff<N>>{
 
    explicit Stuff(dimension<N> dim) : m_dim(dim), m_data(dim.elementwise_product()) {}
 

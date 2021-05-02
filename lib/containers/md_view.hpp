@@ -1,16 +1,18 @@
 #pragma once
 
+#include "containers/md_indexable.hpp"
 #include "loops/dimension.hpp"
-#include "loops/flatten_index.hpp"
 #include "loops/position.hpp"
 #include "utils/runtime_assert.hpp"
 
 namespace JADA {
 
+
 // Poor man's implementation of std::experimental::md_span,
 // needs to be replaced when compilers start to provide the implementation.
-template <size_t N, class Container, StorageOrder SO = StorageOrder::RowMajor>
-struct MdView {
+template <size_t N, class Container>
+struct MdView : public MdIndexable<N, MdView<N, Container>>{
+
 
     MdView(dimension<N> dim, Container& data)
         : m_dim(dim)
@@ -20,15 +22,11 @@ struct MdView {
                               "Size mismatch in MdView");
     }
 
-    auto& operator[](position<N> pos) {
 
-        return m_data[static_cast<size_t>(flatten<N, SO>(m_dim, pos))];
-    }
+    constexpr const auto* get_ptr() const { return m_data.data();}
+    constexpr       auto* get_ptr()       { return m_data.data(); }
+    constexpr dimension<N> const get_dimension() const { return m_dim; }
 
-    const auto& operator[](position<N> pos) const {
-
-        return m_data[static_cast<size_t>(flatten<N, SO>(m_dim, pos))];
-    }
 
 private:
     dimension<N> m_dim;

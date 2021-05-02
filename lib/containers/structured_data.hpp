@@ -10,7 +10,7 @@ namespace JADA {
 template <size_t N, class T, ConnectivityType CT = ConnectivityType::Box> 
 struct StructuredData {
 
-    using storage_t = MdArray<N, T, StorageOrder::RowMajor>;
+    using storage_t = MdArray<N, T>;
     
 
     StructuredData() = default;
