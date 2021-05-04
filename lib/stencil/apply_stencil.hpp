@@ -17,6 +17,24 @@
 
 namespace JADA{
 
+template<size_t N, class T, class Op, ConnectivityType CT>
+void call_sets(const std::vector<T>& in, dimension<N> dim, Op op, HpxMdCommunicator<std::vector<T>, N, CT> comm, size_t step){
+
+
+    auto padding = compute_padding<N, Op>(op);
+
+    for (direction<N> dir : comm.get_directions() ){
+
+        if (comm.has_neighbour(dir)) {
+            auto r = create_interior_region(dim, padding, dir);
+            auto slice = get_slice(in, dim, r.begin(), r.end());
+            comm.set(dir, std::move(slice), step);
+        }
+
+    }
+
+}
+
 
 
 template <size_t N, class T, class Op, ConnectivityType CT>
@@ -24,7 +42,8 @@ void apply_stencil( const std::vector<T>& in,
                     std::vector<T>&       out,
                     dimension<N>          dim,
                     Op                    op,
-                    HpxMdCommunicator<std::vector<T>, N, CT> comm ) {
+                    HpxMdCommunicator<std::vector<T>, N, CT> comm,
+                    size_t step ) {
 
     
 
@@ -39,19 +58,9 @@ void apply_stencil( const std::vector<T>& in,
     StructuredData<N, T> s_in(MdArray<N, T>(in, dim), dim, padding);
     StructuredData<N, T> s_out(dim, padding);
 
-    size_t step = 0;
+    
 
-
-    for (direction<N> dir : comm.get_directions() ){
-
-        if (comm.has_neighbour(dir)) {
-            auto r = create_interior_region(dim, padding, dir);
-            auto slice = get_slice(in, dim, r.begin(), r.end());
-            comm.set(dir, std::move(slice), step);
-        }
-
-    }
-
+    call_sets(in, dim, op, comm, step);
 
 
     
