@@ -118,7 +118,7 @@ TEST_CASE("Test apply_stencil_parallel"){
         using comm_t = HpxMdCommunicator<comm_data_t, 2, ConnectivityType::Star>;
         std::string comm_name = "2by2_stencil_star";
 
-        size_t num_local_partitions = 1;
+        size_t num_local_partitions = 3;
         size_t num_localities = hpx::get_num_localities(hpx::launch::sync);
         size_t n_partitions = num_local_partitions * num_localities;
         size_t rank = hpx::get_locality_id();
