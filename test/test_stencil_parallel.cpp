@@ -30,7 +30,7 @@ TEST_CASE("Test apply_stencil_parallel"){
         using comm_t = HpxMdCommunicator<comm_data_t, 2, ConnectivityType::Box>;
         std::string comm_name = "2by2_stencil_box";
 
-        size_t num_local_partitions = 1;
+        size_t num_local_partitions = 5;
         size_t num_localities = hpx::get_num_localities(hpx::launch::sync);
         size_t n_partitions = num_local_partitions * num_localities;
         size_t rank = hpx::get_locality_id();
@@ -63,7 +63,13 @@ TEST_CASE("Test apply_stencil_parallel"){
             i_data.push_back(comm_data_t(local_dims.elementwise_product(), 1));
             o_data.push_back(comm_data_t(local_dims.elementwise_product(), 0));
 
+            call_sets(i_data[i], local_dims, OpBox{}, comms[i], size_t(0));
+            
+
         }
+
+        
+
 
 
         size_t n_steps = 10;
@@ -79,10 +85,16 @@ TEST_CASE("Test apply_stencil_parallel"){
 
             }
 
+            // 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 = 8
+            // 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 = 64
+            // 64 + 64 ...                   = 512 
+
 
             for (auto d : o_data){
                 for (auto e : d) {
+                    
                     REQUIRE(e == int(std::pow(8, n+1)));
+                    //REQUIRE(e == 8);
                 }
             }
 
@@ -96,6 +108,8 @@ TEST_CASE("Test apply_stencil_parallel"){
 
     }
 
+
+    /*
 
     SECTION("Star operation"){
 
@@ -166,7 +180,7 @@ TEST_CASE("Test apply_stencil_parallel"){
 
 
     }
-    
+    */
 
 }
 
