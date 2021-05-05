@@ -109,7 +109,7 @@ TEST_CASE("Test apply_stencil_parallel"){
     }
 
 
-    /*
+    
 
     SECTION("Star operation"){
 
@@ -151,6 +151,7 @@ TEST_CASE("Test apply_stencil_parallel"){
             i_data.push_back(comm_data_t(local_dims.elementwise_product(), 1));
             o_data.push_back(comm_data_t(local_dims.elementwise_product(), 0));
 
+            call_sets(i_data[i], local_dims, OpBox{}, comms[i], size_t(0));
         }
 
 
@@ -180,7 +181,6 @@ TEST_CASE("Test apply_stencil_parallel"){
 
 
     }
-    */
 
 }
 
