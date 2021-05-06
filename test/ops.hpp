@@ -5,6 +5,21 @@
 
 namespace JADA{
 
+struct OneDLinear {
+
+    template <class Some>
+    auto operator()(position<1> pos, const Some& in) const {
+
+
+        return in.at(pos + position<1>{-1}) +
+               -2 * in.at(pos + position<1>{0}) + 
+               in.at(pos + position<1>{1});
+        
+    }
+};
+
+
+
 struct OpStar {
 
     template <class Some>

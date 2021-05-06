@@ -69,19 +69,24 @@ template <class T, size_t L, class S> struct MathVectorBase {
 
 
 
-    inline S abs() const { 
+    inline constexpr S abs() const { 
         const T* tp = get_ptr(); S r; T* rp = r.get_ptr(); 
         for (size_t i = 0; i < L; i++) rp[i] = std::abs(tp[i]); 
         return r; 
     }
 
-    bool non_zero() const {
+    inline constexpr bool non_zero() const {
         const T* tp = get_ptr();
         for (size_t i = 0; i < L; i++) { 
             if (tp[i] != T(0)) {return true;} 
         }
         return false;
     }
+
+    inline constexpr bool all_zero() const {
+        return !(this->non_zero());
+    }
+
 
     template<size_t I>
     inline constexpr T get() const {return get_ptr()[I];}

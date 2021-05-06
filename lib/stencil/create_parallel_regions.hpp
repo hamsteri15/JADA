@@ -57,29 +57,75 @@ parallel_region_end(dimension<N> dims, dimension<N> padding, direction<N> dir) {
 }
 
 template <size_t N, class Op>
+static Region<N>
+create_parallel_region(dimension<N> dims, Op op, direction<N> dir) {
+
+    const auto padding = compute_padding<N, Op>(op);
+
+    return Region<N>(parallel_region_begin(dims, padding, dir),
+                     parallel_region_end(dims, padding, dir));
+    
+}
+
+template <size_t N, class Op>
 static std::vector<Region<N>> create_parallel_regions(dimension<N> dims,
                                                       Op           op) {
 
-    std::vector<Region<N>> ret;
+    std::vector<Region<N>> ret(Neighbours<N, ConnectivityType::Box>::count());
 
-    constexpr auto dirs    = Neighbours<N, ConnectivityType::Box>::get();
-    const auto padding = compute_padding<N, Op>(op);
+    //create the interior region
+    ret.push_back(create_parallel_region(dims, op, direction<N>{}));
 
-    // this is the interior region
-    auto i_begin = position<N>(padding);
-    auto i_end   = position<N>(dims) - position<N>(padding);
 
-    ret.push_back(Region<N>(i_begin, i_end));
-
-    for (direction<N> dir : dirs) {
-
-        auto begin = parallel_region_begin(dims, padding, dir);
-        auto end   = parallel_region_end(dims, padding, dir);
-
-        ret.push_back(Region<N>(begin, end));
+    for (direction<N> dir : Neighbours<N, ConnectivityType::Box>::get()) {
+        ret.emplace_back(create_parallel_region(dims, op, dir));
     }
-
+    
     return ret;
 }
+
+//TODO: this doesnt belong here
+//TODO: everything here should be constexpr
+template<size_t N>
+static std::vector<direction<N>> dependent_dirs(direction<N> dir) {
+
+    // This should essentially divide the direction dir into basis vectors + the dir
+    // such that
+    // {1, 0}    becomes {1, 0} 
+    // {1,1}     becomes {1, 0}, {0, 1} and {1,1}
+    // {1, 0, 1} becomes {1, 0, 0}, {0, 0, 1}, {1, 0, 1} 
+    // {1, -1, 1}becomes {1, 0, 0}, {0, -1, 0}, {0, 0, 1}, {1, -1, 1}
+
+    //the operation may be called something like an orthonormal basis of dir
+
+    if (dir.abs().elementwise_sum() == 0) {
+        return {};
+    }
+
+    if (dir.abs().elementwise_sum() == 1) {
+        return {dir};
+    }
+
+    std::vector<direction<N>> deps;
+
+    deps.push_back(dir);
+
+    for (size_t i = 0; i < N; ++i){
+
+        if (dir[i] != 0){
+
+            direction<N> dep{};
+            dep[i] = dir[i];
+            deps.push_back(dep);
+        }
+
+
+    }
+    return deps;
+
+
+}
+
+
 
 } // namespace JADA

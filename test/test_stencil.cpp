@@ -107,6 +107,47 @@ TEST_CASE("Test create_parallel_regions"){
 
     }
 
+    SECTION("dependent_dirs()") {
+
+        SECTION("Simple test") {
+
+            auto deps = dependent_dirs(direction<2>{1,0});
+            CHECK(deps.size() == 1);
+            CHECK(deps[0] == direction<2>{1,0});
+        }
+
+        SECTION("2D test") {
+
+            auto deps = dependent_dirs(direction<2>{1,1});
+            CHECK(deps.size() == 3);
+
+            CHECK(deps[0] == direction<2>{1,1});
+            CHECK(deps[1] == direction<2>{1,0});
+            CHECK(deps[2] == direction<2>{0,1});
+
+        }
+
+        SECTION("3D test") {
+
+            auto deps = dependent_dirs(direction<3>{1,-1, 1});
+            CHECK(deps.size() == 4);
+
+            CHECK(deps[0] == direction<3>{1,-1, 1});
+            CHECK(deps[1] == direction<3>{1, 0, 0});
+            CHECK(deps[2] == direction<3>{0,-1, 0});
+            CHECK(deps[3] == direction<3>{0,0, 1});
+
+        }
+
+        SECTION("Empty") {
+
+            auto deps = dependent_dirs(direction<3>{0,0,0});
+            CHECK(deps.size() == 0);
+        
+        }
+
+    }
+
 
 }
 
