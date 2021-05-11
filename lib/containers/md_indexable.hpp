@@ -18,6 +18,8 @@ struct MdIndexable{
     // clang-format off
     static_assert(N > 0, "MdIndexable has to have at least one spatial dimension.");
 
+    static constexpr size_t n_spatial_dims = N;
+
     static constexpr StorageOrder SO = StorageOrder::RowMajor;    
 
 

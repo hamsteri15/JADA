@@ -11,6 +11,7 @@ namespace JADA{
 template<size_t N, class T>
 struct MdArray : public MdIndexable<N, MdArray<N, T>>{
 
+    using value_type = T;
     using storage_t = std::vector<T>;
 
     MdArray() = default;

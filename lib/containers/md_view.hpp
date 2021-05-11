@@ -14,6 +14,9 @@ template <size_t N, class Container>
 struct MdView : public MdIndexable<N, MdView<N, Container>>{
 
 
+    using value_type = typename Container::value_type;
+
+
     MdView(dimension<N> dim, Container& data)
         : m_dim(dim)
         , m_data(data) {

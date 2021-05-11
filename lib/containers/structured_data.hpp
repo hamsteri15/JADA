@@ -3,9 +3,10 @@
 #include "containers/md_array.hpp"
 #include "grid/neighbours.hpp"
 #include "loops/direction.hpp"
-#include "dimension_handle.hpp"
+#include "containers/dimension_handle.hpp"
 
 namespace JADA {
+
 
 template <size_t N, class T, ConnectivityType CT = ConnectivityType::Box> 
 struct StructuredData {

@@ -11,6 +11,21 @@ struct DimensionHandle {
 
     static constexpr Neighbours<N, CT> m_neighbours{};
 
+    DimensionHandle() = default;
+
+
+    DimensionHandle(dimension<N> inner_dims) : 
+    m_inner_dims(inner_dims),
+    m_outer_dims(inner_dims)
+    {}
+
+
+    DimensionHandle(dimension<N> inner_dims, dimension<N> outer_dims) : 
+    m_inner_dims(inner_dims),
+    m_outer_dims(outer_dims)
+    {}
+
+
 
     dimension<N> get_padding() const {
         return (m_outer_dims - m_inner_dims) / 2;
@@ -74,6 +89,22 @@ struct DimensionHandle {
         return dir;
     }
 
+    static dimension<N> compute_halo_dims(dimension<N> dims,
+                                          position<N>  dir,
+                                          dimension<N> padding) {
+
+        dimension<N> h_dims{};
+
+        for (size_t i = 0; i < N; ++i) {
+            if (dir[i] != 0) {
+                h_dims[i] = padding[i];
+            } else {
+                h_dims[i] = dims[i];
+            }
+        }
+
+        return h_dims;
+    }
 
 
 
@@ -109,22 +140,6 @@ private:
         return begin;
     }
 
-    static dimension<N> compute_halo_dims(dimension<N> dims,
-                                          position<N>  dir,
-                                          dimension<N> padding) {
-
-        dimension<N> h_dims{};
-
-        for (size_t i = 0; i < N; ++i) {
-            if (dir[i] != 0) {
-                h_dims[i] = padding[i];
-            } else {
-                h_dims[i] = dims[i];
-            }
-        }
-
-        return h_dims;
-    }
 };
 
 } // namespace JADA

@@ -25,6 +25,7 @@ add_test( NAME SerialTest COMMAND SerialTest.bin)
 SET(ParallelTestSources
     test_communication.cpp;
     test_stencil_parallel.cpp;
+    test_containers_parallel.cpp;
 )
 
 add_hpx_executable(ParallelTest.bin
