@@ -55,7 +55,7 @@ create_interior_region(dimension<N> dims, dimension<N> padding, direction<N> dir
     const auto begin = interior_region_begin(dims, padding, dir);
     const auto end = interior_region_end(dims, padding, dir);
 
-    return Region<N>(begin, end);
+    return Region<N>(begin, end, dir);
 
 
 }

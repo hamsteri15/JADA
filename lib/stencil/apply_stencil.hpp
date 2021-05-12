@@ -42,73 +42,7 @@ void call_sets(const std::vector<T>& in, dimension<N> dim, Op op, HpxMdCommunica
 }
 
 template <size_t N, class T, class Op, ConnectivityType CT>
-void apply_stencil(const std::vector<T>&                    in,
-                   std::vector<T>&                          out,
-                   dimension<N>                             dim,
-                   Op                                       op,
-                   HpxMdCommunicator<std::vector<T>, N, CT> comm,
-                   size_t                                   step,
-                   direction<N>                             dir) {
-
-
-
-    
-
-
-    Utils::runtime_assert(in.size() == dim.elementwise_product(), "Invalid dimension to apply_stencil.");
-
-    auto padding = compute_padding<N, Op>(op);
-
-    auto region = create_parallel_region(dim, op, dir);
-
-
-    StructuredData<N, T> s_in(MdArray<N, T>(in, dim), dim, padding); //TODO: this should be some kind of view instead
-    
-    MdView<N, std::vector<T>> s_out(dim, out);
-
-    auto dep_dirs = dependent_dirs(dir);
-
-    //This doesnt work because same locality calls get multiple times from the same direction in corners.
-    for (auto d : dep_dirs) {
-
-        if (comm.has_neighbour(d)){
-            
-            std::cout << "calling get from " << d << std::endl;
-
-            std::vector<T> data = comm.get(d, step).get();
-            auto slice_dims = create_interior_region(dim, padding, d).get_dimension();
-            s_in.put_halo(MdArray<N, T>(data, slice_dims), d);
-
-        }
-    }
-
-
-    auto idx_view = md_range_indices(region.begin(), region.end());
-    std::for_each(
-        std::execution::par,
-        idx_view.begin(), idx_view.end(),
-        [&](auto pos){
-            s_out[pos] = op(pos, s_in);
-        }
-    );
-
-
-
-    for (auto d : dep_dirs) {
-        call_set(out, dim, op, comm, step + 1, d);
-    }
-
-
-
-
-
-
-
-}
-
-
-template <size_t N, class T, class Op, ConnectivityType CT>
-void apply_stencil( const std::vector<T>& in,
+void apply_stencil_boundaries( const std::vector<T>& in,
                     std::vector<T>&       out,
                     dimension<N>          dim,
                     Op                    op,
@@ -121,13 +55,6 @@ void apply_stencil( const std::vector<T>& in,
                           "Invalid dimension to apply_stencil");
     Utils::runtime_assert(in.size() == dim.elementwise_product(), "Invalid dimension to apply_stencil.");
 
-    /*
-    for (auto dir : Neighbours<N, ConnectivityType::Box>::get()){
-        apply_stencil(in, out, dim, op, comm, step, dir);
-    }
-    */
-
-    
     auto padding = compute_padding<N, Op>(op);
 
 
@@ -135,7 +62,7 @@ void apply_stencil( const std::vector<T>& in,
     MdView<N, std::vector<T>> s_out(dim, out);
   
     //call gets
-    for (direction<N> dir : comm.get_directions()) {
+    for (auto dir : comm.get_directions()) {
 
         if (comm.has_neighbour(dir)){
 
@@ -147,8 +74,16 @@ void apply_stencil( const std::vector<T>& in,
 
     }
 
+    //all halos now communicated 
 
-    for (auto r : create_parallel_regions(dim, op)) {
+    auto regions = create_parallel_regions(dim, op, false);
+
+    
+
+    for (auto r : regions) {
+
+
+
 
         auto idx_view = md_range_indices(r.begin(), r.end());
         std::for_each(
@@ -159,10 +94,71 @@ void apply_stencil( const std::vector<T>& in,
             }
         );
 
+
+        //cant call set here yet because the size of the interior region does not match the "parallel region" because of the corners
+        //also cant solve for interior regions because then the corners would be solved multiple times
+        //could consider solving for interior and not immediately writing but still sending 
+
+
+        //call_set(out, dim, op, comm, step + 1, r.get_direction());
+
+
     }
+    //std::cout <<" ============ " << std::endl;
+
+    /*
+    for (auto r : regions) {
+        call_set(out, dim, op, comm, step + 1, r.get_direction());
+    }*/
+
 
     call_sets(out, dim, op, comm, step + 1);
+
+
     
+}
+
+
+
+template <size_t N, class T, class Op, ConnectivityType CT>
+void apply_stencil( const std::vector<T>& in,
+                    std::vector<T>&       out,
+                    dimension<N>          dim,
+                    Op                    op,
+                    HpxMdCommunicator<std::vector<T>, N, CT> comm,
+                    size_t step ) {
+
+
+    
+
+    Utils::runtime_assert(in.size() == out.size(),
+                          "Invalid dimension to apply_stencil");
+    Utils::runtime_assert(in.size() == dim.elementwise_product(), "Invalid dimension to apply_stencil.");
+    
+
+    apply_stencil_boundaries(in, out, dim, op, comm, step);
+
+
+    auto padding = compute_padding<N, Op>(op);
+    StructuredData<N, T> s_in(MdArray<N, T>(in, dim), dim, padding);
+    //MdView<N, std::vector<T>> s_in(dim, out);
+    MdView<N, std::vector<T>> s_out(dim, out);
+
+
+    auto r = create_parallel_region(dim, op, direction<N>{});
+
+
+    auto idx_view = md_range_indices(r.begin(), r.end());
+        std::for_each(
+            std::execution::par,
+            idx_view.begin(), idx_view.end(),
+            [&](auto pos){
+                s_out[pos] = op(pos, s_in);
+            }
+        );
+
+
+
 }
 
 

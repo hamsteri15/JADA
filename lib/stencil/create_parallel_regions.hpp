@@ -63,21 +63,30 @@ create_parallel_region(dimension<N> dims, Op op, direction<N> dir) {
     const auto padding = compute_padding<N, Op>(op);
 
     return Region<N>(parallel_region_begin(dims, padding, dir),
-                     parallel_region_end(dims, padding, dir));
+                     parallel_region_end(dims, padding, dir),
+                     dir);
     
 }
 
+
+
 template <size_t N, class Op>
 static std::vector<Region<N>> create_parallel_regions(dimension<N> dims,
-                                                      Op           op) {
-
-    std::vector<Region<N>> ret(Neighbours<N, ConnectivityType::Box>::count());
-
-    //create the interior region
-    ret.push_back(create_parallel_region(dims, op, direction<N>{}));
+                                                      Op           op,
+                                                      bool add_interior) {
 
 
-    for (direction<N> dir : Neighbours<N, ConnectivityType::Box>::get()) {
+    static constexpr ConnectivityType CT = ConnectivityType::Box;
+
+    std::vector<Region<N>> ret; ret.reserve(Neighbours<N, CT>::count());
+
+    if (add_interior) {
+        //create the interior region
+        ret.push_back(create_parallel_region(dims, op, direction<N>{}));
+    }
+
+
+    for (auto dir : Neighbours<N, CT>::get()) {
         ret.emplace_back(create_parallel_region(dims, op, dir));
     }
     

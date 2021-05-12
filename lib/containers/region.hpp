@@ -13,9 +13,10 @@ template <size_t N> struct Region {
 
     Region() = default;
 
-    constexpr Region(position<N> begin, position<N> end)
+    constexpr Region(position<N> begin, position<N> end, direction<N> dir)
         : m_begin(begin)
-        , m_end(end) {
+        , m_end(end)
+        , m_dir(dir) {
             Utils::runtime_assert(begin <= end, "Begin position of region larger than end position.");
         }
 
@@ -32,11 +33,16 @@ template <size_t N> struct Region {
         return dim;
     }
 
+    constexpr direction<N> get_direction() const {
+        return m_dir;
+    }
+
 
 
 private:
     position<N>  m_begin;
     position<N>  m_end;
+    direction<N> m_dir;
 };
 
 

@@ -7,6 +7,10 @@ namespace JADA{
 
 struct OneDLinear {
 
+
+    static constexpr ConnectivityType CT = ConnectivityType::Star;
+
+
     template <class Some>
     auto operator()(position<1> pos, const Some& in) const {
 
@@ -22,6 +26,8 @@ struct OneDLinear {
 
 struct OpStar {
 
+    static constexpr ConnectivityType CT = ConnectivityType::Star;
+    
     template <class Some>
     auto operator()(position<2> pos, const Some& in) const {
 
@@ -34,6 +40,7 @@ struct OpStar {
 
 struct OpBox {
 
+    static constexpr ConnectivityType CT = ConnectivityType::Star;
     template <class Some>
     auto operator()(position<2> pos, const Some& in) const {
 

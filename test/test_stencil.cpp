@@ -90,7 +90,7 @@ TEST_CASE("Test create_parallel_regions"){
         dimension<2> padding{1, 2};
 
         auto data = MdArray<2, int>(dims);
-        auto regions = create_parallel_regions(dims, OpBox{});
+        auto regions = create_parallel_regions(dims, OpBox{}, true);
 
         for (auto r : regions) {
 

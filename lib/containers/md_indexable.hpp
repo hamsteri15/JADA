@@ -44,6 +44,13 @@ struct MdIndexable{
         return get_ptr()[flatten<N, SO>(this->get_dimension(), pos)];
     }
 
+    inline constexpr const auto& at(position<N> pos) const {
+        return get_ptr()[flatten<N, SO>(this->get_dimension(), pos)];
+    }
+
+    inline constexpr auto& at(position<N> pos) {
+        return get_ptr()[flatten<N, SO>(this->get_dimension(), pos)];
+    }
 
 
     inline constexpr auto*                 data()      noexcept       {return get_ptr();}
