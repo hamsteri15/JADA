@@ -111,14 +111,14 @@ TEST_CASE("Test create_parallel_regions"){
 
         SECTION("Simple test") {
 
-            auto deps = dependent_dirs(direction<2>{1,0});
+            auto deps = dependent_dirs(direction<2>{1,0}, ConnectivityType::Box);
             CHECK(deps.size() == 1);
             CHECK(deps[0] == direction<2>{1,0});
         }
 
         SECTION("2D test") {
 
-            auto deps = dependent_dirs(direction<2>{1,1});
+            auto deps = dependent_dirs(direction<2>{1,1}, ConnectivityType::Box);
             CHECK(deps.size() == 3);
 
             CHECK(deps[0] == direction<2>{1,1});
@@ -129,7 +129,7 @@ TEST_CASE("Test create_parallel_regions"){
 
         SECTION("3D test") {
 
-            auto deps = dependent_dirs(direction<3>{1,-1, 1});
+            auto deps = dependent_dirs(direction<3>{1,-1, 1}, ConnectivityType::Box);
             CHECK(deps.size() == 4);
 
             CHECK(deps[0] == direction<3>{1,-1, 1});
@@ -141,7 +141,7 @@ TEST_CASE("Test create_parallel_regions"){
 
         SECTION("Empty") {
 
-            auto deps = dependent_dirs(direction<3>{0,0,0});
+            auto deps = dependent_dirs(direction<3>{0,0,0}, ConnectivityType::Star);
             CHECK(deps.size() == 0);
         
         }

@@ -41,6 +41,13 @@ void call_sets(const std::vector<T>& in, dimension<N> dim, Op op, HpxMdCommunica
 
 }
 
+
+
+
+
+
+
+
 template <size_t N, class T, class Op, ConnectivityType CT>
 void apply_stencil_boundaries( const std::vector<T>& in,
                     std::vector<T>&       out,
@@ -49,8 +56,10 @@ void apply_stencil_boundaries( const std::vector<T>& in,
                     HpxMdCommunicator<std::vector<T>, N, CT> comm,
                     size_t step ) {
 
-    
 
+
+
+    
     Utils::runtime_assert(in.size() == out.size(),
                           "Invalid dimension to apply_stencil");
     Utils::runtime_assert(in.size() == dim.elementwise_product(), "Invalid dimension to apply_stencil.");
@@ -106,15 +115,10 @@ void apply_stencil_boundaries( const std::vector<T>& in,
     }
     //std::cout <<" ============ " << std::endl;
 
-    /*
-    for (auto r : regions) {
-        call_set(out, dim, op, comm, step + 1, r.get_direction());
-    }*/
-
 
     call_sets(out, dim, op, comm, step + 1);
 
-
+    
     
 }
 

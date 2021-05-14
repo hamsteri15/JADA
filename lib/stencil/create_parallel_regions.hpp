@@ -96,7 +96,7 @@ static std::vector<Region<N>> create_parallel_regions(dimension<N> dims,
 //TODO: this doesnt belong here
 //TODO: everything here should be constexpr
 template<size_t N>
-static std::vector<direction<N>> dependent_dirs(direction<N> dir) {
+static std::vector<direction<N>> dependent_dirs(direction<N> dir, ConnectivityType CT) {
 
     // This should essentially divide the direction dir into basis vectors + the dir
     // such that
@@ -117,19 +117,25 @@ static std::vector<direction<N>> dependent_dirs(direction<N> dir) {
 
     std::vector<direction<N>> deps;
 
-    deps.push_back(dir);
+    if (CT == ConnectivityType::Box) {
 
-    for (size_t i = 0; i < N; ++i){
+        deps.push_back(dir);
 
-        if (dir[i] != 0){
+        for (size_t i = 0; i < N; ++i){
 
-            direction<N> dep{};
-            dep[i] = dir[i];
-            deps.push_back(dep);
+            if (dir[i] != 0){
+
+                direction<N> dep{};
+                dep[i] = dir[i];
+                deps.push_back(dep);
+            }
+
+
         }
 
 
     }
+
     return deps;
 
 

@@ -196,6 +196,7 @@ TEST_CASE("Test apply_stencil_parallel"){
 
 
     
+    
 
     SECTION("Star operation"){
 
@@ -267,6 +268,9 @@ TEST_CASE("Test apply_stencil_parallel"){
 
 
     }
+
+    
+
 
 }
 

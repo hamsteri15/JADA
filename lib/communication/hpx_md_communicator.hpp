@@ -53,6 +53,13 @@ public:
     }
 
 
+    hpx::shared_future<T> get_shared(direction<N> dir, std::size_t step) {
+        Utils::runtime_assert(this->has_neighbour(dir), "Trying to get from non-existing neighbour.");
+        return m_recv[recv_idx(dir)].get(hpx::launch::async, step);
+    }
+
+
+
 private:
     std::string m_name; 
     std::array<channel_type, base_type::neighbour_count()> m_recv;
