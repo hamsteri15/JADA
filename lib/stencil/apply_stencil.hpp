@@ -6,6 +6,7 @@
 #include "loops/md_index_loops.hpp"
 #include "loops/md_range_indices.hpp"
 #include "containers/structured_data.hpp"
+#include "containers/structured_data_view.hpp"
 #include "containers/md_view.hpp"
 #include "grid/neighbours.hpp"
 #include "communication/hpx_md_communicator.hpp"
@@ -43,11 +44,6 @@ void call_sets(const std::vector<T>& in, dimension<N> dim, Op op, HpxMdCommunica
 
 
 
-
-
-
-
-
 template <size_t N, class T, class Op, ConnectivityType CT>
 void apply_stencil_boundaries( const std::vector<T>& in,
                     std::vector<T>&       out,
@@ -60,6 +56,7 @@ void apply_stencil_boundaries( const std::vector<T>& in,
 
 
     
+
     Utils::runtime_assert(in.size() == out.size(),
                           "Invalid dimension to apply_stencil");
     Utils::runtime_assert(in.size() == dim.elementwise_product(), "Invalid dimension to apply_stencil.");
@@ -67,32 +64,18 @@ void apply_stencil_boundaries( const std::vector<T>& in,
     auto padding = compute_padding<N, Op>(op);
 
 
-    StructuredData<N, T> s_in(MdArray<N, T>(in, dim), dim, padding);
-    MdView<N, std::vector<T>> s_out(dim, out);
+    auto [datas, dirs] = comm.get_all_shared(step);
+
   
-    //call gets
-    for (auto dir : comm.get_directions()) {
+    MdView<N, std::vector<T>> s_out(dim, out);
+    StructuredDataView<N, T, CT> s_in(dim, padding, in, datas, dirs);
 
-        if (comm.has_neighbour(dir)){
-
-            std::vector<T> data = comm.get(dir, step).get();
-            auto slice_dims = create_interior_region(dim, padding, dir).get_dimension();
-            s_in.put_halo(MdArray<N, T>(data, slice_dims), dir);
-
-        }
-
-    }
-
-    //all halos now communicated 
 
     auto regions = create_parallel_regions(dim, op, false);
 
     
-
+    //TODO: this should somehow account for physical boundaries as well
     for (auto r : regions) {
-
-
-
 
         auto idx_view = md_range_indices(r.begin(), r.end());
         std::for_each(
@@ -103,18 +86,7 @@ void apply_stencil_boundaries( const std::vector<T>& in,
             }
         );
 
-
-        //cant call set here yet because the size of the interior region does not match the "parallel region" because of the corners
-        //also cant solve for interior regions because then the corners would be solved multiple times
-        //could consider solving for interior and not immediately writing but still sending 
-
-
-        //call_set(out, dim, op, comm, step + 1, r.get_direction());
-
-
     }
-    //std::cout <<" ============ " << std::endl;
-
 
     call_sets(out, dim, op, comm, step + 1);
 

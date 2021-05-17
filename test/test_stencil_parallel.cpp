@@ -38,7 +38,7 @@ TEST_CASE("Test apply_stencil_parallel"){
         size_t rank = hpx::get_locality_id();
 
         dimension<1> global_dims = {80};
-        std::array<bool, 1> periodicity  = {false};
+        std::array<bool, 1> periodicity  = {true};
 
         Decomposition<1> dec(
             global_dims,
