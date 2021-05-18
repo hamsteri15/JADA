@@ -18,6 +18,13 @@ public:
             Utils::runtime_assert(dec.valid_id(id), "Invalid part id, typically the id exceeds the number of partitions.");
         }
 
+    /*
+    MdCommunicator(idx_t id, dimension<N> grid_dims, size_t n_partitions, std::array<bool, N> periodicity) : 
+    MdCommunicator(id, Decomposition<N>(grid_dims, n_partitions, periodicity))
+    {}
+    */
+
+
     idx_t id() const { return m_id; }
 
     static constexpr size_t neighbour_count() { return m_neighbours.count(); }
@@ -36,6 +43,18 @@ public:
                               "Trying to get invalid neighbour");
         return size_t(m_dec.get_neighbour(m_id, dir));
     }
+
+
+    dimension<N> get_global_grid_dimensions() const {
+        return m_dec.global_grid_dimensions();
+    }
+
+    dimension<N> get_local_grid_dimensions() const {
+        return m_dec.local_grid_dimensions(this->id());
+    }
+
+
+
 
 protected:
 

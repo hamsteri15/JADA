@@ -238,7 +238,7 @@ TEST_CASE("Test apply_stencil_parallel"){
             i_data.push_back(comm_data_t(local_dims.elementwise_product(), 1));
             o_data.push_back(comm_data_t(local_dims.elementwise_product(), 0));
 
-            call_sets(i_data[i], local_dims, OpBox{}, comms[i], size_t(0));
+            call_sets(i_data[i], local_dims, OpStar{}, comms[i], size_t(0));
         }
 
 
@@ -265,6 +265,50 @@ TEST_CASE("Test apply_stencil_parallel"){
             std::swap(i_data, o_data);
 
         }
+
+
+    }
+
+    SECTION("SHORT TEST") {
+
+
+
+        using comm_data_t = std::vector<int>;
+        using comm_t = HpxMdCommunicator<comm_data_t, 2, ConnectivityType::Star>;
+        std::string comm_name = "2by2_stencil_star_second";
+
+        
+
+        dimension<2> global_dims = {10, 10};
+        std::array<bool, 2> periodicity  = {true, true};
+
+        comm_t comm(comm_name, global_dims, periodicity);
+
+        auto local_dims = comm.get_local_grid_dimensions();
+
+        std::vector<int> i_data(local_dims.elementwise_product(), 1);        
+        std::vector<int> o_data(local_dims.elementwise_product(), 0);        
+
+        call_sets(i_data, local_dims, OpStar{}, comm, size_t(0)); 
+
+
+
+        size_t n_steps = 10;
+
+        for (size_t n = 0; n < n_steps; ++n){
+
+
+            apply_stencil(i_data, o_data, local_dims, OpStar{}, comm, n);
+
+
+            for (auto e : o_data){
+                REQUIRE(e == int(std::pow(4, n+1)));
+            }
+
+            std::swap(i_data, o_data);
+
+        }
+
 
 
     }

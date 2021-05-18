@@ -36,6 +36,23 @@ public:
         }
     }
 
+    //Creates a decomposition by splitting the grid into number of localities (ranks)
+    HpxMdCommunicator(std::string         name,
+                      dimension<N>        grid_dims,
+                      std::array<bool, N> periodicity)
+        : HpxMdCommunicator(
+              name,
+              idx_t(hpx::get_locality_id()),
+              Decomposition<N>(grid_dims,
+                               hpx::get_num_localities(hpx::launch::sync),
+                               periodicity)) {}
+
+    //MdCommunicator(idx_t id, dimension<N> grid_dims, size_t n_partitions, std::array<bool, N> periodicity)
+
+
+
+
+
     void set(direction<N> dir, T&& t, std::size_t step) {
         Utils::runtime_assert(this->has_neighbour(dir),
                               "Trying to set for non-existing neighbour.");
