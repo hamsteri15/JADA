@@ -11,6 +11,7 @@ Although, the library is intended to be as dependency-free as possible, the foll
   [here](#cmakeliststxt) for more info)
 - [Hpx](https://stellar-group.org/libraries/hpx/) A runtime scheduler to handle all kinds of things parallel
 - [Boost](https://www.boost.org/) Extension to standard library
+- [range-v3](https://github.com/ericniebler/range-v3) Ranges to support syntactic sugar for multidimensional indices
 
 In addition the following libraries are used but they ship alongside the library
 
@@ -33,4 +34,5 @@ The following tools are also used but are not mandatory
 $ mkdir build
 $ cd build
 $ cmake ..
+$ make
 ```
