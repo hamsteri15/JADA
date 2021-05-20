@@ -1,6 +1,7 @@
 #pragma once
 
 #include "loops/position.hpp"
+#include "dimension.hpp"
 
 #include <range/v3/view/indices.hpp>
 #include <range/v3/view/cartesian_product.hpp>
@@ -35,7 +36,13 @@ auto md_range_indices(position<N> begin, position<N> end){
 
 
 }
+template<size_t N>
+auto md_range_indices(dimension<N> dims){
 
+    return md_range_indices(position<N>{}, position<N>(dims));
+
+
+}
 
 
 

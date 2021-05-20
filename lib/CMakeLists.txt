@@ -3,6 +3,7 @@ SET(LibrarySubDirs
     stencil
     grid
     communication
+    operation
     ) #add more here if necessary
 SUBDIRS(${LibrarySubDirs} )
 

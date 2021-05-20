@@ -11,7 +11,6 @@ SET(SerialTestSources
     test_containers.cpp;
     #test_communication.cpp;
     test_stencil.cpp;
-    #test_operation.cpp;u
 )
 
 
@@ -26,6 +25,7 @@ SET(ParallelTestSources
     test_communication.cpp;
     test_stencil_parallel.cpp;
     test_containers_parallel.cpp;
+    test_operation_parallel.cpp;
 )
 
 add_hpx_executable(ParallelTest.bin
