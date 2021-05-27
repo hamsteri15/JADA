@@ -5,6 +5,7 @@ add_library(catch_main STATIC catch_main.cpp)
 
 
 SET(SerialTestSources
+    test_concepts.cpp;
     test_utils.cpp;
     test_loops.cpp;
     test_grid.cpp;
@@ -25,7 +26,6 @@ SET(ParallelTestSources
     test_communication.cpp;
     test_stencil_parallel.cpp;
     test_containers_parallel.cpp;
-    test_operation_parallel.cpp;
 )
 
 add_hpx_executable(ParallelTest.bin
