@@ -3,7 +3,6 @@
 #include "containers/md_array.hpp"
 #include "grid/neighbours.hpp"
 #include "loops/direction.hpp"
-#include "containers/dimension_handle.hpp"
 
 namespace JADA {
 
