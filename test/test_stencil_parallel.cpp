@@ -10,17 +10,20 @@
 #include <hpx/include/components.hpp>
 #include <hpx/include/compute.hpp>
 #include <hpx/include/util.hpp>
+#include <hpx/iostream.hpp>
+
 #include "communication/md_communicator.hpp"
 #include "communication/hpx_md_communicator.hpp"
 #include "grid/neighbours.hpp"
 #include "stencil/apply_stencil.hpp"
 #include "stencil/apply_stencil_pvec.hpp"
+#include "containers/partitioned_vector.hpp"
 #include "ops.hpp"
 
 
 
 
-
+/*
 TEST_CASE("Test apply_stencil_parallel"){
 
     using namespace JADA;
@@ -317,51 +320,170 @@ TEST_CASE("Test apply_stencil_parallel"){
 
 
 }
+*/
 
 TEST_CASE("Test stencil pvec"){
 
 
     using namespace JADA;
 
-    size_t nx = 10;
-    size_t ny = 11;
-
-    dimension<2> dims{ny, nx};
-
-    std::vector<int> in(dims.elementwise_product());
-    std::vector<int> out(dims.elementwise_product());
-
-    std::fill(in.begin(), in.end(), 1);
+    SECTION("For vector"){
 
 
-    auto i_begin = in.begin() + 1 + idx_t(nx);
-    auto i_end   = i_begin + idx_t(nx) - 2;
+        size_t nx = 10;
+        size_t ny = 11;
 
-    auto o_begin = out.begin() + 1 + idx_t(nx);
+        dimension<2> dims{ny, nx};
+
+        std::vector<int> in(dims.elementwise_product());
+        std::vector<int> out(dims.elementwise_product());
+
+        std::fill(in.begin(), in.end(), 1);
 
 
-    do_work_segment(i_begin, i_end, o_begin, dims, OpStar{});
+        auto i_begin = in.begin() + 1 + idx_t(nx);
+        auto i_end   = i_begin + idx_t(nx) - 2;
+
+        auto o_begin = out.begin() + 1 + idx_t(nx);
 
 
+        do_work_segment(i_begin, i_end, o_begin, dims, OpStar{});
 
-    auto view = MdView(dimension<2>{ny, nx}, out);
+        auto view = MdView(dimension<2>{ny, nx}, out);
 
-    view.pretty_print();
+        view.pretty_print();
 
-    /*
-        for (auto it = i_begin; it != i_end; ++it){
-        *it = 1;
     }
 
-    auto i_view = MdView(dimension<2>{ny, nx}, in);
+    SECTION("For pvector") {
 
-    i_view.pretty_print();
+        size_t nx = 4;
+        size_t ny = 12;
 
-    out[0] = 1;
+        dimension<2> dims{ny, nx};
 
-    */
+        auto v = make_partitioned_vector<2, int>(dims);
+    
+        std::iota(v.begin(), v.end(), 0);
+
+        for (size_t i = 0; i < v.size(); ++i){
+            std::cout << "Partition: "<<v.get_partition(i) << std::endl;
+        }
 
 
 
+
+
+
+
+
+        auto local_sbegin = v.segment_begin(hpx::get_locality_id());
+        auto local_send = v.segment_end(hpx::get_locality_id());
+
+        size_t count = local_segment_count(v);
+        size_t s0 = local_first_segment_number(v);
+        size_t s1 = local_last_segment_number(v);
+
+        CHECK(count == size_t(std::distance(local_sbegin, local_send)));
+        CHECK(count == s1 - s0);
+
+
+        //std::cout << count << std::endl;
+        //std::cout << first_segment_number << std::endl;
+
+//        auto global_sbegin = v.segment_begin();
+
+        //auto n = std::distance(global_sbegin, local_sbegin);
+
+
+        /*for (auto it = local_sbegin; it != local_send; ++it){
+
+            auto number = std::distance(global_sbegin, it);
+            std::cout << number << std::endl;
+
+
+        }
+*/
+//        std::fill(s_begin, s_end, 1);
+
+
+
+        /*
+        
+        auto n_segs = segment_count(v);
+
+        for (size_t i = 0; i < n_segs; ++i) {
+
+            auto [begin, end] = get_segment(v, i);
+
+            
+
+        } 
+
+        */
+        /*
+
+
+
+        auto s_begin = v.segment_begin(hpx::get_locality_id());
+        auto s_end = v.segment_end()
+        */
+
+        //auto s_begin = v.segment_begin(hpx::get_locality_id());
+        //auto s_end = v.segment_end(hpx::get_locality_id());
+
+        //std::cout <
+
+
+//        for (auto s_it = v.segment_begin(hpx::get_locality_id())
+
+        /*
+        v.share
+
+
+        for (auto it = v.begin(); it != v.end(); ++it){
+
+            *it = int(hpx::get_locality_id());
+
+        }
+
+
+        auto localities = hpx::find_all_localities();
+
+        hpx::cout << "My locality id: " << hpx::get_locality_id() << " Locality count: " << localities.size() << hpx::endl;
+
+        if (hpx::get_locality_id() == 0) {
+        
+            for (auto e : v) {
+                std::cout << e << std::endl;
+            }
+        }
+        */
+        /*
+        size_t nx = 10;
+        size_t ny = 11;
+
+        dimension<2> dims{ny, nx};
+
+        auto in = make_partitioned_vector<2, int>(dims);
+        auto out = make_partitioned_vector<2, int>(dims);
+
+        std::fill(in.begin(), in.end(), 1);
+
+
+        auto i_begin = in.begin() + 1 + idx_t(nx);
+        auto i_end   = i_begin + idx_t(nx) - 2;
+
+        auto o_begin = out.begin() + 1 + idx_t(nx);
+
+        do_work_segment(i_begin, i_end, o_begin, dims, OpStar{});
+
+        for (auto o : out) {
+            std::cout << o << std::endl;
+        }
+        */
+
+
+    }
 
 }

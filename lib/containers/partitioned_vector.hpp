@@ -102,21 +102,49 @@ static bool uniform_segments(hpx::partitioned_vector<T> v) {
 }
 
 template<class T>
+static size_t local_segment_count(hpx::partitioned_vector<T> v, uint32_t locality_id) {
+
+    auto local_sbegin = v.segment_begin(locality_id);
+    auto local_send = v.segment_end(locality_id);
+    return size_t(std::distance(local_sbegin, local_send));
+        
+}
+
+template<class T>
 static size_t local_segment_count(hpx::partitioned_vector<T> v) {
 
-    Utils::runtime_assert(uniform_segments(v), "local_segment_count assumes uniform segment sizes");
+    return local_segment_count(v, hpx::get_locality_id());
+        
+}
 
-    auto begin = local_begin(v);
-    auto end = local_end(v);
+template<class T>
+static size_t local_first_segment_number(hpx::partitioned_vector<T> v, uint32_t locality_id) {
 
-    size_t segment_size = v.size() / segment_count(v);
-
-    size_t local_size = size_t(std::distance(begin, end));
-
-    return local_size / segment_size;
+    auto local_sbegin = v.segment_cbegin(locality_id);
+    return size_t(v.get_partition(local_sbegin));
+}
 
 
 
+template<class T>
+static size_t local_first_segment_number(hpx::partitioned_vector<T> v) {
+
+    return local_first_segment_number(v, hpx::get_locality_id());
+}
+
+
+template<class T>
+static size_t local_last_segment_number(hpx::partitioned_vector<T> v, uint32_t locality_id) {
+
+    auto local_send = v.segment_cend(locality_id);
+    return size_t(v.get_partition(local_send));
+}
+
+
+template<class T>
+static size_t local_last_segment_number(hpx::partitioned_vector<T> v) {
+
+    return local_last_segment_number(v, hpx::get_locality_id());
 }
 
 

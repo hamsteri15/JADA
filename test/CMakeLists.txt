@@ -47,5 +47,7 @@ add_hpx_executable(ParallelTest.bin
 
 ###################################################
 
-add_test(NAME ParallelTest COMMAND ParallelTest.bin)
+#add_test(NAME ParallelTest COMMAND ParallelTest.bin)
+add_test(NAME ParallelTest_l1 COMMAND hpxrun.py ${CMAKE_BINARY_DIR}/bin/ParallelTest.bin -l 1 -t 2)
+add_test(NAME ParallelTest_l2 COMMAND hpxrun.py ${CMAKE_BINARY_DIR}/bin/ParallelTest.bin -l 2 -t 2)
 

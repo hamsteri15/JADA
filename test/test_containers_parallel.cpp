@@ -10,7 +10,7 @@
 //REGISTER_PARTITION_SERVER(2, double);
 //REGISTER_PARTITION_SERVER(2, int);
 
-
+/*
 TEST_CASE("Test StructuredDataView"){
 
     
@@ -91,66 +91,9 @@ TEST_CASE("Test StructuredDataView"){
 
 
 }
-
-namespace JADA{
-
-/*
-
-template<size_t N, class T>
-hpx::partitioned_vector<T> make_vector(dimension<N> dims) {
-
-    auto num_segments = n_partitions(dims);
-
-    std::vector<hpx::id_type> locs = hpx::find_all_localities();
-
-    auto layout = hpx::container_layout( num_segments, locs );
-
-    return hpx::partitioned_vector<T>(dims.elementwise_product(), layout);
-
-
-}
-
-
-
-//This returns iterators to the beginning and end of segment number seg_n
-template<class T>
-auto get_segment(hpx::partitioned_vector<T> v, size_t seg_n) {
-
-    Utils::runtime_assert(seg_n < n_partitions(v), "Segment out of bounds.");
-
-    using iterator = hpx::partitioned_vector<T>::iterator;
-    using traits   = hpx::traits::segmented_iterator_traits<iterator>;
-
-    auto seg_it = traits::segment(v.begin()) + std::ptrdiff_t(seg_n);
-
-
-    auto loc_begin = traits::begin(seg_it);
-    auto loc_end   = traits::end(seg_it);
-
-    return std::make_pair(loc_begin, loc_end);
-
-}
-
-
-
-template<size_t N, class T>
-auto get_segment(hpx::partitioned_vector<T> v, dimension<N> dims, position<N - 1> pos){
-
-    dimension<N - 1> seg_dims;
-    for (size_t i = 0; i < N - 1; ++i){
-        seg_dims[i] = dims[i];
-    }
-
-
-    auto idx = flatten<N - 1, StorageOrder::RowMajor>(seg_dims, pos);
-
-    return get_segment(v, size_t(idx));
-
-
-
-}
 */
-}
+
+
 
 
 TEST_CASE("Test partioned vector"){
@@ -221,11 +164,37 @@ TEST_CASE("Test partioned vector"){
     }
 
 
-    SECTION("local_segment_count()"){
+    SECTION("local_segment_count() / local_first_segment_number()"){
 
-        auto v1 = make_partitioned_vector<2, int>(dimension<2>{13, 5});
+        auto v1 = make_partitioned_vector<2, int>(dimension<2>{2, 4});
+        auto v2 = make_partitioned_vector<2, int>(dimension<2>{13, 5});
+        auto v3 = make_partitioned_vector<2, int>(dimension<2>{51, 55});
+        auto v4 = make_partitioned_vector<2, int>(dimension<2>{5, 1});
 
-        CHECK(local_segment_count(v1) == size_t(13));
+        std::vector<hpx::partitioned_vector<int>> vs = {v1, v2, v3, v4};
+
+        auto n_locs = size_t(hpx::get_num_localities().get());
+
+        for (size_t i = 0; i < n_locs; ++i){
+
+        for (auto v : vs) {
+            auto local_sbegin = v.segment_begin(uint32_t(i));
+            auto local_send = v.segment_end(uint32_t(i));
+
+            size_t count = local_segment_count(v, uint32_t(i));
+            size_t s0 = local_first_segment_number(v, uint32_t(i));
+            size_t s1 = local_last_segment_number(v, uint32_t(i));
+
+            CHECK(count == size_t(std::distance(local_sbegin, local_send)));
+            CHECK(count == s1 - s0);
+
+        } 
+
+        }
+
+        //auto v1 = make_partitioned_vector<2, int>(dimension<2>{13, 5});
+
+//        CHECK(local_segment_count(v1) == size_t(13) / hpx::get_num_localities());
 
 
 
