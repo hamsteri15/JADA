@@ -56,6 +56,12 @@ template <class T, size_t L, class S> struct MathVectorBase {
     inline constexpr reverese_iterator_t        crend()     const noexcept {return const_reverse_iterator_t(begin());}
 
 
+    inline constexpr       T& front()       noexcept {return get_ptr()[0];}
+    inline constexpr const T& front() const noexcept {return get_ptr()[0];}
+
+    inline constexpr       T& back()       noexcept {return get_ptr()[L - 1];}
+    inline constexpr const T& back() const noexcept {return get_ptr()[L - 1];}
+
     inline constexpr const T& operator[](size_t idx) const { return get_ptr()[idx]; }
     inline constexpr     T& operator[](size_t idx)       { return get_ptr()[idx]; }
 

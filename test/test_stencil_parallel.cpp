@@ -14,7 +14,7 @@
 #include "communication/hpx_md_communicator.hpp"
 #include "grid/neighbours.hpp"
 #include "stencil/apply_stencil.hpp"
-
+#include "stencil/apply_stencil_pvec.hpp"
 #include "ops.hpp"
 
 
@@ -318,3 +318,50 @@ TEST_CASE("Test apply_stencil_parallel"){
 
 }
 
+TEST_CASE("Test stencil pvec"){
+
+
+    using namespace JADA;
+
+    size_t nx = 10;
+    size_t ny = 11;
+
+    dimension<2> dims{ny, nx};
+
+    std::vector<int> in(dims.elementwise_product());
+    std::vector<int> out(dims.elementwise_product());
+
+    std::fill(in.begin(), in.end(), 1);
+
+
+    auto i_begin = in.begin() + 1 + idx_t(nx);
+    auto i_end   = i_begin + idx_t(nx) - 2;
+
+    auto o_begin = out.begin() + 1 + idx_t(nx);
+
+
+    do_work_segment(i_begin, i_end, o_begin, dims, OpStar{});
+
+
+
+    auto view = MdView(dimension<2>{ny, nx}, out);
+
+    view.pretty_print();
+
+    /*
+        for (auto it = i_begin; it != i_end; ++it){
+        *it = 1;
+    }
+
+    auto i_view = MdView(dimension<2>{ny, nx}, in);
+
+    i_view.pretty_print();
+
+    out[0] = 1;
+
+    */
+
+
+
+
+}

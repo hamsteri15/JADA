@@ -24,6 +24,8 @@ struct OneDLinear {
 
 
 
+
+
 struct OpStar {
 
     static constexpr ConnectivityType CT = ConnectivityType::Star;
