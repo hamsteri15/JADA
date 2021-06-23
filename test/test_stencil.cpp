@@ -4,9 +4,23 @@
 #include "stencil/create_parallel_regions.hpp"
 #include "stencil/create_interior_regions.hpp"
 #include "containers/structured_data.hpp"
+#include "stencil/iterative_stencil_loop.hpp"
+
 
 #include "ops.hpp"
 
+
+TEST_CASE("Test iterative stencil loop"){
+
+    using namespace JADA;
+
+    REQUIRE_NOTHROW(
+        IterativeStencilLoop<double, double>()
+    );
+
+
+
+}
 
 
 TEST_CASE("Test create_parallel_regions"){
