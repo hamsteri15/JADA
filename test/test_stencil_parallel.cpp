@@ -17,7 +17,10 @@
 #include "grid/neighbours.hpp"
 #include "stencil/apply_stencil.hpp"
 #include "stencil/apply_stencil_pvec.hpp"
+#include "stencil/op_to_iterators.hpp"
+
 #include "containers/partitioned_vector.hpp"
+
 #include "ops.hpp"
 
 
@@ -322,6 +325,24 @@ TEST_CASE("Test apply_stencil_parallel"){
 }
 */
 
+TEST_CASE("Test op_to_iterators"){
+
+    /*
+    using namespace JADA;
+
+
+    size_t nx = 2;
+    size_t ny = 2;
+
+    std::vector<position<2>> positions = {position<2> }
+    */
+
+
+
+}
+
+
+
 TEST_CASE("Test stencil pvec"){
 
 
@@ -357,132 +378,60 @@ TEST_CASE("Test stencil pvec"){
 
     SECTION("For pvector") {
 
-        size_t nx = 4;
-        size_t ny = 12;
+        /*
+        size_t nx = 2;
+        size_t ny = 2;
 
         dimension<2> dims{ny, nx};
 
         auto v = make_partitioned_vector<2, int>(dims);
     
-        std::iota(v.begin(), v.end(), 0);
 
-        for (size_t i = 0; i < v.size(); ++i){
-            std::cout << "Partition: "<<v.get_partition(i) << std::endl;
+        size_t first_seg = local_first_segment_number(v);
+//        size_t last_seg = local_last_segment_number(v);
+
+        std::cout << "Tassa " << first_seg << std::endl;
+
+        //auto [begin, end] = get_segment(v, first_seg);
+        auto begin = v.segment_begin(uint32_t(first_seg));
+        auto end = v.segment_end(uint32_t(first_seg));
+
+
+        for (auto it = begin; it != end; ++it){
+            *it = 1;
         }
-
-
-
-
-
-
-
-
-        auto local_sbegin = v.segment_begin(hpx::get_locality_id());
-        auto local_send = v.segment_end(hpx::get_locality_id());
-
-        size_t count = local_segment_count(v);
-        size_t s0 = local_first_segment_number(v);
-        size_t s1 = local_last_segment_number(v);
-
-        CHECK(count == size_t(std::distance(local_sbegin, local_send)));
-        CHECK(count == s1 - s0);
-
-
-        //std::cout << count << std::endl;
-        //std::cout << first_segment_number << std::endl;
-
-//        auto global_sbegin = v.segment_begin();
-
-        //auto n = std::distance(global_sbegin, local_sbegin);
-
-
-        /*for (auto it = local_sbegin; it != local_send; ++it){
-
-            auto number = std::distance(global_sbegin, it);
-            std::cout << number << std::endl;
-
-
-        }
-*/
-//        std::fill(s_begin, s_end, 1);
-
-
-
-        /*
-        
-        auto n_segs = segment_count(v);
-
-        for (size_t i = 0; i < n_segs; ++i) {
-
-            auto [begin, end] = get_segment(v, i);
-
-            
-
-        } 
 
         */
+
+
+
         /*
 
+        using iterator = hpx::partitioned_vector<int>::iterator;
+        using traits   = hpx::traits::segmented_iterator_traits<iterator>;
 
+        auto seg_begin = traits::segment(v.begin());
+        auto seg_end   = traits::segment(v.end());
 
-        auto s_begin = v.segment_begin(hpx::get_locality_id());
-        auto s_end = v.segment_end()
-        */
+        // Iterate over segments
+        for (auto seg_it = seg_begin; seg_it != seg_end; ++seg_it)
+        {
+            auto loc_begin = traits::begin(seg_it);
+            auto loc_end   = traits::end(seg_it);
 
-        //auto s_begin = v.segment_begin(hpx::get_locality_id());
-        //auto s_end = v.segment_end(hpx::get_locality_id());
-
-        //std::cout <
-
-
-//        for (auto s_it = v.segment_begin(hpx::get_locality_id())
-
-        /*
-        v.share
-
-
-        for (auto it = v.begin(); it != v.end(); ++it){
-
-            *it = int(hpx::get_locality_id());
-
-        }
-
-
-        auto localities = hpx::find_all_localities();
-
-        hpx::cout << "My locality id: " << hpx::get_locality_id() << " Locality count: " << localities.size() << hpx::endl;
-
-        if (hpx::get_locality_id() == 0) {
-        
-            for (auto e : v) {
-                std::cout << e << std::endl;
+            // Iterate over elements inside segments
+            for (auto lit = loc_begin; lit != loc_end; ++lit)
+            {
+                *lit = 1;
             }
         }
-        */
-        /*
-        size_t nx = 10;
-        size_t ny = 11;
 
-        dimension<2> dims{ny, nx};
-
-        auto in = make_partitioned_vector<2, int>(dims);
-        auto out = make_partitioned_vector<2, int>(dims);
-
-        std::fill(in.begin(), in.end(), 1);
-
-
-        auto i_begin = in.begin() + 1 + idx_t(nx);
-        auto i_end   = i_begin + idx_t(nx) - 2;
-
-        auto o_begin = out.begin() + 1 + idx_t(nx);
-
-        do_work_segment(i_begin, i_end, o_begin, dims, OpStar{});
-
-        for (auto o : out) {
-            std::cout << o << std::endl;
-        }
         */
 
+
+        //for (auto e : v) {
+        //    std::cout << e << std::endl;
+        //}
 
     }
 

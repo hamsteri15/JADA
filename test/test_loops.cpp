@@ -7,9 +7,11 @@
 #include "loops/paired_md_index_loops.hpp"
 //#include "loops/serial_index_loops.hpp"
 #include "loops/loopable.hpp"
-#include "loops/neighbour_iterator.hpp"
+#include "loops/iterator_set.hpp"
 #include "loops/direction.hpp"
 #include "loops/md_range_indices.hpp"
+#include "loops/position_set.hpp"
+
 
 TEST_CASE("Test position"){
 
@@ -578,43 +580,100 @@ TEST_CASE("Test Loopable"){
 
 }
 
-
-
-TEST_CASE("Test neighbour_iterator"){
+TEST_CASE("Test PositionSet"){
 
     using namespace JADA;
 
-    std::vector<int> v{1, 2, 3, 4, 5, 6, 7, 8};
+    PositionSet<2> p1({{1,0}, {-1,0}});
 
+    std::cout << "Hello" << std::endl;
 
-    auto it = neighbour_iterator(v.begin() + 1, std::array{v.begin(), v.begin()+2 } );
-
-
-    CHECK(*it == 2);
-    CHECK(*it.neighbour(0) == 1);
-    CHECK(*it.neighbour(1) == 3);
-
-    it++;
-
-    CHECK(*it == 3);
-    CHECK(*it.neighbour(0) == 2);
-    CHECK(*it.neighbour(1) == 4);
-
-    it = it + 2;
-
-    CHECK(*it == 5);
-    CHECK(*it.neighbour(0) == 4);
-    CHECK(*it.neighbour(1) == 6);
-
-    it--;
-    CHECK(*it == 4);
-    CHECK(*it.neighbour(0) == 3);
-    CHECK(*it.neighbour(1) == 5);
-
-    *it.neighbour(0) = 1;
-    CHECK(*it.neighbour(0) == 1);
-
-    REQUIRE_THROWS(it.neighbour(2));
-
+    std::cout << p1 << std::endl;
 
 }
+
+
+TEST_CASE("Test iterator_sets") {
+
+    using namespace JADA;
+
+    SECTION("dynamic_iterator_set"){
+
+
+        std::vector<int> v{1, 2, 3, 4, 5, 6, 7, 8};
+
+        auto it = dynamic_iterator_set({v.begin(), v.begin()+2 } );
+
+        CHECK(*it.at(0) == 1);
+        CHECK(*it.at(1) == 3);
+
+        it++;
+
+        CHECK(*it.at(0) == 2);
+        CHECK(*it.at(1) == 4);
+
+        it += 2;
+        //it = it + 2;
+
+        CHECK(*it.at(0) == 4);
+        CHECK(*it.at(1) == 6);
+
+        
+        it--;
+        CHECK(*it.at(0) == 3);
+        CHECK(*it.at(1) == 5);
+
+        *it.at(0) = 1;
+        CHECK(*it.at(0) == 1);
+
+        REQUIRE_THROWS(it.at(2));
+
+
+        auto it2 = dynamic_iterator_set({v.begin(), v.begin()+2 } );
+        auto it3 = dynamic_iterator_set({v.begin(), v.begin()+2 } );
+
+        CHECK(it2 == it3);
+        CHECK(it != it3);
+
+
+    }
+
+    SECTION("static_iterator_set"){
+
+
+        std::vector<int> v{1, 2, 3, 4, 5, 6, 7, 8};
+
+        
+
+        //auto it = static_iterator_set{v.begin(), v.begin()+2};
+        auto it = static_iterator_set{std::array<std::vector<int>::iterator, 2>{v.begin(), v.begin()+2}};
+
+        CHECK(*it.at(0) == 1);
+        CHECK(*it.at(1) == 3);
+
+        it++;
+
+        CHECK(*it.at(0) == 2);
+        CHECK(*it.at(1) == 4);
+
+        it += 2;
+        //it = it + 2;
+
+        CHECK(*it.at(0) == 4);
+        CHECK(*it.at(1) == 6);
+
+        
+        it--;
+        CHECK(*it.at(0) == 3);
+        CHECK(*it.at(1) == 5);
+
+        *it.at(0) = 1;
+        CHECK(*it.at(0) == 1);
+
+        REQUIRE_THROWS(it.at(2));
+    
+    }
+}
+
+
+

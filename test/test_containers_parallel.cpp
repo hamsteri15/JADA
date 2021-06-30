@@ -170,31 +170,29 @@ TEST_CASE("Test partioned vector"){
         auto v2 = make_partitioned_vector<2, int>(dimension<2>{13, 5});
         auto v3 = make_partitioned_vector<2, int>(dimension<2>{51, 55});
         auto v4 = make_partitioned_vector<2, int>(dimension<2>{5, 1});
+        auto v5 = make_partitioned_vector<3, int>(dimension<3>{5, 1, 5});
 
-        std::vector<hpx::partitioned_vector<int>> vs = {v1, v2, v3, v4};
+        std::vector<hpx::partitioned_vector<int>> vs = {v1, v2, v3, v4, v5};
 
         auto n_locs = size_t(hpx::get_num_localities().get());
 
         for (size_t i = 0; i < n_locs; ++i){
 
-        for (auto v : vs) {
-            auto local_sbegin = v.segment_begin(uint32_t(i));
-            auto local_send = v.segment_end(uint32_t(i));
+            for (auto v : vs) {
+                auto local_sbegin = v.segment_begin(uint32_t(i));
+                auto local_send = v.segment_end(uint32_t(i));
 
-            size_t count = local_segment_count(v, uint32_t(i));
-            size_t s0 = local_first_segment_number(v, uint32_t(i));
-            size_t s1 = local_last_segment_number(v, uint32_t(i));
+                size_t count = local_segment_count(v, uint32_t(i));
+                size_t s0 = local_first_segment_number(v, uint32_t(i));
+                size_t s1 = local_last_segment_number(v, uint32_t(i));
 
-            CHECK(count == size_t(std::distance(local_sbegin, local_send)));
-            CHECK(count == s1 - s0);
+                CHECK(count == size_t(std::distance(local_sbegin, local_send)));
+                CHECK(count == s1 - s0);
 
-        } 
+            } 
 
         }
 
-        //auto v1 = make_partitioned_vector<2, int>(dimension<2>{13, 5});
-
-//        CHECK(local_segment_count(v1) == size_t(13) / hpx::get_num_localities());
 
 
 
