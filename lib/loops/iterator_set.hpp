@@ -29,6 +29,16 @@ struct iterator_set_base
 
     constexpr auto size() const { return this->get_storage().size(); }
 
+    // TODO: consider if this makes sense, "begin" on an iterator set is
+    // confusing
+    constexpr auto begin() const { return this->get_storage().begin(); }
+    constexpr auto begin() { return this->get_storage().begin(); }
+    constexpr auto cbegin() const { return this->get_storage().cbegin(); }
+
+    constexpr auto end() const { return this->get_storage().end(); }
+    constexpr auto end() { return this->get_storage().end(); }
+    constexpr auto cend() const { return this->get_storage().cend(); }
+
     bool equal(const iterator_set_base& other) const {
         return std::equal(this->get_storage().begin(),
                           this->get_storage().end(),
@@ -54,13 +64,6 @@ struct iterator_set_base
     constexpr Iter at(size_t i) { return this->get_storage().at(i); }
 };
 
-
-
-
-
-
-
-
 template <typename Iter>
 struct dynamic_iterator_set
     : public iterator_set_base<Iter, dynamic_iterator_set<Iter>> {
@@ -68,8 +71,10 @@ struct dynamic_iterator_set
     using storage_t = std::vector<Iter>;
 
     constexpr dynamic_iterator_set() = default;
-    constexpr dynamic_iterator_set(storage_t iters)
+
+    explicit constexpr dynamic_iterator_set(const storage_t& iters)
         : m_storage(iters) {}
+
     constexpr dynamic_iterator_set(std::initializer_list<Iter> iters)
         : m_storage(iters) {}
 
@@ -80,11 +85,6 @@ private:
     storage_t m_storage;
 };
 
-
-
-
-
-
 template <size_t L, typename Iter>
 struct static_iterator_set
     : public iterator_set_base<Iter, static_iterator_set<L, Iter>> {
@@ -92,8 +92,10 @@ struct static_iterator_set
     using storage_t = std::array<Iter, L>;
 
     constexpr static_iterator_set() = default;
-    constexpr static_iterator_set(storage_t storage)
+
+    explicit constexpr static_iterator_set(storage_t storage)
         : m_storage(storage) {}
+
     constexpr static_iterator_set(std::initializer_list<Iter> list) {
         if (list.size() > L) {
             throw std::logic_error(

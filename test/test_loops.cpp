@@ -11,7 +11,7 @@
 #include "loops/direction.hpp"
 #include "loops/md_range_indices.hpp"
 #include "loops/position_set.hpp"
-
+#include "loops/positions_to_iterators.hpp"
 
 TEST_CASE("Test position"){
 
@@ -584,11 +584,11 @@ TEST_CASE("Test PositionSet"){
 
     using namespace JADA;
 
-    PositionSet<2> p1({{1,0}, {-1,0}});
+    SECTION("Test1"){
+        PositionSet<2> p1({{1,0}, {-1,0}});
+        CHECK(p1.size() == size_t(2));
+    }
 
-    std::cout << "Hello" << std::endl;
-
-    std::cout << p1 << std::endl;
 
 }
 
@@ -635,6 +635,10 @@ TEST_CASE("Test iterator_sets") {
         CHECK(it2 == it3);
         CHECK(it != it3);
 
+        std::vector<std::vector<int>::iterator> iters(3);
+        REQUIRE_NOTHROW(dynamic_iterator_set<std::vector<int>::iterator>(iters));
+
+
 
     }
 
@@ -675,5 +679,53 @@ TEST_CASE("Test iterator_sets") {
     }
 }
 
+TEST_CASE("Test positions_to_iterators"){
 
+    using namespace JADA;
+
+    SECTION("Test 1"){
+
+        size_t nx = 3;
+        size_t ny = 3;
+
+        dimension<2> dims = {ny, nx};
+
+        std::vector<int> data(dims.elementwise_product());
+
+        PositionSet<2> positions(
+                                    {   
+                                        {1, 0}, 
+                                        {-1, 0},
+                                        {0, 1},
+                                        {0, -1},
+                                        {0, 0}
+                                    }
+                                );
+
+        auto center = data.begin() + 4;
+
+        auto iters = positions_to_iterators(positions, center, dims);
+
+        CHECK(iters.size() == positions.size());
+
+        
+        for (auto iter : iters) {
+            *iter = 1;
+        }
+
+        std::vector<int> correct = {
+            0,1,0,
+            1,1,1,
+            0,1,0
+        };
+
+        CHECK(data == correct);
+        
+        
+
+    }
+
+
+
+}
 

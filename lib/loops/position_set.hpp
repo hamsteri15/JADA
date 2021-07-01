@@ -14,7 +14,7 @@ template <size_t N> struct PositionSet {
 
     PositionSet() = default;
 
-    constexpr PositionSet(std::initializer_list<element_t> list)
+    explicit constexpr PositionSet(std::initializer_list<element_t> list)
         : m_storage(list) {}
 
     constexpr auto size() const { return m_storage.size(); }
@@ -42,13 +42,6 @@ std::ostream& operator<<(std::ostream& os, const PositionSet<N>& v) {
     os << "}";
     return os;
 }
-
-
-template<size_t N, class It>
-auto get_neighbours(It center, dimension<N> dims, PositionSet<2> neighbours) {
-
-}
-
 
 
 
