@@ -14,7 +14,9 @@ template <size_t N> struct PositionSet {
 
     PositionSet() = default;
 
-    explicit constexpr PositionSet(std::initializer_list<element_t> list)
+    explicit constexpr PositionSet(const storage_t& storage) : m_storage(storage) {}
+
+    constexpr PositionSet(std::initializer_list<element_t> list)
         : m_storage(list) {}
 
     constexpr auto size() const { return m_storage.size(); }

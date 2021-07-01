@@ -21,6 +21,8 @@
 
 #include "containers/partitioned_vector.hpp"
 
+#include "loops/positions_to_iterators.hpp"
+
 #include "ops.hpp"
 
 
@@ -341,6 +343,87 @@ TEST_CASE("Test op_to_iterators"){
 
 }
 
+TEST_CASE("TEST Pvec iterator set"){
+
+    using namespace JADA;
+
+    SECTION("Test 1"){
+
+        size_t nx = 3;
+        size_t ny = 3;
+
+        dimension<2> dims{ny, nx};
+
+        auto data = make_partitioned_vector<2, int>(dims);
+
+        PositionSet<2> positions(
+                                    {   
+                                        {1, 0}, 
+                                        {-1, 0},
+                                        {0, 1},
+                                        {0, -1},
+                                        {0, 0}
+                                    }
+                                );
+
+        auto center = data.begin() + 4;
+
+        auto iters = positions_to_iterators(positions, center, dims);
+
+        CHECK(iters.size() == positions.size());
+
+        
+        for (auto iter : iters) {
+            *iter = 1;
+        }
+
+        /*hpx::partitioned_vector<int> correct{
+            0,1,0,
+            1,1,1,
+            0,1,0
+        };
+
+        CHECK(data == correct);
+        */
+
+       //for (auto d : data){
+        //   std::cout << d << std::endl;
+       //}
+
+
+    }
+
+
+    SECTION("ASDfd"){
+
+        auto min_max = find_min_max(TestOp{});
+
+        CHECK(min_max.first == position<2>{-1, -1});
+        CHECK(min_max.second == position<2>{1,1});
+
+    }
+
+    SECTION("Test segment_loop_bounds"){
+
+        size_t nx = 4;
+        size_t ny = 6;
+        dimension<2> dims = {ny, nx};
+
+        auto [begin, end] = segment_loop_bounds(dims, TestOp{});
+
+        CHECK(begin == position<2>{1, 1});
+        CHECK(end == position<2>{5, 2});
+
+        
+
+
+
+    }
+
+
+
+}
+
 
 
 TEST_CASE("Test stencil pvec"){
@@ -357,81 +440,55 @@ TEST_CASE("Test stencil pvec"){
         dimension<2> dims{ny, nx};
 
         std::vector<int> in(dims.elementwise_product());
-        std::vector<int> out(dims.elementwise_product());
-
         std::fill(in.begin(), in.end(), 1);
 
-
-        auto i_begin = in.begin() + 1 + idx_t(nx);
-        auto i_end   = i_begin + idx_t(nx) - 2;
-
-        auto o_begin = out.begin() + 1 + idx_t(nx);
+        auto out = apply_stencil(in, dims, TestOp{});
 
 
-        do_work_segment(i_begin, i_end, o_begin, dims, OpStar{});
+        auto view = MdView(dims, out);
 
-        auto view = MdView(dimension<2>{ny, nx}, out);
+        CHECK(view[{0,0}] == 0);
+        CHECK(view[{1,1}] == 4);
 
-        view.pretty_print();
+        for (auto pos : md_indices(position<2>{1,1}, position<2>{10, 9})) {
+            REQUIRE(view[pos] == 4);
+        }
 
+
+        //view.pretty_print();
+        
     }
 
     SECTION("For pvector") {
 
-        /*
-        size_t nx = 2;
-        size_t ny = 2;
+
+        size_t nx = 10;
+        size_t ny = 11;
 
         dimension<2> dims{ny, nx};
 
-        auto v = make_partitioned_vector<2, int>(dims);
-    
+        auto in = make_partitioned_vector<2, int>(dims);
 
-        size_t first_seg = local_first_segment_number(v);
-//        size_t last_seg = local_last_segment_number(v);
+        std::fill(in.begin(), in.end(), 1);
 
-        std::cout << "Tassa " << first_seg << std::endl;
-
-        //auto [begin, end] = get_segment(v, first_seg);
-        auto begin = v.segment_begin(uint32_t(first_seg));
-        auto end = v.segment_end(uint32_t(first_seg));
+        CHECK(in[0] == 1);
 
 
-        for (auto it = begin; it != end; ++it){
-            *it = 1;
+        auto out = apply_stencil(in, dims, TestOp{});
+
+        
+        CHECK(out[0] == 0);
+
+        for (auto pos : md_indices(position<2>{1,1}, position<2>{10, 9})) {
+
+            auto idx = flatten<2, StorageOrder::RowMajor>(dims, pos);
+            CHECK(out[size_t(idx)] == 4);
+
         }
 
-        */
 
 
-
-        /*
-
-        using iterator = hpx::partitioned_vector<int>::iterator;
-        using traits   = hpx::traits::segmented_iterator_traits<iterator>;
-
-        auto seg_begin = traits::segment(v.begin());
-        auto seg_end   = traits::segment(v.end());
-
-        // Iterate over segments
-        for (auto seg_it = seg_begin; seg_it != seg_end; ++seg_it)
-        {
-            auto loc_begin = traits::begin(seg_it);
-            auto loc_end   = traits::end(seg_it);
-
-            // Iterate over elements inside segments
-            for (auto lit = loc_begin; lit != loc_end; ++lit)
-            {
-                *lit = 1;
-            }
-        }
-
-        */
-
-
-        //for (auto e : v) {
-        //    std::cout << e << std::endl;
-        //}
+        
 
     }
 

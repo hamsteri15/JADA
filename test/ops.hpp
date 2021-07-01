@@ -1,7 +1,7 @@
 #pragma once
 
 #include "loops/position.hpp"
-
+#include "loops/position_set.hpp"
 
 namespace JADA{
 
@@ -20,6 +20,34 @@ struct OneDLinear {
                in.at(pos + position<1>{1});
         
     }
+};
+
+
+struct TestOp{
+
+    static constexpr position<2> center = {0,0};
+
+    static constexpr std::array<position<2>, 4> stencil = {
+        position<2>{0, -1},
+        position<2>{0, 1},
+        position<2>{1, 0},
+        position<2>{-1, 0}};
+
+    template <class Some>
+    auto operator()(Some s) const {
+
+        return *s.at(0) + *s.at(1) + *s.at(2) + *s.at(3);
+        /*
+        return in.at(pos + position<2>{0, -1}) +
+               in.at(pos + position<2>{0, 1}) + 
+               in.at(pos + position<2>{1, 0}) +
+               in.at(pos + position<2>{-1, 0});
+        */
+    
+    }
+
+
+
 };
 
 
